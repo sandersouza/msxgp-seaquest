@@ -1,6 +1,7 @@
 # Seaquest MSX1 — proposed design and delivery roadmap
 
-Status: roadmap authorized for backlog publication; implementation has not started.
+Status: implementation underway; consult the GitHub project and linked delivery
+plans for current issue status and verified evidence.
 Date: 2026-10-30. Owner: sandersouza. Repository: sandersouza/msxgp-seaquest.
 Project: https://github.com/users/sandersouza/projects/7 (MSX Game Ports).
 

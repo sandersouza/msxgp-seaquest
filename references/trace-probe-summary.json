@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "schema_version": 1,
+    "backend": "ale-py",
+    "backend_version": "0.12.1",
+    "numpy_version": "2.5.4",
+    "rom_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+    "frame_skip": 1,
+    "sticky_action_probability": 0.0,
+    "random_seed": 0,
+    "mode": 0,
+    "left_difficulty": "B",
+    "right_difficulty": "B",
+    "reset_policy": "loadROM; setMode(0); setDifficulty; reset_game (ALE warmup and soft resets)",
+    "boundary": "RAM after ALE act completes one frame; not an arbitrary PC/cycle boundary",
+    "scenario_sha256": "79f9c364bb6dd8053a87016b3c251cb54d3e36cefb21cfc152fe45ce18e59d1c"
+  },
+  "snapshots_per_run": 209,
+  "independent_replays_match": true,
+  "frame_counter_step": 1,
+  "initial_frame_phase": 67,
+  "initial_rom_seed": 204,
+  "initial_ram_sha256": "0bab9da950b933b921ecc733427c7ed4a9f8132250615efc2df11ba60c923e76",
+  "input_and_refill_probes_passed": true,
+  "firing_b_x_after_8": 44,
+  "firing_a_x_after_8": 60,
+  "injected_difference": {
+    "kind": "ram",
+    "index": 170,
+    "address": 198,
+    "expected": 96,
+    "actual": 97
+  },
+  "acceptance": "initial solo post-frame capture only; full #6 remains open"
+}

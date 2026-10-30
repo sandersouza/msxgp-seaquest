@@ -18,6 +18,8 @@ See [delivery and CI conventions](docs/project-workflow.md) for automated checks
 the boundary between diagnostic, emulator and physical-machine acceptance.
 The [original gameplay contract](docs/gameplay-contract.md) records source-derived
 rules and the scenarios required for later runtime trace acceptance.
+An [initial deterministic reference capture](docs/reference-traces.md) is available;
+full trace/alignment work remains in progress in issue #6.
 
 ```sh
 python3 -B scripts/reference_inventory.py

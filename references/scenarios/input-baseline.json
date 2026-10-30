@@ -1,0 +1,12 @@
+{
+  "id": "initial-input-baseline-v1",
+  "description": "Wait for refill, move right/left, dive into firing band, hold fire and surface. Initial solo fixture; not full-game acceptance.",
+  "steps": [
+    {"action": "NOOP", "frames": 150},
+    {"action": "RIGHT", "frames": 20},
+    {"action": "LEFT", "frames": 20},
+    {"action": "DOWN", "frames": 5},
+    {"action": "FIRE", "frames": 8},
+    {"action": "UP", "frames": 5}
+  ]
+}
