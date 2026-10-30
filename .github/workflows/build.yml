@@ -28,5 +28,7 @@ jobs:
           path: |
             outputs/seaquest-diagnostic.rom
             outputs/seaquest-diagnostic.json
+            outputs/render/synthetic.rom
+            outputs/render/synthetic-build.json
           if-no-files-found: error
           retention-days: 14

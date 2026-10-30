@@ -1,0 +1,45 @@
+{
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "ale": "0.12.1",
+  "phase": 1,
+  "patrol_x": 64,
+  "frames": [
+    {
+      "player_animation": 0,
+      "raw_nonzero_bounds": [
+        64,
+        46,
+        71,
+        52
+      ]
+    },
+    {
+      "player_animation": 1,
+      "raw_nonzero_bounds": [
+        64,
+        46,
+        71,
+        52
+      ]
+    },
+    {
+      "player_animation": 2,
+      "raw_nonzero_bounds": [
+        64,
+        46,
+        71,
+        52
+      ]
+    }
+  ],
+  "display_y_translation": -15,
+  "sprite_box_y": [
+    22,
+    37
+  ],
+  "first_lane_sprite_box_y": [
+    49,
+    64
+  ],
+  "verdict": "patrol box ends before first diver lane"
+}

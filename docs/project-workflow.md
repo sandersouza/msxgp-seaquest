@@ -34,7 +34,8 @@ The repository's `AGENTS.md` makes this rule visible to future agents.
 
 The Synthetic build and tests workflow uses pinned action commits and a pinned
 sjasmplus commit on Ubuntu 24.04 with Python 3.12. It runs synthetic unit tests and
-builds/validates the diagnostic cartridge without original reference inputs. It
+builds/validates the diagnostic cartridge and assembles the synthetic renderer
+probe without original reference inputs. It
 also rejects accidentally tracked original ROM inputs. The ROM and hash manifest
 are uploaded as an explicitly named diagnostic artifact with a 14-day retention.
 

@@ -9,14 +9,22 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #4: Bootstrap reproducible macOS toolchain and MSX1 ROM scaffold
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] Record cycles, VRAM timing, scanline sprite occupancy, RAM use and frame pacing on standard MSX1. No enemy-count reduction, slower simulation or invisible collidable objects. Document the measured rendering choice and unresolved fidelity tradeoffs.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] Record cycles, VRAM timing, scanline sprite occupancy, RAM use and frame pacing on standard MSX1. No enemy-count reduction, slower simulation or invisible collidable objects. Document the measured rendering choice and unresolved fidelity tradeoffs.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+
+## Verification and delivery
+
+- [Measured renderer decision](https://github.com/sandersouza/msxgp-seaquest/blob/main/docs/renderer-feasibility.md): 240px hybrid SCREEN 2; twelve background enemies plus eight hardware sprites, at most four per scanline. Patrol bottom alignment preserves original raster position while avoiding the first diver lane.
+- [Exact evidence](https://github.com/sandersouza/msxgp-seaquest/tree/main/references/renderer): 4,238 native/reference RAM and original-enemy pixel comparisons, maximum 54,179 cycles of 59,736; 240 paced frames without skips; minimum VRAM data spacing29 cycles; RAM guard and stack high-water record.
+- Synthetic256 cases, 20 host tests, original/native2,707-case regression, intentional pixel corruption detection, and local synthetic CI pass. Fresh independent review completed; accumulator-marshalling finding fixed and verified.
+- Original sprite/HUD artwork, palette/edge variants, full gameplay, input/audio/PAL integration and physical hardware remain later gates. Approximately5,557 cycles remain for integration; no playable-ROM claim.
+- Merge/remote CI is the final delivery gate; close this issue only after its scoped PR is integrated.
 
 ## Tracking
 - Roadmap ID: SQ-07

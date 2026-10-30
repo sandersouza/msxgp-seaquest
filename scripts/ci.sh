@@ -20,3 +20,4 @@ make -C .tools/sjasmplus -j2 USE_LUA=0
 python3 -B -m unittest discover -s tests -v
 python3 -B scripts/rom.py build
 python3 -B scripts/rom.py check
+python3 -B scripts/render_bench.py --build-only

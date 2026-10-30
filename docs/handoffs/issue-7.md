@@ -1,5 +1,12 @@
 # Issue #7 handoff — MSX1 renderer feasibility
 
+**Superseded by the completed benchmark:** see `docs/renderer-feasibility.md`,
+`references/renderer/` and the current `docs/handoffs/issue-8.md`. The text below
+records the incoming unfinished candidate, not current delivery status. The
+three WIP files have been preserved, completed, assembled and measured. Native
+integration now passes 4,238 cases and 240 paced frames. A bottom-aligned hardware
+patrol is feasible; the earlier mandatory-background assumption is withdrawn.
+
 The owner now requires **one new chat per new issue, inside the same Seaquest
 Codex project**. Continue this issue in its dedicated chat; create the next issue's
 chat when dependencies are satisfied. This planning chat stops implementation.
@@ -57,10 +64,11 @@ multiple harnesses against the same `outputs/native` directory.
   in a lane share the same tile phase/cache. This avoids tripling pattern uploads.
 - Enemies are software background tiles: six 8×8 patterns per lane (3 columns ×
   2 rows), 24 patterns / 192 bytes total per frame, shared by up to three copies.
-- Player uses two 16×16 sprites for its 24×12 stretched bitmap; torpedo one;
+- Initial proposal (superseded by measured hardware patrol): player uses two 16×16 sprites for its 24×12 stretched bitmap; torpedo one;
   four lane balls/divers one each, separated vertically by 24. Peak is four sprites
-  per scanline. **Patrol must use background tiles**, since making it a hardware
-  sprite can raise peak to five where it overlaps the first lane's bounding box.
+  per scanline. The initial proposal placed patrol in background tiles. The
+  completed measurement instead anchors its hardware box at Y22–37 and preserves
+  original nonzero pixels at Y31–37, avoiding the first ball box at Y49–64.
 - Dirty name-table spans per row avoid a 768-byte upload every frame. Previous
   enemy cells are tracked/cleared in RAM; upload only the union of old/new spans.
 - Active-display writes use `OUTI; JR NZ` spacing rather than unsafe tight OTIR.
