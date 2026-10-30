@@ -14,6 +14,8 @@ toolchain and a bootable MSX1 hardware diagnostic. A playable Seaquest ROM is no
 available yet. Original ROMs/source must be supplied locally; they are not distributed here.
 
 See [development setup and commands](docs/development.md) to build/run the diagnostic.
+See [delivery and CI conventions](docs/project-workflow.md) for automated checks and
+the boundary between diagnostic, emulator and physical-machine acceptance.
 
 ```sh
 python3 -B scripts/reference_inventory.py
