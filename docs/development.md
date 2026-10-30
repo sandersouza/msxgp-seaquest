@@ -26,8 +26,9 @@ reset existing tool checkouts or touch reference ROMs. If an existing tool diffe
 repair it explicitly or preserve/move it aside before rerunning setup.
 
 Python >=3.11 is required; the tested interpreter is Homebrew Python 3.14.7.
-All project scripts use the standard library; no game-analysis dependencies are
-needed yet. New venvs receive current pip/setuptools/wheel. Existing environments
+Base build/check scripts use the standard library. The optional reference capture
+adds the pinned backend from `requirements-reference.txt`; see
+[reference traces](reference-traces.md). New venvs receive current pip/setuptools/wheel. Existing environments
 are checked rather than upgraded implicitly. Homebrew packages may vary with its
 catalogue; pinned assembler revisions and reference byte-identity checks establish
 the reproducible binary boundary, not a claim of fully locked host software.
