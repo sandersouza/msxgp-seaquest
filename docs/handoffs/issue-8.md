@@ -7,8 +7,10 @@ two implementations in the shared checkout.
 - Repo: `/Users/sandersouza/Developer/msx-gamePorts/seaquest`.
 - Project id: `745758fe-48e5-471b-950b-4a2cee9dea9a`.
 - Issue: https://github.com/sandersouza/msxgp-seaquest/issues/8.
-- #7 delivery branch: `codex/feat/7-msx1-renderer`; delivery PR will be linked
-  in its issue. Verify the merged main commit before branching for #8.
+- #7 delivery branch: `codex/feat/7-msx1-renderer`; implementation commit
+  `19e32b8fcc5d057611c061bb7afccf2b8693887f`, delivery
+  https://github.com/sandersouza/msxgp-seaquest/pull/23. Verify the merged main
+  commit before branching for #8.
 - User authorizes routine implementation, scoped PRs/review/integration and
   continuation toward first playable openMSX without repeated permission.
 - #1–#6 are delivered. #7 passed feasibility; successor starts after its PR/CI

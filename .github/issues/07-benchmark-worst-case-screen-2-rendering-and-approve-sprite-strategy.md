@@ -20,6 +20,7 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 
 ## Verification and delivery
 
+- Delivery PR: https://github.com/sandersouza/msxgp-seaquest/pull/23.
 - [Measured renderer decision](https://github.com/sandersouza/msxgp-seaquest/blob/main/docs/renderer-feasibility.md): 240px hybrid SCREEN 2; twelve background enemies plus eight hardware sprites, at most four per scanline. Patrol bottom alignment preserves original raster position while avoiding the first diver lane.
 - [Exact evidence](https://github.com/sandersouza/msxgp-seaquest/tree/main/references/renderer): 4,238 native/reference RAM and original-enemy pixel comparisons, maximum 54,179 cycles of 59,736; 240 paced frames without skips; minimum VRAM data spacing29 cycles; RAM guard and stack high-water record.
 - Synthetic256 cases, 20 host tests, original/native2,707-case regression, intentional pixel corruption detection, and local synthetic CI pass. Fresh independent review completed; accumulator-marshalling finding fixed and verified.
