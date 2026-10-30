@@ -1,4 +1,10 @@
 # Byte-compiled / optimized / DLL files
+.DS_Store
+# Original research inputs remain local; metadata and analysis are versioned.
+/references/roms/*
+/references/dissasm/seaquest-atari800.s
+/outputs/
+/.tools/
 __pycache__/
 *.py[codz]
 *$py.class
