@@ -49,6 +49,9 @@ describes the preparation steps without applying changes.
 | `make disassemble` | byte-identical local reference rebuilds and address metadata |
 | `make render-bench` | synthetic renderer pixel/SAT/timing checks on openMSX |
 | `make render-native-bench` | local original/native state plus renderer feasibility checks |
+| `make controls-run` | continuous original input/collision integration diagnostic |
+| `make collision-contract` | original TIA occupancy, Z80 acquisition and ordered resolution |
+| `make render-collision-bench` | full-density collision/input/graphics timing and VRAM checks |
 
 Use `PYTHON=/path/to/python` with make to override the local venv interpreter.
 `references/tools-lock.json` pins reference research tools; sjasmplus is pinned to
@@ -81,3 +84,5 @@ extraction plus ALE pixels) and `make render-graphics-bench` (native core plus
 original sprites in openMSX). See [the graphics contract](original-graphics.md)
 for palette, clipping, exact evidence and tight CPU/ROM constraints. These targets
 require the verified local original ROM and never run or upload art in public CI.
+The [collision contract](collision-contract.md) describes the current integrated
+hardware phase and its independent Atari/openMSX checks.

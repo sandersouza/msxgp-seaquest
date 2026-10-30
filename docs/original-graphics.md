@@ -3,6 +3,9 @@
 The measurements below record issue #8's delivery baseline. See
 [issue #9 controls](input-controls.md) and references/input/ for the later
 translator/renderer optimizations and the current complete input workload.
+The current [collision integration](collision-contract.md) also preserves the
+source carry-dependent patrol variant during death1..9 or with zero/one reserve
+and no death, and records newer timings.
 
 The local extractor preserves the verified NTSC Atari 2600 revision's silhouettes,
 animations and lettering. The MSX adaptation has a separate display mapping;

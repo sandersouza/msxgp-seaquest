@@ -27,6 +27,12 @@ def bitmap(data, address, height, reflect=False, stretch=1):
     return rows
 
 
+def early_patrol(ram):
+    """Carry at F1B5: CPY lives>=2 unless death's CPX replaces it."""
+    death = ram[0xe9]
+    return 0 < death < 10 or death == 0 and ram[0xbb] < 2
+
+
 def ball(data, selection):
     """Decode the original ball's per-scanline HMOVE and CTRLPF writes."""
     motion = 0xfd00 + data[0xf7e+selection]
@@ -76,6 +82,9 @@ def extract(data):
                 [address], canonical_width=16)
         # Last GRP1 write is suppressed before it reaches the visible scanline.
         add(f'patrol-{frame}', [[]]+bitmap(data,address+5,7,True), [address+5])
+        # Carry clear at F1B5 (death1..9 or no death/BB<2) selects one earlier
+        # source row throughout the patrol's eight raster writes.
+        add(f'early-patrol-{frame}',bitmap(data,address+4,8,True),[address+4])
     for death in range(10,15):
         address = 0xfd00+data[0xdf0+death]
         for reflect in range(2):
@@ -145,7 +154,7 @@ def sprite_bank(assets):
         if value not in bank: bank.append(value)
     resident = len(bank)
     for name, asset in assets.items():
-        if not name.startswith(('player-','explosion-','ball-','patrol-','torpedo','surface-')):
+        if not name.startswith(('player-','explosion-','ball-','patrol-','early-patrol-','torpedo','surface-')):
             continue
         # All edges, including signed diver offsets; invisible X is handled by SAT.
         positions = (range(64,65) if name.startswith('surface-') else
@@ -158,7 +167,7 @@ def sprite_bank(assets):
             for chunk in range(chunks):
                 origin = anchor+16*chunk
                 crop = [[px for px in row if origin <= px < origin+16] for row in rows]
-                if name.startswith('patrol-'):
+                if name.startswith(('patrol-','early-patrol-')):
                     crop = [[] for _ in range(8)] + crop
                 value = sprite_bytes(crop,origin)
                 if value not in bank:
@@ -187,6 +196,8 @@ def write_assembly(bank,lookup,resident):
         text += table(prefix+'_images',[entry(f'{prefix}-{n}' if count>1 else prefix,
                                                64+i if i<2 else min(159,151+i))
                                        for n in range(count) for i in range(16)])
+    text += table('early_patrol_images',[entry(f'early-patrol-{n}',64+i if i<2 else min(159,151+i))
+                                        for n in range(3) for i in range(16)])
     from graphics_palette import tms_color
     text += table('tia_to_tms',[tms_color(n) for n in range(256)])
     (OUT/'sprites.inc').write_text(text)
