@@ -62,11 +62,11 @@ not a claim that the blocks contain identical code or hardware semantics.
 | Main display preparation LF00E | `$F00E` | `$2235` |
 | Lane processing LF219 | `$F219` | `$2486` |
 | Enemy scanline graphics LF34F | `$F34F` | `$2510` |
-| Frame counter increment LF689 | `$F689` | `$271D` |
+| Frame boundary / counter update LF689 | `$F689` | `$271D` |
 | Console/color processing LF6A7 | `$F6A7` | `$2728` |
 | Reset LFB54 / LFB56 | `$FB54` / `$FB56` | `$2BCF` / `$2BD1` |
 | PRNG LFEDB | `$FEDB` | `$2CA0` |
-| Score helper LFFDA | `$FFDA` | `$2CDB` |
+| Seven-field player-state swap LFFDA | `$FFDA` | `$2CDB` |
 
 Important table families in the original listing: `$FC18` and following
 positioning data; `$FCE6/$FCF0` palette/lane data; `$FCFB–$FEBA`
