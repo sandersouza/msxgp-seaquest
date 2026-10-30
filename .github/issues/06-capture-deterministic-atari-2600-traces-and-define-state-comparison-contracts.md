@@ -15,9 +15,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] A known short sequence proves reset, seed, input-sampling and tick-boundary alignment. Capture positions, RNG, timers, oxygen, score, lives, enemies, divers and shots. Demonstrate a deliberately introduced mismatch is detected.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] A known short sequence proves reset, seed, input-sampling and tick-boundary alignment. Capture positions, RNG, timers, oxygen, score, lives, enemies, divers and shots. Demonstrate a deliberately introduced mismatch is detected.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-06
@@ -37,5 +37,12 @@ Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/6
 - https://github.com/sandersouza/msxgp-seaquest/pull/21 adds optional ALE 0.12.1 solo post-frame capture and a strict reference-replay comparator.
 - Two independent 209-snapshot B/B runs match; frame-byte stepping, refill/movement, B/A firing and an injected real-trace mismatch were verified. Fourteen synthetic tests and fresh independent review pass.
 - Initial frame67/seed204 reflects explicitly recorded ALE warmup/soft resets, not cold frame zero.
-- Remaining: native canonical-field/phase mapping, source clock/scanlines, reset/select/alternate-player and additional switch adapters, full collision/oxygen/rescue/score/death fixture catalogue. Keep this issue open and In progress.
+- Remaining: native canonical-field/phase mapping, source clock/scanlines, reset/select/alternate-player and additional switch adapters, full collision/oxygen/rescue/score/death fixture catalogue. This was the initial delivery's remaining work; see the completed logical contract below.
 - Evidence and reproduction: docs/reference-traces.md and references/trace-probe-summary.json. No full gameplay or hardware acceptance claimed.
+
+## Delivery — native logical phase contract
+- Completed in https://github.com/sandersouza/msxgp-seaquest/pull/22 (merged 1ff1616).
+- 2,707 original-6502/native-Z80 RAM comparisons pass, including reset plus 480 continuous updates without reloading native game state, sampled controls, Select/Reset, frame rollover, death and player switching.
+- Named boundary is original PC F5B8→F00E. Original PRNG seeds, BCD scores, timers, lane arrays, oxygen, diver and shot state are compared. Injected X corruption is detected at chain tick13, RAM C6, expected76/actual77.
+- Fresh review's continuity gap was resolved with a real chained replay. Synthetic CI passes; no original/generated sources are published.
+- Physical raster/clock/refresh validation and full natural-game coverage remain the renderer, #14 and #15 gates; this closure certifies the logical state/input-phase contract rather than claiming full gameplay acceptance.

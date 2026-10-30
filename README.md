@@ -18,8 +18,10 @@ See [delivery and CI conventions](docs/project-workflow.md) for automated checks
 the boundary between diagnostic, emulator and physical-machine acceptance.
 The [original gameplay contract](docs/gameplay-contract.md) records source-derived
 rules and the scenarios required for later runtime trace acceptance.
-An [initial deterministic reference capture](docs/reference-traces.md) is available;
-full trace/alignment work remains in progress in issue #6.
+The [native gameplay contract](docs/native-core.md) passes independent original-CPU
+comparisons, including continuous replay. The [SCREEN 2 feasibility gate](docs/renderer-feasibility.md)
+records full-density renderer and native-core timing; complete assets and playable
+integration remain subsequent work.
 
 ```sh
 python3 -B scripts/reference_inventory.py

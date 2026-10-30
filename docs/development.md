@@ -47,6 +47,8 @@ describes the preparation steps without applying changes.
 | `make test` | synthetic unit tests, no original ROM inputs needed |
 | `make reference-check` | verify all local originals against the immutable manifest |
 | `make disassemble` | byte-identical local reference rebuilds and address metadata |
+| `make render-bench` | synthetic renderer pixel/SAT/timing checks on openMSX |
+| `make render-native-bench` | local original/native state plus renderer feasibility checks |
 
 Use `PYTHON=/path/to/python` with make to override the local venv interpreter.
 `references/tools-lock.json` pins reference research tools; sjasmplus is pinned to
@@ -70,5 +72,6 @@ with other openMSX sessions. The selected C-BIOS_MSX1 machine has a TMS9918A,
 On macOS ARM / openMSX 21.0, diagnostic ROM SHA-256
 `62131a8d9f569d2799445d94e898df09004797ed292bf12f1b924d0754497791`
 passed this automated boot check. Snapshot: `references/msx1-smoke.json`.
-No original-BIOS matrix, visual gameplay, PAL behavior, performance benchmark or
-physical-machine acceptance is implied. These are later issue deliverables.
+No original-BIOS matrix, visual gameplay, PAL behavior or physical-machine
+acceptance is implied. The separate [renderer feasibility benchmark](renderer-feasibility.md)
+records its own performance evidence and limitations.

@@ -1,0 +1,32 @@
+{
+  "cases": 256,
+  "max_cycles": 43072,
+  "worst_case": "position-80",
+  "rom_sha256": "7fa109fd6ebc3e67b4c32f12745ace916061578ad668f85440c8755cdc5abc92",
+  "io": {
+    "min_data_spacing": 29,
+    "data_writes": 139264
+  },
+  "machine": "C-BIOS_MSX1",
+  "cpu_hz": 3579545,
+  "vdp": "TMS9918A",
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "video": "NTSC",
+  "rom_bytes": 32768,
+  "python": "3.14.7",
+  "openmsx": "openMSX 21.0",
+  "sjasmplus_revision": "d379eeac9ad3857fb48fd3a3929175d0a56038ce",
+  "original_sha256": null,
+  "status": "renderer feasibility probe; synthetic sprites/HUD, no playable or physical-hardware acceptance",
+  "pace": {
+    "frames": 240,
+    "min_period": 59734,
+    "max_period": 59762,
+    "max_commit_cycles": 11501,
+    "max_busy_cycles": 43050,
+    "stack_min": 62322,
+    "min_commit_y": 192,
+    "max_commit_end_y": -20
+  }
+}
