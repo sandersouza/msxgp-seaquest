@@ -16,8 +16,8 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 
 ## Definition of Done
 - [x] Aligned reference replays match player state, movement and firing events. Verify held fire, reversal, diagonal input and boundaries; measure input latency on the target.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-09
@@ -34,6 +34,8 @@ Original ROMs are local research inputs; do not publish them accidentally. This 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/9
 
 ## Implementation and evidence
+
+Delivery PR: https://github.com/sandersouza/msxgp-seaquest/pull/25.
 
 The controls adapter samples actual MSX keyboard/joystick devices at original
 F6A7 and retains the translated movement/firing algorithm. Independent original

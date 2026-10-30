@@ -10,6 +10,12 @@ reuse it if it exists. The #9 chat stops shared-checkout changes after dispatch.
   `PVT_kwHOAJR8nM4Bn8x0` (project7).
 - #9 branch: `codex/feat/9-original-input`; verify its merged PR/main commit,
   CI and clean checkout before starting a scoped #10 branch.
+- #9 delivery: https://github.com/sandersouza/msxgp-seaquest/pull/25.
+- Independent review of implementation head
+  `c21dc72086b36bc403bae404840c95268d16b804` found no actionable issues and
+  independently replayed9,597 visible-VRAM transitions and659 natural updates.
+  Both remote diagnostic checks passed at that head. Final PR head must also
+  pass before merge. See references/input/review.md.
 - Owner authorizes routine implementation, review, scoped PRs, integration and
   autonomous issue succession toward first playable openMSX. No repeated routine
   permission requests. No implementation delegation was authorized.
@@ -50,6 +56,11 @@ Honor the owner's restriction to Obsidian skills unless explicitly requested.
   neutral collisions, normal/refill states, shot birth/edges, all16 directions,
   fire levels and switch combinations. Real acquisition/resolution density must
   be remeasured before acceptance; do not just add collision code to this budget.
+  The accepted maximum is59,369/59,736 cycles, leaving367;32 KiB probe padding
+  is1,792 bytes. Timed probe SHA-256:
+  `f5a3c463bcb8077d38a19611e77710f4e54cfae4dcb9a574d38e5682f0e3d474`.
+  Cold-boot controls ROM SHA-256:
+  `701e3293951b902ef08d81a75bc63c1f5fc5637ffaec02cf5e5992d40198845a`.
 - Renderer objects/pixels and inactive-bank contracts remain unchanged. New
   generated column/repeat-mask tables and per-lane name pointers reduce repeated
   work; fixed three-copy name drawing is unrolled. Repeat masks prove every
