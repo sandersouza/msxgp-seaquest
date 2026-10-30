@@ -1,9 +1,14 @@
 # Reference traces — initial #6 delivery
 
-**Issue #6 remains In progress.** This delivery proves a bounded solo capture
+The initial delivery proves a bounded solo capture
 and repeatability check; it does not complete native acquisition alignment, the
 full rule fixture catalogue, exact source clock measurement or raster collision
 verification.
+
+The subsequent [native CPU contract](native-core.md) supplies the required named
+logical phase, reset/seed/control replay and 480 chained updates without reloading
+native game state. Broader natural-game/raster capture and physical clock/refresh
+validation belong to #10/#14/#15; the initial ALE limitations below remain explicit.
 
 ## Install and reproduce
 

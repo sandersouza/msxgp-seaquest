@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "cases": 2707,
+  "max_z80_cycles": 16838,
+  "detail": "complete",
+  "continuous_ticks": 480,
+  "native_state_reloaded_between_chained_ticks": false,
+  "injected_difference": {
+    "case": 2240,
+    "chain_tick": 13,
+    "address": 198,
+    "expected": 76,
+    "actual": 77,
+    "detected": true
+  }
+}
