@@ -62,8 +62,50 @@ def visible_signature(vram):
             start = bank*2048+tile*8
             signature.extend(vram[start:start+8])
             signature.extend(vram[start+8192:start+8200])
-    signature.extend(vram[0x3800:0x3900])
+    for slot in range(8):
+        pattern = vram[0x1b00+slot*4+2] & 252
+        signature.extend(vram[0x3800+pattern*8:0x3820+pattern*8])
     return signature
+
+
+def check_original_sprites(ram,vram,assets,rom):
+    from original_graphics import scale_rows
+    from graphics_palette import sprite_colors
+    actual = set()
+    ys = []
+    for slot in range(8):
+        y,x,pattern,color = vram[0x1b00+slot*4:0x1b04+slot*4]
+        y = (y+1)&255
+        ys.append(y)
+        if not color & 15: raise ValueError('transparent original sprite color')
+        for row in range(16):
+            for column in range(16):
+                value = vram[0x3800+(pattern&252)*8+(column//8)*16+row]
+                if value & (128>>(column%8)) and x+column<256 and y+row<192:
+                    actual.add((x+column,y+row,slot))
+    frame = ram[0xe0] if ram[0xe0]<3 else 0
+    reflect = int(bool(ram[0xd6]&8))
+    player = (f'explosion-{max(ram[0xe9],10)}-{reflect}' if 0<ram[0xe9]<15
+              else f'player-{frame}-{reflect}')
+    expected = set()
+    objects = [(player,ram[0xc6],ram[0xe1]+17,0, bool(ram[0xe1])),
+               ('torpedo',ram[0xe7],ram[0xe1]+24,2,ram[0xe1]>=17 and ram[0xe7]!=0)]
+    objects += [(f'ball-{ram[0xd9+lane]&15}',ram[0xc7+lane],120-lane*24,3+lane,
+                 ram[0xc7+lane]!=0) for lane in range(4)]
+    objects += [(f'patrol-{frame}',ram[0xf6],30,7,ram[0xf6]!=0)]
+    for name,x,y,slot,enabled in objects:
+        if not enabled or x>=160: continue
+        for row, pixels in enumerate(scale_rows(assets[name]['rows'],x)):
+            if slot==0 and 37 <= y+row <= 40: continue
+            for px in pixels:
+                part = int(px >= 8+x*3//2+16) if slot==0 else 0
+                if 0 <= y+row < 192: expected.add((px,y+row,slot+part))
+    if actual != expected:
+        raise ValueError(f'original sprite pixel mismatch: extra={list(actual-expected)[:3]}, missing={list(expected-actual)[:3]}')
+    if vram[0x1b20]!=208 or sprite_peak(ys)>4:
+        raise ValueError('original sprite terminator/scanline budget exceeded')
+    if list(vram[0x1b03:0x1b20:4]) != sprite_colors(ram,rom):
+        raise ValueError('original sprite palette selection mismatch')
 
 
 def check_sprites(ram,vram):
@@ -83,8 +125,10 @@ def check_sprites(ram,vram):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--native', action='store_true')
+    parser.add_argument('--graphics', action='store_true',help='local original sprite integration, includes native core')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
+    args.native = args.native or args.graphics
     OUT.mkdir(parents=True,exist_ok=True)
     lock = (OUT/'.lock').open('w')
     fcntl.flock(lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -93,6 +137,10 @@ def main():
         native_lock = (ROOT/'outputs/native/.lock').open('w')
         fcntl.flock(native_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     generate()
+    assets = None
+    if args.graphics:
+        from original_graphics import generate as graphics_generate
+        assets,_,_ = graphics_generate()
     rom = None
     cases = []
     entries = []
@@ -124,9 +172,46 @@ def main():
                 entries.append((0xf5b8,0,0x82,0,0))
                 reference_states.append(expected)
                 case_names.append(f'dense-{x}-{mask}')
+        if args.graphics:
+            for x in range(145,160):
+                for kind in range(16):
+                    ram = bytearray(template)
+                    ram[0x9e:0xa2] = bytes([64]*4)
+                    ram[0xa4:0xa8] = bytes([7]*4)
+                    ram[0xc7:0xcb] = bytes([x]*4)
+                    ram[0xd9:0xdd] = bytes([kind]*4)
+                    ram[0xe7],ram[0xf6] = x,x
+                    ram[0x81] = 2
+                    expected,_ = reference(rom,list(ram),0xf5b8,0,0x82)
+                    cases.append(ram)
+                    entries.append((0xf5b8,0,0x82,0,0))
+                    reference_states.append(expected)
+                    case_names.append(f'graphics-edge-{x}-{kind}')
+            # Independent lane shapes/edge phases; do not assume four balls
+            # share an animation, position or VRAM image.
+            import random
+            rng = random.Random(8)
+            for n in range(2048):
+                ram = bytearray(template)
+                ram[0x9e:0xa2] = bytes([64]*4)
+                ram[0xa4:0xa8] = bytes([7]*4)
+                ram[0xc7:0xcb] = bytes(rng.randrange(150,160) for _ in range(4))
+                ram[0xd9:0xdd] = bytes(rng.randrange(16) for _ in range(4))
+                ram[0xe7],ram[0xf6] = rng.randrange(150,160),rng.randrange(150,160)
+                ram[0x81] = rng.randrange(256)
+                if n>=1024:
+                    ram[0xe1] = 13+rng.randrange(96)
+                    ram[0xc6] = rng.randrange(21,135)
+                    if n%4==0: ram[0xe9] = rng.randrange(1,24)
+                expected,_ = reference(rom,list(ram),0xf5b8,0,0x82)
+                cases.append(ram)
+                entries.append((0xf5b8,0,0x82,0,0))
+                reference_states.append(expected)
+                case_names.append(f'graphics-mixed-{n}')
     subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'), '--nologo',
                     '--raw='+str(OUT/'bench.rom'), '--sym='+str(OUT/'bench.sym'),
                     *(['-DWITH_NATIVE'] if args.native else []),
+                    *(['-DWITH_GRAPHICS'] if args.graphics else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
     if args.build_only:
@@ -169,7 +254,10 @@ def main():
         if args.native and ram[:251] != reference_states[index]:
             raise ValueError(f'native state mismatch in render case {index}')
         actual = decode(dumps[index*16384:(index+1)*16384])
-        check_sprites(ram,dumps[index*16384:(index+1)*16384])
+        if args.graphics:
+            check_original_sprites(ram,dumps[index*16384:(index+1)*16384],assets,rom)
+        else:
+            check_sprites(ram,dumps[index*16384:(index+1)*16384])
         expected = expected_pixels(ram,rom)
         if actual != expected:
             first = next(i for i,(a,b) in enumerate(zip(actual,expected)) if a!=b)
@@ -184,7 +272,8 @@ def main():
                   openmsx=subprocess.check_output(['openmsx','-v'],text=True).splitlines()[0],
                   sjasmplus_revision=subprocess.check_output(['git','-C',str(ROOT/'.tools/sjasmplus'),'rev-parse','HEAD'],text=True).strip(),
                   original_sha256=hashlib.sha256(rom).hexdigest() if rom else None,
-                  status='renderer feasibility probe; synthetic sprites/HUD, no playable or physical-hardware acceptance')
+                  status=('original sprite integration probe; synthetic HUD/background colors; no playable or physical-hardware acceptance'
+                          if args.graphics else 'renderer feasibility probe; synthetic sprites/HUD, no playable or physical-hardware acceptance'))
     if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])
@@ -203,10 +292,10 @@ def main():
                       'max_commit_end_y':max(pace['commit_end_y'])}
     if pace['max_busy_cycles'] >= 59736: raise ValueError('frame CPU budget exceeded')
     if max(cycles) >= 59736: raise ValueError('unpaced frame CPU budget exceeded')
-    variant = 'native' if args.native else 'synthetic'
+    variant = 'graphics' if args.graphics else ('native' if args.native else 'synthetic')
     shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
     shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
-    (OUT/('native-result.json' if args.native else 'synthetic-result.json')).write_text(json.dumps(report,indent=2)+'\n')
+    (OUT/(variant+'-result.json')).write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report))
 
 

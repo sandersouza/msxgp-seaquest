@@ -11,7 +11,6 @@ lane_y EQU $C403
 tile_base EQU $C404
 phase_page EQU $C406
 source_ptr EQU $C408
-slot_ptr EQU $C40A
 saved_sp EQU $C40E
 cache_page EQU $C410
 copy_mask EQU $C411
@@ -188,7 +187,6 @@ draw_enemy_names:
 ; Generate 6 tiles from 15 original bitmap rows, reflected if requested.
 ; source_ptr points to last source row, pattern_base selects lane cache RAM.
 make_lane_patterns:
-    LD IX,(slot_ptr)
     LD IY,(source_ptr)
     LD A,(lane_var)
     LD E,A
@@ -203,13 +201,13 @@ make_lane_patterns:
     LD L,(IY-row)
     LD H,D
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)),A
+    LD (PATBUF+(row/8)*24+(row%8)),A
     INC H
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)+8),A
+    LD (PATBUF+(row/8)*24+(row%8)+8),A
     INC H
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)+16),A
+    LD (PATBUF+(row/8)*24+(row%8)+16),A
     EDUP
     JP .blank
 .reflected:
@@ -221,19 +219,19 @@ make_lane_patterns:
     LD L,(HL)
     LD H,D
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)),A
+    LD (PATBUF+(row/8)*24+(row%8)),A
     INC H
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)+8),A
+    LD (PATBUF+(row/8)*24+(row%8)+8),A
     INC H
     LD A,(HL)
-    LD (IX+(row/8)*24+(row%8)+16),A
+    LD (PATBUF+(row/8)*24+(row%8)+16),A
     EDUP
 .blank:
     XOR A
-    LD (IX+31),A
-    LD (IX+39),A
-    LD (IX+47),A
+    LD (PATBUF+31),A
+    LD (PATBUF+39),A
+    LD (PATBUF+47),A
     RET
 
 ; Render current canonical enemy groups. Shape pointer and colors are provided
@@ -285,15 +283,6 @@ render_enemies:
     LD A,(cache_page)
     OR B
     LD (tile_base),A
-    LD A,B
-    LD H,0
-    LD L,A
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    LD DE,PATBUF-256
-    ADD HL,DE
-    LD (slot_ptr),HL
     LD A,(lane_var)
     ADD A,A
     LD E,A
@@ -306,6 +295,7 @@ render_enemies:
     EX DE,HL
     LD (source_ptr),HL
     CALL make_lane_patterns
+    CALL upload_lane_patterns
     LD A,(lane_var)
     LD E,A
     LD D,0
@@ -358,38 +348,18 @@ render_enemies:
     JP P,.lane
     RET
 
-upload_patterns:
-    LD A,3
-.lane:
-    PUSH AF
+; Reuse one 48-byte staging lane. Direct stores avoid indexed-store overhead;
+; each upload still targets only the inactive VRAM cache.
+upload_lane_patterns:
+    LD A,(lane_var)
+    ADD A,A
     LD E,A
     LD D,0
-    LD L,A
-    LD H,0
-    ADD HL,HL
+    LD HL,lane_vram
     ADD HL,DE
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    LD DE,PATBUF
-    ADD HL,DE
-    POP AF
-    PUSH AF
-    PUSH HL
-    LD C,A
-    LD B,0
-    LD H,B
-    LD L,C
-    ADD HL,HL
-    ADD HL,BC
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    LD DE,256
-    ADD HL,DE
-    EX DE,HL
+    LD E,(HL)
+    INC HL
+    LD D,(HL)
     LD A,(cache_page)
     RRCA
     RRCA
@@ -398,19 +368,13 @@ upload_patterns:
     RRCA
     ADD A,D
     LD D,A
-    ; Lane3 bank0; others bank1; lane0 bottom tile row is in bank2.
-    POP HL
-    POP AF
-    PUSH AF
-    CP 3
-    JR Z,.bank_ok
-    SET 3,D
-.bank_ok:
+    LD HL,PATBUF
+    LD A,(lane_var)
     OR A
     JR Z,.split
     LD BC,48
     CALL vram_copy
-    JR .done_lane
+    RET
 .split:
     PUSH HL
     PUSH DE
@@ -425,12 +389,9 @@ upload_patterns:
     ADD HL,BC
     EX DE,HL
     LD BC,24
-    CALL vram_copy
-.done_lane:
-    POP AF
-    DEC A
-    JP P,.lane
-    RET
+    JP vram_copy
+lane_vram:
+    DW $0900,$0930,$0960,$0190
 
 upload_name_strips:
     DUP 4, lane
@@ -448,8 +409,7 @@ render_frame:
 ; Write only the inactive pattern cache during the active display.
 render_prepare:
     CALL render_begin
-    CALL render_enemies
-    JP upload_patterns
+    JP render_enemies
 
 ; Call at VBlank. All visible name/SAT changes finish before the next picture.
 render_commit:

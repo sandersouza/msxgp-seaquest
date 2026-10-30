@@ -31,5 +31,14 @@ class RenderTableTests(unittest.TestCase):
         after[0x1800] = 96
         self.assertNotEqual(visible_signature(before),visible_signature(after))
 
+    def test_visible_signature_tracks_sprite_patterns_beyond_first_eight(self):
+        before = bytearray(16384)
+        before[0x1b02] = 47*4
+        after = bytearray(before)
+        after[0x3800+55*32] = 128
+        self.assertEqual(visible_signature(before),visible_signature(after))
+        after[0x3800+47*32] = 128
+        self.assertNotEqual(visible_signature(before),visible_signature(after))
+
 
 if __name__ == '__main__': unittest.main()

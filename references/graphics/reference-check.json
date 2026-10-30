@@ -1,0 +1,9 @@
+{
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "ale": "0.12.1",
+  "python": "3.14.7",
+  "edge_cases": 260,
+  "passed": true,
+  "scenarios_count": 467,
+  "status": "local original raster masks and lettering; no gameplay acceptance"
+}
