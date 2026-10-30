@@ -155,33 +155,32 @@ draw_enemy_names:
     LD (HL),A
     RET
 .clipped:
-    LD A,(tile_base)
-    LD B,2
-.rows:
-    PUSH BC
-    PUSH HL
-    LD B,3
-.cols:
-    PUSH AF
     LD A,C
-    CP 1
-    JR C,.skip
     CP 31
-    JR NC,.skip
-    POP AF
+    RET NC
+    CP 30
+    LD A,(tile_base)
+    JR Z,.one_column
+    ; Column29 retains two tiles; column30 retains one. Admitted copies
+    ; cannot start left of column1. Preserve the same six-tile cache indices.
     LD (HL),A
-    PUSH AF
-.skip:
-    POP AF
-    INC A
     INC HL
-    INC C
-    DJNZ .cols
-    POP HL
+    INC A
+    LD (HL),A
+    LD DE,31
+    ADD HL,DE
+    ADD A,2
+    LD (HL),A
+    INC HL
+    INC A
+    LD (HL),A
+    RET
+.one_column:
+    LD (HL),A
     LD DE,32
     ADD HL,DE
-    POP BC
-    DJNZ .rows
+    ADD A,3
+    LD (HL),A
     RET
 
 ; Generate 6 tiles from 15 original bitmap rows, reflected if requested.

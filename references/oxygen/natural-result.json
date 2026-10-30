@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "continuous_ticks": 6262,
+  "ram_reloads_after_boot": 0,
+  "original_tia_acquisition_ticks": 6262,
+  "max_busy_cycles": 59107,
+  "skipped_vdp_frames": 0,
+  "rom_sha256": "e50cec4855f0767e2fde0cc2ba5741b0cc8793ee9dd1fe988bfcfc01bff98dd6",
+  "latency": [
+    {
+      "time": 12.0,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 4.5905,
+      "sat_commit_ms": 16.7965
+    },
+    {
+      "time": 12.2137,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 8.0081,
+      "sat_commit_ms": 20.042
+    },
+    {
+      "time": 12.4274,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 11.0971,
+      "sat_commit_ms": 23.2874
+    },
+    {
+      "time": 12.6411,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 14.4082,
+      "sat_commit_ms": 26.5281
+    },
+    {
+      "time": 12.854800000000001,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 17.5991,
+      "sat_commit_ms": 29.7739
+    },
+    {
+      "time": 13.0685,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 4.138,
+      "sat_commit_ms": 16.3362
+    },
+    {
+      "time": 13.2822,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 7.5402,
+      "sat_commit_ms": 19.5819
+    },
+    {
+      "time": 13.4959,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 10.6459,
+      "sat_commit_ms": 22.8307
+    },
+    {
+      "time": 13.7096,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 13.8531,
+      "sat_commit_ms": 26.0751
+    },
+    {
+      "time": 13.9233,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 16.9731,
+      "sat_commit_ms": 29.3177
+    },
+    {
+      "time": 14.137,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 3.5064,
+      "sat_commit_ms": 15.8745
+    },
+    {
+      "time": 14.3507,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 6.9119,
+      "sat_commit_ms": 19.1235
+    },
+    {
+      "time": 14.5644,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 10.0099,
+      "sat_commit_ms": 22.3701
+    },
+    {
+      "time": 14.7781,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 13.321,
+      "sat_commit_ms": 25.6175
+    },
+    {
+      "time": 14.9918,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 16.5214,
+      "sat_commit_ms": 28.8649
+    },
+    {
+      "time": 15.2055,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 3.069,
+      "sat_commit_ms": 15.4203
+    }
+  ],
+  "max_state_ms": 17.5991,
+  "max_sat_commit_ms": 29.7739,
+  "method": "cold boot; keyboard/joystick replay device events; original 6502 comparison every captured update",
+  "display_measurement": "SAT upload completed; visible scanout and host OS event latency are separate",
+  "physical_hardware": false,
+  "natural_events": {
+    "alarm_ticks": 512,
+    "pickups": 12,
+    "partial_rescues": 1,
+    "full_rescues": 0,
+    "deaths": 6,
+    "oxygen_depletions": 1,
+    "refills": 7
+  }
+}

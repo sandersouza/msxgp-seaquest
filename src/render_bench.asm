@@ -88,7 +88,7 @@ rpc_start:
 frame_start:
     IFDEF WITH_NATIVE
     IFDEF WITH_COLLISIONS
-    CALL acquire_contacts
+    CALL acquire_frame_state
     ELSE
     IFDEF WITH_INPUT
     CALL neutral_contacts
@@ -121,7 +121,7 @@ paced_commit:
 paced_frame_start:
     IFDEF WITH_NATIVE
     IFDEF WITH_COLLISIONS
-    CALL acquire_contacts
+    CALL acquire_frame_state
     ELSE
     IFDEF WITH_INPUT
     CALL neutral_contacts
@@ -165,13 +165,18 @@ collision_rpc_done:
     JP idle
 collision_tick_rpc_start:
     LD SP,$F380
-    CALL acquire_contacts
+    CALL acquire_frame_state
     XOR A
     LD E,A
     LD B,$82
     LD C,A
     CALL core_F5B8
     JP collision_rpc_done
+oxygen_rpc_start:
+    LD SP,$F380
+    CALL prepare_oxygen
+    JP collision_rpc_done
+    INCLUDE "oxygen.asm"
     INCLUDE "collision.asm"
     ENDIF
 
