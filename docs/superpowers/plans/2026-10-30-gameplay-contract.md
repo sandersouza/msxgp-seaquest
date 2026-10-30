@@ -20,9 +20,13 @@ extraction is not a captured trace or gameplay acceptance. No production behavio
 - [x] Inspect original loop, input, collision, movement, oxygen, bonus, score, PRNG and player switching.
 - [x] Record source addresses, constants and update ordering; enumerate runtime acceptance scenarios.
 - [x] Correct LF689 and LFFDA role descriptions in the reference map.
-- [ ] Fresh domain review against original listing; resolve material discrepancies.
+- [x] Fresh domain review against original listing; resolve material discrepancies.
 - [ ] Green CI, PR integration and project update; advance #6 after #3 completion.
 
 #1/#2/#4/#5 completed first. #3 started once its reference disassembly dependency
 was satisfied. Captured masks/coordinate mapping and actual frame timing remain
 explicit #6/#7/#8/#14 acceptance work; the original source algorithm is binding.
+Review corrections: patrol lookup starts two bytes before the displayed table
+label (groups 2–4 every four ticks, 5+ every two); successful rescue conditionally
+increments wave once rather than taking a maximum after byte wrap; held-select
+counter 30 yields 31 updates between repeats. Enemy-value source starts at $F633.

@@ -66,7 +66,9 @@ In alternating mode the other player's reserve field initially holds four so
 the switch/decrement path yields the appropriate first turn.
 
 Select at `$F6EC` toggles `$80 & 1`, resets the game state, displays game number
-1/2 through the score field, sets `$A3=$FF`, and uses a 30-tick held-select delay.
+1/2 through the score field, sets `$A3=$FF`, and loads held-select counter 30.
+It decrements that counter on the next 30 updates and toggles on the following
+update: 31 updates between repeated selections while held.
 Mode switching and reset must be mapped to MSX controls, with mappings documented.
 Both original difficulty settings must remain independently selectable per player.
 
@@ -119,7 +121,9 @@ Bonus at `$F71D–$F7A6` first consumes remaining oxygen on even phases, awardin
 the current enemy BCD value for each consumed unit. When oxygen is zero, process
 one diver on `frame & 15 == 0`. Each diver yields 50 points repeated
 `min(successful_groups,19)+1` times: 50..1000. After all six have been processed,
-increment successful groups `$BC`, raise `$BD` to at least that value, clear lane
+increment successful groups `$BC`, then increment `$BD` **once** only if its
+unsigned value is less than the new `$BC`; do not replace this with a maximum
+operation (the values differ after wave-byte wrap). Clear lane
 positions, and set refill state 1. No normal player update runs during bonus.
 
 ## Enemies, divers, patrol and randomness
@@ -145,8 +149,10 @@ old-frame phases. Other code reads that seed without automatically advancing it.
 Preserve startup, reset and phase behavior when replaying inputs.
 
 The patrol begins after at least two successful full groups (`$F7A6`), moving
-left when the frame mask permits: every four ticks for groups 2/3, every two
-for 4/5, every tick from 6 onward. Contact consumes the latched surface collision
+left when the frame mask permits: every four ticks for groups 2/3/4 and every two
+for 5 and above. The index is capped at six and the lookup base is `$F7ED`, two
+bytes before the displayed `$F7EF` data label; its zero mask is unreachable through
+this path. Contact consumes the latched surface collision
 and initiates death even during refill. Bonus handling branches before patrol
 processing; do not independently move it during bonus.
 
@@ -183,7 +189,7 @@ the affected repeat mask. Preserve this behavior instead of “fixing” it.
 `$FB9D` adds BCD with carry through `$BA,$B9,$B8`, saturates overflow to 999999
 and increments the non-playing state. Every 10000-point crossing can add one
 reserve, capped at six. Enemy value is `10 * min(successful_groups+2,9)` points
-(with original byte arithmetic), calculated at `$F62A–$F63E` before event handling.
+(with original byte arithmetic), calculated from `$F633` before event handling.
 Track wave and successful groups separately: partial surfacing changes wave
 without increasing the successful-group-based point value.
 
