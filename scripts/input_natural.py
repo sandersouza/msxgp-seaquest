@@ -3,14 +3,19 @@
 import hashlib
 import json
 import re
+import argparse
 
 from input_contract import OUT, ROOT, device_events, replay, run
 from native_contract import reference
 from collision_reference import contacts
 from original_graphics import extract
+from oxygen_reference import alarm
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--rescue',action='store_true',help='extend device-only replay through natural rescue/death/oxygen cycles')
+    args = parser.parse_args()
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'outputs/render/controls.sym').read_text(),re.M)}
     rom = ROOT/'outputs/render/controls.rom'
     events = []
@@ -32,11 +37,15 @@ def main():
         latency.append(dict(time=time,source=source,direction=-1 if left else 1))
     for time,controls in sorted(schedule):
         events += device_events(time,controls)
-    replay(OUT/'seed.omr',events,17,OUT/'natural.omr')
+    replay(OUT/'seed.omr',events,112 if args.rescue else 17,OUT/'natural.omr')
     script = OUT/'natural-start.tcl'
+    tcl = (ROOT/'scripts/input_natural.tcl').read_text()
+    if args.rescue:
+        tcl = tcl.replace('after time 16.5','after time 110').replace(' -viewonly','')
     script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_prepared'))+
                       f'set sample_input_return {symbols["core_F6A7"]+3}\n'+
-                      'if {[catch {source scripts/input_natural.tcl} detail]} {puts stderr $detail; exit 1}\n')
+                      ('set oxygen_natural 1\nsource scripts/oxygen_natural.tcl\n' if args.rescue else '')+
+                      tcl)
     (OUT/'natural-complete.txt').unlink(missing_ok=True)
     run(script,rom,'natural')
     if not (OUT/'natural-complete.txt').exists():
@@ -58,6 +67,8 @@ def main():
         acquired = contacts(raster,original,assets)
         if acquired != before[0xb0:0xb7]+before[0xf8:0xf9]:
             raise ValueError(f'natural tick {n}: native acquisition differs from occupancy')
+        if before[0xf9] != alarm(original,raster):
+            raise ValueError(f'natural tick {n}: omitted HUD alarm differs from original')
         ale.image(**{f'{i:x}':raster[i] for i in occupancy_fields})
         source = bytes(ale.ale.getRAM())
         if acquired != source[0x30:0x37]+source[0x78:0x79]:
@@ -69,7 +80,7 @@ def main():
         if actual != expected:
             first = next(i for i,(a,b) in enumerate(zip(actual,expected)) if a!=b)
             raise ValueError(f'natural tick {n}, byte {first}: {actual[first]} != {expected[first]}')
-        continuous = [i for i in range(0x80,251) if i not in (*range(0xb0,0xb7),0xf8)]
+        continuous = [i for i in range(0x80,251) if i not in (*range(0xb0,0xb7),0xf8,0xf9)]
         if states and any(before[i] != states[-1][i] for i in continuous):
             raise ValueError(f'natural state was reloaded between ticks {n-1}/{n}')
         states.append(actual)
@@ -99,6 +110,18 @@ def main():
                   method='cold boot; keyboard/joystick replay device events; original 6502 comparison every captured update',
                   display_measurement='SAT upload completed; visible scanout and host OS event latency are separate',
                   physical_hardware=False)
+    if args.rescue:
+        report['natural_events'] = dict(
+            alarm_ticks=sum(s[0xf9]!=0 for s in states),
+            pickups=sum(b[0xbe]>a[0xbe] for a,b in zip(states,states[1:])),
+            partial_rescues=sum(b[0xbe]+1==a[0xbe] and a[0xe1]==13 and not a[0xe9] and b[0xbd]==(a[0xbd]+1)&255 for a,b in zip(states,states[1:])),
+            full_rescues=sum(b[0xe8]==6 and a[0xe8]!=6 for a,b in zip(states,states[1:])),
+            deaths=sum(not a[0xe9] and bool(b[0xe9]) for a,b in zip(states,states[1:])),
+            oxygen_depletions=sum(a[0xe6]==1 and b[0xe6]==0 and b[0xe9]==23 and a[0xe1]==20 for a,b in zip(states,states[1:])),
+            refills=sum(a[0xe8]&1 and not b[0xe8]&1 for a,b in zip(states,states[1:])))
+        required = ('alarm_ticks','pickups','partial_rescues','deaths','oxygen_depletions','refills')
+        if any(not report['natural_events'][event] for event in required):
+            raise ValueError(f'incomplete natural rescue/depletion coverage: {report["natural_events"]}')
     (OUT/'natural-result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('latency','shot_births')}))
 

@@ -5,6 +5,7 @@
     DS 12,0
 idle:
     JP idle
+    INCLUDE "oxygen.asm"
     INCLUDE "collision.asm"
     ALIGN 256
 original_rom:

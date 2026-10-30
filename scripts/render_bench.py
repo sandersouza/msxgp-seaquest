@@ -130,10 +130,11 @@ def main():
     parser.add_argument('--input', action='store_true',help='measure real BIOS input at original sample phase, with graphics')
     parser.add_argument('--controls', action='store_true',help='build an automatically running controls diagnostic')
     parser.add_argument('--collisions', action='store_true',help='acquire original raster contacts before the native update')
+    parser.add_argument('--oxygen', action='store_true',help='include the issue #11 oxygen/rescue workload')
     parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
-    args.collisions = args.collisions or args.controls
+    args.collisions = args.collisions or args.controls or args.oxygen
     args.input = args.input or args.controls or args.collisions
     args.graphics = args.graphics or args.input
     args.native = args.native or args.graphics
@@ -262,13 +263,35 @@ def main():
                         entries.append((0xf5b8,0,0x82,0,0))
                         case_names.append(f'controls-dense-{variant}-{keys}-{fire}-{switches}')
                         input_controls.append((0,0,row8,switches))
+        if args.oxygen:
+            oxygen_start = len(cases)
+            from oxygen_contract import transition_cases
+            for name,ram,keys in transition_cases(rom):
+                cases.append(ram)
+                entries.append((0xf5b8,0,0x82,0,0))
+                case_names.append('oxygen-'+name)
+                input_controls.append((0,0,keys,63))
+            # Low oxygen with the same full-density clipped source shapes as
+            # the previous worst workload; retain every object and transfer.
+            import itertools
+            for base,oxygen,phase,state,groups in itertools.product(
+                    dense,(1,15,16,17,63),(0,15,16,31,255),(0,1,6),(0,19,255)):
+                ram = bytearray(base)
+                ram[0xe6],ram[0x81],ram[0xe8],ram[0xe9],ram[0xa3] = oxygen,phase,state,0,0
+                ram[0xbc] = groups
+                cases.append(ram)
+                entries.append((0xf5b8,0,0x82,0,0))
+                case_names.append(f'oxygen-dense-{len(cases)}')
+                input_controls.append((0,0,65,63))
         reference_states = []
-        for ram,entry in zip(cases,entries):
+        for ram,entry,controls in zip(cases,entries,input_controls):
             sampled = bytearray(ram)
             if args.collisions:
-                from collision_reference import contacts
-                acquired = contacts(ram,rom,assets)
-                sampled[0xb0:0xb7],sampled[0xf8] = acquired[:7],acquired[7]
+                from oxygen_reference import acquire
+                sampled = acquire(ram,rom,assets)
+            r6,r7,r8,switches = controls
+            sampled[0x280],sampled[0x282],sampled[12],sampled[13],_,_ = hardware(
+                (r6,r7,r8,0,0),ram[0xb7],switches,0)
             reference_states.append(reference(rom,list(sampled),*entry)[0])
     subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'), '--nologo',
                     '--raw='+str(OUT/'bench.rom'), '--sym='+str(OUT/'bench.sym'),
@@ -277,6 +300,7 @@ def main():
                     *(['-DWITH_INPUT'] if args.input or args.input_synthetic else []),
                     *(['-DWITH_COLLISIONS'] if args.collisions else []),
                     *(['-DCOLLISION_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_COLLISION_CORRUPT')=='1' else []),
+                    *(['-DOXYGEN_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_OXYGEN_CORRUPT')=='1' else []),
                     *(['-DINPUT_CORRUPT_PORT2'] if args.input and os.environ.get('SEAQUEST_INPUT_CORRUPT_PORT2')=='1' else []),
                     *(['-DCONTROL_DEMO'] if args.controls else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
@@ -352,8 +376,10 @@ def main():
                       cpu_margin_cycles=59736-max(cycles))
     if args.collisions:
         report.update(status='original collision/input/graphics integration; synthetic HUD/background; full-game and hardware unverified',
-                      collision_inputs='original raster occupancy acquired before F5B8; original resolution order',
+                      collision_inputs='original raster occupancy and F44F HUD alarm acquired before F5B8; original resolution order',
                       input_sweep_cases=len(variants)*128)
+    if args.oxygen:
+        report['oxygen_sweep_cases'] = len(cases)-oxygen_start
     if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])

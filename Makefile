@@ -45,5 +45,11 @@ collision-contract:
 	@$(PYTHON) -B scripts/collision_contract.py
 render-collision-bench:
 	@$(PYTHON) -B scripts/render_bench.py --collisions
+oxygen-contract:
+	@$(PYTHON) -B scripts/oxygen_contract.py
+render-oxygen-bench:
+	@$(PYTHON) -B scripts/render_bench.py --oxygen
+oxygen-natural: input-contract
+	@$(PYTHON) -B scripts/input_natural.py --rescue
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

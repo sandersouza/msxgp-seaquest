@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "cases": 0,
+  "scenario": "alarm-0-13-0-0",
+  "detail": "byte=249 expected=0 actual=15",
+  "injection": "SEAQUEST_OXYGEN_CORRUPT=1",
+  "expected_failure": true,
+  "subsequent_normal_contract": "contract-result.json"
+}

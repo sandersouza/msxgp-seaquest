@@ -15,6 +15,7 @@ debug set_bp $::paced_frame_start {} {
         puts $::timings "\{\"kind\":\"commit\",\"time\":[machine_info time],\"x\":[debug read VRAM 0x1B01]\}"
     }
     if {[machine_info time] >= 5.5} {
+        if {[info exists ::oxygen_natural] && [machine_info time]>=17} {oxygen_controller}
         set ::recording 1
         set ::raster_input [debug read_block memory 0xC000 1024]
     }

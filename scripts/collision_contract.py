@@ -119,6 +119,8 @@ def main():
             ram[0x280],ram[0x282],ram[0xc],ram[0xd] = 255,63,128,128
             expected_ram = bytearray(ram)
             expected_ram[0xb0:0xb7],expected_ram[0xf8] = expected[:7],expected[7]
+            from oxygen_reference import alarm
+            expected_ram[0xf9] = alarm(original,ram)
             expected_ram,_ = reference(original,list(expected_ram),0xf5b8,0,0x82)
             f.write(bytes([1])+ram+expected_ram)
             names.append(name+'/resolve')
