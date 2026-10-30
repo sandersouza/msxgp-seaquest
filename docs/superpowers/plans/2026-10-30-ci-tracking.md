@@ -19,7 +19,7 @@ tracking; local checks do not substitute for a real green GitHub run.
 - [x] Add portable synthetic checks, original-input tracking guard and pinned workflow.
 - [x] Add task/PR templates and status/acceptance conventions.
 - [x] Run shellcheck and local synthetic build/test path (ten tests, identical ROM hash).
-- [ ] Fresh review, green GitHub run, focused PR and project update.
+- [x] Fresh review, green GitHub run, focused PR and project update (PR #19, merged c619c33; #5 Done).
 
 Started after #4 delivered in PR #18; #3 remains Ready for the original-mechanics
 contract. Do not alter unrelated project items or shared fields.

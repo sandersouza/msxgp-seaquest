@@ -8,14 +8,14 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #4: Bootstrap reproducible macOS toolchain and MSX1 ROM scaffold
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] CI builds project inputs and uses synthetic fixtures where original ROMs are unavailable. Record issue type, priority, size, effort, dependencies and acceptance evidence; distinguish public CI from local fidelity checks.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] CI builds project inputs and uses synthetic fixtures where original ROMs are unavailable. Record issue type, priority, size, effort, dependencies and acceptance evidence; distinguish public CI from local fidelity checks.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-05
@@ -30,3 +30,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/5
+
+## Delivery evidence
+- Merged in https://github.com/sandersouza/msxgp-seaquest/pull/19.
+- GitHub Ubuntu CI passed: https://github.com/sandersouza/msxgp-seaquest/actions/runs/41086215493 (push) and https://github.com/sandersouza/msxgp-seaquest/actions/runs/41086215448 (PR).
+- Ten synthetic tests and diagnostic build/check passed without original inputs; shellcheck and fresh independent review clean.
+- Pinned workflow, diagnostic artifact/hash, issue/PR templates and scoped delivery conventions are documented in docs/project-workflow.md.

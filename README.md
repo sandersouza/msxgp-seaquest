@@ -16,6 +16,8 @@ available yet. Original ROMs/source must be supplied locally; they are not distr
 See [development setup and commands](docs/development.md) to build/run the diagnostic.
 See [delivery and CI conventions](docs/project-workflow.md) for automated checks and
 the boundary between diagnostic, emulator and physical-machine acceptance.
+The [original gameplay contract](docs/gameplay-contract.md) records source-derived
+rules and the scenarios required for later runtime trace acceptance.
 
 ```sh
 python3 -B scripts/reference_inventory.py
