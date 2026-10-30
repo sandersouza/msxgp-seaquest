@@ -1,2 +1,3 @@
 # Optional local capture backend; synthetic CI does not install this dependency.
 ale-py==0.12.1
+py65==1.2.0
