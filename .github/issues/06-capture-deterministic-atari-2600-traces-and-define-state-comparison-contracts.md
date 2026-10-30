@@ -10,9 +10,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #4: Bootstrap reproducible macOS toolchain and MSX1 ROM scaffold
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
 - [ ] A known short sequence proves reset, seed, input-sampling and tick-boundary alignment. Capture positions, RNG, timers, oxygen, score, lives, enemies, divers and shots. Demonstrate a deliberately introduced mismatch is detected.
@@ -32,3 +32,10 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/6
+
+## Progress — initial partial delivery
+- https://github.com/sandersouza/msxgp-seaquest/pull/21 adds optional ALE 0.12.1 solo post-frame capture and a strict reference-replay comparator.
+- Two independent 209-snapshot B/B runs match; frame-byte stepping, refill/movement, B/A firing and an injected real-trace mismatch were verified. Fourteen synthetic tests and fresh independent review pass.
+- Initial frame67/seed204 reflects explicitly recorded ALE warmup/soft resets, not cold frame zero.
+- Remaining: native canonical-field/phase mapping, source clock/scanlines, reset/select/alternate-player and additional switch adapters, full collision/oxygen/rescue/score/death fixture catalogue. Keep this issue open and In progress.
+- Evidence and reproduction: docs/reference-traces.md and references/trace-probe-summary.json. No full gameplay or hardware acceptance claimed.

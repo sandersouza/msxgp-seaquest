@@ -21,7 +21,7 @@ players, cycle-accurate native alignment or source clock measurement yet.
 - [x] Capture local original via optional ALE with frame skip 1 and sticky probability 0.
 - [x] Independently repeat 209 snapshots; verify frame-byte stepping and position/refill probes.
 - [x] Verify B/A shot displacement and detect an intentionally changed real-trace X byte.
-- [ ] Fresh review and CI for this initial partial delivery; PR uses Refs #6.
+- [x] Fresh review of initial partial delivery: clean; PR #21 uses Refs #6. CI is checked before merge.
 - [ ] Finish native phase mapping, exact timing evidence and additional source contract fixtures.
 
 #1–#5 are delivered; #6 is In progress and #7 Ready. Initial ALE source inspection
