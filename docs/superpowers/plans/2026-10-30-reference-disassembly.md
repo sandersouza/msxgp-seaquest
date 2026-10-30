@@ -26,7 +26,7 @@ buffers require short relative input; source originals must remain unchanged.
 - [x] Rebuild both complete binaries and compare byte for byte.
 - [x] Observe failing tests, implement strict identity and listing map, pass nine tests.
 - [x] Export 196 shared labels and code/data reachability ranges; document hardware differences.
-- [ ] Fresh review, final checks, focused PR and project update.
+- [x] Fresh review, final checks, focused PR and project update (PR #17; merged d07ab4c; #2 Done).
 
 Ruling: generated source/listings remain in ignored outputs/reference; only address
 metadata and hashes are published. Tools are local and ignored; setup automation is #4.
