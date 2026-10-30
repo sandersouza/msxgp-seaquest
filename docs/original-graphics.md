@@ -150,6 +150,10 @@ the earlier #7 margin no longer applies.30 synthetic host tests,2,707 native
 continuous-contract cases and the local public-CI script pass. Both deliberate
 source-mask and VRAM-pixel corruptions are detected.
 
+[Independent read-only review](../references/graphics/review.md) found no
+actionable issues and independently replayed all6,525 saved VRAM preparations,
+confirming that previous visible SAT/pattern data stay intact.
+
 Negative controls:
 
 ```

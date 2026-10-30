@@ -9,6 +9,9 @@ if present. The #8 chat stops all shared-checkout changes after dispatch.
 - #8 branch: `codex/feat/8-original-graphics`; verify its merged main commit and
   PR/CI integration before creating the scoped #9 branch.
 - #8 delivery: https://github.com/sandersouza/msxgp-seaquest/pull/24.
+- Independent read-only review of #8 head8167971 found no actionable issues;
+  its independent replay verified6,525 safe sprite-bank transitions. See
+  `references/graphics/review.md`. This approval was scoped to #8's review.
 - The owner authorizes routine implementation, review, scoped PRs, integration
   and autonomous succession toward first playable openMSX. Keep one issue per chat.
 - Dependencies #3/#6/#7 are integrated; #8 adds original sprite display assets.
