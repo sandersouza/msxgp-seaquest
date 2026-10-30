@@ -21,15 +21,17 @@ hash recognition must not be presented as measured frame cadence.
 
 ## Tasks
 
-- [ ] Add tests for digest verification and malformed/valid XEX structures; observe failure.
-- [ ] Add inspector and immutable reference manifest; pass synthetic tests and real-input check.
-- [ ] Document reference identity, source provenance, switches and unresolved timing.
-- [ ] Review changes, run checks, publish focused PR and update #1/project status.
+- [x] Add tests for digest verification and malformed/valid XEX structures; observe failure.
+- [x] Add inspector and immutable reference manifest; pass synthetic tests and real-input check.
+- [x] Document reference identity, source provenance, switches and unresolved timing.
+- [x] Review changes, run checks, publish focused PR and update #1/project status.
 - [ ] Continue #2 and #4 after the reference inventory delivery conditions are satisfied.
 
 ## Execution ledger
 
 - Started #1 on codex/docs/1-reference-inventory; project status In progress.
+- Completed #1 in PR #16, merged as ef70182; project status Done. Six tests and
+  original-input verification pass; fresh independent review clean. Continuing #2.
 - Ruling: use a dedicated branch in the current checkout, preserving the owner's
   untracked originals and the already prepared planning/draft files. No extra worktree
   is needed for this documentation and inspection delivery.

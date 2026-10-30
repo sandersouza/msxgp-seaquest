@@ -1,0 +1,1072 @@
+{
+  "schema_version": 1,
+  "atari2600": {
+    "byte_identical": true,
+    "original_size": 4096,
+    "rebuilt_size": 4096,
+    "sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+    "first_difference": null
+  },
+  "atari800": {
+    "byte_identical": true,
+    "original_size": 4393,
+    "rebuilt_size": 4393,
+    "sha256": "e97cee62f9a99003d78df122eacdd99a24d8e14bd3d0e7d6a497275e4aed86a1",
+    "first_difference": null
+  },
+  "classification": "DiStella automatic reachability heuristic, not independent proof of code/data semantics",
+  "atari2600_ranges": [
+    {
+      "start": 61440,
+      "end": 62392,
+      "kind": "code"
+    },
+    {
+      "start": 62393,
+      "end": 62400,
+      "kind": "data"
+    },
+    {
+      "start": 62401,
+      "end": 63470,
+      "kind": "code"
+    },
+    {
+      "start": 63471,
+      "end": 63477,
+      "kind": "data"
+    },
+    {
+      "start": 63478,
+      "end": 64337,
+      "kind": "code"
+    },
+    {
+      "start": 64338,
+      "end": 64339,
+      "kind": "data"
+    },
+    {
+      "start": 64340,
+      "end": 64535,
+      "kind": "code"
+    },
+    {
+      "start": 64536,
+      "end": 64716,
+      "kind": "data"
+    },
+    {
+      "start": 64717,
+      "end": 64741,
+      "kind": "code"
+    },
+    {
+      "start": 64742,
+      "end": 65210,
+      "kind": "data"
+    },
+    {
+      "start": 65211,
+      "end": 65258,
+      "kind": "code"
+    },
+    {
+      "start": 65259,
+      "end": 65454,
+      "kind": "data"
+    },
+    {
+      "start": 65455,
+      "end": 65517,
+      "kind": "code"
+    },
+    {
+      "start": 65518,
+      "end": 65535,
+      "kind": "data"
+    }
+  ],
+  "shared_labels": [
+    {
+      "label": "LF00E",
+      "atari2600": 61454,
+      "atari800": 8757
+    },
+    {
+      "label": "LF01A",
+      "atari2600": 61466,
+      "atari800": 8772
+    },
+    {
+      "label": "LF03C",
+      "atari2600": 61500,
+      "atari800": 8786
+    },
+    {
+      "label": "LF04A",
+      "atari2600": 61514,
+      "atari800": 8800
+    },
+    {
+      "label": "LF056",
+      "atari2600": 61526,
+      "atari800": 8812
+    },
+    {
+      "label": "LF070",
+      "atari2600": 61552,
+      "atari800": 8842
+    },
+    {
+      "label": "LF080",
+      "atari2600": 61568,
+      "atari800": 8859
+    },
+    {
+      "label": "LF0D6",
+      "atari2600": 61654,
+      "atari800": 9177
+    },
+    {
+      "label": "LF0F3",
+      "atari2600": 61683,
+      "atari800": 9185
+    },
+    {
+      "label": "LF18F",
+      "atari2600": 61839,
+      "atari800": 9261
+    },
+    {
+      "label": "LF199",
+      "atari2600": 61849,
+      "atari800": 9271
+    },
+    {
+      "label": "LF1BB",
+      "atari2600": 61883,
+      "atari800": 9293
+    },
+    {
+      "label": "LF1E5",
+      "atari2600": 61925,
+      "atari800": 9310
+    },
+    {
+      "label": "LF206",
+      "atari2600": 61958,
+      "atari800": 9325
+    },
+    {
+      "label": "LF219",
+      "atari2600": 61977,
+      "atari800": 9350
+    },
+    {
+      "label": "LF240",
+      "atari2600": 62016,
+      "atari800": 9372
+    },
+    {
+      "label": "LF285",
+      "atari2600": 62085,
+      "atari800": 9403
+    },
+    {
+      "label": "LF2A1",
+      "atari2600": 62113,
+      "atari800": 9416
+    },
+    {
+      "label": "LF2D4",
+      "atari2600": 62164,
+      "atari800": 9428
+    },
+    {
+      "label": "LF31C",
+      "atari2600": 62236,
+      "atari800": 9469
+    },
+    {
+      "label": "LF34F",
+      "atari2600": 62287,
+      "atari800": 9488
+    },
+    {
+      "label": "LF382",
+      "atari2600": 62338,
+      "atari800": 9504
+    },
+    {
+      "label": "LF3A1",
+      "atari2600": 62369,
+      "atari800": 9517
+    },
+    {
+      "label": "LF3A7",
+      "atari2600": 62375,
+      "atari800": 9525
+    },
+    {
+      "label": "LF3AD",
+      "atari2600": 62381,
+      "atari800": 9533
+    },
+    {
+      "label": "LF3B3",
+      "atari2600": 62387,
+      "atari800": 9541
+    },
+    {
+      "label": "LF3B9",
+      "atari2600": 62393,
+      "atari800": 9547
+    },
+    {
+      "label": "LF3C1",
+      "atari2600": 62401,
+      "atari800": 9555
+    },
+    {
+      "label": "LF3C3",
+      "atari2600": 62403,
+      "atari800": 9557
+    },
+    {
+      "label": "LF3DD",
+      "atari2600": 62429,
+      "atari800": 9580
+    },
+    {
+      "label": "LF46F",
+      "atari2600": 62575,
+      "atari800": 9682
+    },
+    {
+      "label": "LF47E",
+      "atari2600": 62590,
+      "atari800": 9689
+    },
+    {
+      "label": "LF4F9",
+      "atari2600": 62713,
+      "atari800": 9731
+    },
+    {
+      "label": "LF506",
+      "atari2600": 62726,
+      "atari800": 9741
+    },
+    {
+      "label": "LF56A",
+      "atari2600": 62826,
+      "atari800": 9795
+    },
+    {
+      "label": "LF5CD",
+      "atari2600": 62925,
+      "atari800": 9825
+    },
+    {
+      "label": "LF5D7",
+      "atari2600": 62935,
+      "atari800": 9835
+    },
+    {
+      "label": "LF5F4",
+      "atari2600": 62964,
+      "atari800": 9864
+    },
+    {
+      "label": "LF605",
+      "atari2600": 62981,
+      "atari800": 9881
+    },
+    {
+      "label": "LF613",
+      "atari2600": 62995,
+      "atari800": 9895
+    },
+    {
+      "label": "LF619",
+      "atari2600": 63001,
+      "atari800": 9901
+    },
+    {
+      "label": "LF61B",
+      "atari2600": 63003,
+      "atari800": 9903
+    },
+    {
+      "label": "LF62A",
+      "atari2600": 63018,
+      "atari800": 9918
+    },
+    {
+      "label": "LF63E",
+      "atari2600": 63038,
+      "atari800": 9938
+    },
+    {
+      "label": "LF646",
+      "atari2600": 63046,
+      "atari800": 9946
+    },
+    {
+      "label": "LF64F",
+      "atari2600": 63055,
+      "atari800": 9955
+    },
+    {
+      "label": "LF654",
+      "atari2600": 63060,
+      "atari800": 9960
+    },
+    {
+      "label": "LF66C",
+      "atari2600": 63084,
+      "atari800": 9984
+    },
+    {
+      "label": "LF672",
+      "atari2600": 63090,
+      "atari800": 9990
+    },
+    {
+      "label": "LF680",
+      "atari2600": 63104,
+      "atari800": 10004
+    },
+    {
+      "label": "LF689",
+      "atari2600": 63113,
+      "atari800": 10013
+    },
+    {
+      "label": "LF6A7",
+      "atari2600": 63143,
+      "atari800": 10024
+    },
+    {
+      "label": "LF6B2",
+      "atari2600": 63154,
+      "atari800": 10034
+    },
+    {
+      "label": "LF6BD",
+      "atari2600": 63165,
+      "atari800": 10045
+    },
+    {
+      "label": "LF6D5",
+      "atari2600": 63189,
+      "atari800": 10065
+    },
+    {
+      "label": "LF6E0",
+      "atari2600": 63200,
+      "atari800": 10076
+    },
+    {
+      "label": "LF6EC",
+      "atari2600": 63212,
+      "atari800": 10087
+    },
+    {
+      "label": "LF6F9",
+      "atari2600": 63225,
+      "atari800": 10100
+    },
+    {
+      "label": "LF714",
+      "atari2600": 63252,
+      "atari800": 10127
+    },
+    {
+      "label": "LF716",
+      "atari2600": 63254,
+      "atari800": 10129
+    },
+    {
+      "label": "LF71D",
+      "atari2600": 63261,
+      "atari800": 10136
+    },
+    {
+      "label": "LF726",
+      "atari2600": 63270,
+      "atari800": 10145
+    },
+    {
+      "label": "LF74C",
+      "atari2600": 63308,
+      "atari800": 10183
+    },
+    {
+      "label": "LF755",
+      "atari2600": 63317,
+      "atari800": 10192
+    },
+    {
+      "label": "LF758",
+      "atari2600": 63320,
+      "atari800": 10195
+    },
+    {
+      "label": "LF768",
+      "atari2600": 63336,
+      "atari800": 10211
+    },
+    {
+      "label": "LF776",
+      "atari2600": 63350,
+      "atari800": 10225
+    },
+    {
+      "label": "LF77F",
+      "atari2600": 63359,
+      "atari800": 10234
+    },
+    {
+      "label": "LF79C",
+      "atari2600": 63388,
+      "atari800": 10263
+    },
+    {
+      "label": "LF7A6",
+      "atari2600": 63398,
+      "atari800": 10273
+    },
+    {
+      "label": "LF7B2",
+      "atari2600": 63410,
+      "atari800": 10285
+    },
+    {
+      "label": "LF7BB",
+      "atari2600": 63419,
+      "atari800": 10294
+    },
+    {
+      "label": "LF7C9",
+      "atari2600": 63433,
+      "atari800": 10309
+    },
+    {
+      "label": "LF7D7",
+      "atari2600": 63447,
+      "atari800": 10323
+    },
+    {
+      "label": "LF7EC",
+      "atari2600": 63468,
+      "atari800": 10344
+    },
+    {
+      "label": "LF7EF",
+      "atari2600": 63471,
+      "atari800": 10347
+    },
+    {
+      "label": "LF7F6",
+      "atari2600": 63478,
+      "atari800": 10354
+    },
+    {
+      "label": "LF80A",
+      "atari2600": 63498,
+      "atari800": 10374
+    },
+    {
+      "label": "LF824",
+      "atari2600": 63524,
+      "atari800": 10400
+    },
+    {
+      "label": "LF827",
+      "atari2600": 63527,
+      "atari800": 10403
+    },
+    {
+      "label": "LF850",
+      "atari2600": 63568,
+      "atari800": 10444
+    },
+    {
+      "label": "LF852",
+      "atari2600": 63570,
+      "atari800": 10446
+    },
+    {
+      "label": "LF862",
+      "atari2600": 63586,
+      "atari800": 10462
+    },
+    {
+      "label": "LF875",
+      "atari2600": 63605,
+      "atari800": 10481
+    },
+    {
+      "label": "LF877",
+      "atari2600": 63607,
+      "atari800": 10483
+    },
+    {
+      "label": "LF891",
+      "atari2600": 63633,
+      "atari800": 10509
+    },
+    {
+      "label": "LF8B1",
+      "atari2600": 63665,
+      "atari800": 10541
+    },
+    {
+      "label": "LF8BC",
+      "atari2600": 63676,
+      "atari800": 10552
+    },
+    {
+      "label": "LF8C9",
+      "atari2600": 63689,
+      "atari800": 10565
+    },
+    {
+      "label": "LF8D8",
+      "atari2600": 63704,
+      "atari800": 10580
+    },
+    {
+      "label": "LF8E0",
+      "atari2600": 63712,
+      "atari800": 10588
+    },
+    {
+      "label": "LF8EF",
+      "atari2600": 63727,
+      "atari800": 10603
+    },
+    {
+      "label": "LF8FA",
+      "atari2600": 63738,
+      "atari800": 10614
+    },
+    {
+      "label": "LF900",
+      "atari2600": 63744,
+      "atari800": 10620
+    },
+    {
+      "label": "LF90D",
+      "atari2600": 63757,
+      "atari800": 10633
+    },
+    {
+      "label": "LF910",
+      "atari2600": 63760,
+      "atari800": 10636
+    },
+    {
+      "label": "LF932",
+      "atari2600": 63794,
+      "atari800": 10670
+    },
+    {
+      "label": "LF93E",
+      "atari2600": 63806,
+      "atari800": 10682
+    },
+    {
+      "label": "LF94C",
+      "atari2600": 63820,
+      "atari800": 10696
+    },
+    {
+      "label": "LF94E",
+      "atari2600": 63822,
+      "atari800": 10698
+    },
+    {
+      "label": "LF960",
+      "atari2600": 63840,
+      "atari800": 10716
+    },
+    {
+      "label": "LF962",
+      "atari2600": 63842,
+      "atari800": 10718
+    },
+    {
+      "label": "LF97D",
+      "atari2600": 63869,
+      "atari800": 10745
+    },
+    {
+      "label": "LF980",
+      "atari2600": 63872,
+      "atari800": 10748
+    },
+    {
+      "label": "LF983",
+      "atari2600": 63875,
+      "atari800": 10751
+    },
+    {
+      "label": "LF994",
+      "atari2600": 63892,
+      "atari800": 10768
+    },
+    {
+      "label": "LF99E",
+      "atari2600": 63902,
+      "atari800": 10778
+    },
+    {
+      "label": "LF9B4",
+      "atari2600": 63924,
+      "atari800": 10800
+    },
+    {
+      "label": "LF9BC",
+      "atari2600": 63932,
+      "atari800": 10808
+    },
+    {
+      "label": "LF9D5",
+      "atari2600": 63957,
+      "atari800": 10833
+    },
+    {
+      "label": "LF9E5",
+      "atari2600": 63973,
+      "atari800": 10849
+    },
+    {
+      "label": "LF9EF",
+      "atari2600": 63983,
+      "atari800": 10859
+    },
+    {
+      "label": "LF9F5",
+      "atari2600": 63989,
+      "atari800": 10865
+    },
+    {
+      "label": "LF9FD",
+      "atari2600": 63997,
+      "atari800": 10873
+    },
+    {
+      "label": "LFA07",
+      "atari2600": 64007,
+      "atari800": 10883
+    },
+    {
+      "label": "LFA0E",
+      "atari2600": 64014,
+      "atari800": 10890
+    },
+    {
+      "label": "LFA19",
+      "atari2600": 64025,
+      "atari800": 10901
+    },
+    {
+      "label": "LFA39",
+      "atari2600": 64057,
+      "atari800": 10933
+    },
+    {
+      "label": "LFA47",
+      "atari2600": 64071,
+      "atari800": 10947
+    },
+    {
+      "label": "LFA49",
+      "atari2600": 64073,
+      "atari800": 10949
+    },
+    {
+      "label": "LFA4D",
+      "atari2600": 64077,
+      "atari800": 10953
+    },
+    {
+      "label": "LFA58",
+      "atari2600": 64088,
+      "atari800": 10964
+    },
+    {
+      "label": "LFA5A",
+      "atari2600": 64090,
+      "atari800": 10966
+    },
+    {
+      "label": "LFA5C",
+      "atari2600": 64092,
+      "atari800": 10968
+    },
+    {
+      "label": "LFA62",
+      "atari2600": 64098,
+      "atari800": 10974
+    },
+    {
+      "label": "LFA7A",
+      "atari2600": 64122,
+      "atari800": 10998
+    },
+    {
+      "label": "LFA7D",
+      "atari2600": 64125,
+      "atari800": 11001
+    },
+    {
+      "label": "LFA85",
+      "atari2600": 64133,
+      "atari800": 11009
+    },
+    {
+      "label": "LFA94",
+      "atari2600": 64148,
+      "atari800": 11024
+    },
+    {
+      "label": "LFAA2",
+      "atari2600": 64162,
+      "atari800": 11038
+    },
+    {
+      "label": "LFAB0",
+      "atari2600": 64176,
+      "atari800": 11052
+    },
+    {
+      "label": "LFAC2",
+      "atari2600": 64194,
+      "atari800": 11070
+    },
+    {
+      "label": "LFAD2",
+      "atari2600": 64210,
+      "atari800": 11086
+    },
+    {
+      "label": "LFAF6",
+      "atari2600": 64246,
+      "atari800": 11122
+    },
+    {
+      "label": "LFB03",
+      "atari2600": 64259,
+      "atari800": 11135
+    },
+    {
+      "label": "LFB0E",
+      "atari2600": 64270,
+      "atari800": 11146
+    },
+    {
+      "label": "LFB25",
+      "atari2600": 64293,
+      "atari800": 11168
+    },
+    {
+      "label": "LFB2B",
+      "atari2600": 64299,
+      "atari800": 11174
+    },
+    {
+      "label": "LFB35",
+      "atari2600": 64309,
+      "atari800": 11184
+    },
+    {
+      "label": "LFB37",
+      "atari2600": 64311,
+      "atari800": 11186
+    },
+    {
+      "label": "LFB4D",
+      "atari2600": 64333,
+      "atari800": 11208
+    },
+    {
+      "label": "LFB4F",
+      "atari2600": 64335,
+      "atari800": 11210
+    },
+    {
+      "label": "LFB52",
+      "atari2600": 64338,
+      "atari800": 11213
+    },
+    {
+      "label": "LFB54",
+      "atari2600": 64340,
+      "atari800": 11215
+    },
+    {
+      "label": "LFB56",
+      "atari2600": 64342,
+      "atari800": 11217
+    },
+    {
+      "label": "LFB58",
+      "atari2600": 64344,
+      "atari800": 11219
+    },
+    {
+      "label": "LFB61",
+      "atari2600": 64353,
+      "atari800": 11228
+    },
+    {
+      "label": "LFB7B",
+      "atari2600": 64379,
+      "atari800": 11254
+    },
+    {
+      "label": "LFB84",
+      "atari2600": 64388,
+      "atari800": 11263
+    },
+    {
+      "label": "LFB98",
+      "atari2600": 64408,
+      "atari800": 11283
+    },
+    {
+      "label": "LFB9D",
+      "atari2600": 64413,
+      "atari800": 11288
+    },
+    {
+      "label": "LFBB9",
+      "atari2600": 64441,
+      "atari800": 11316
+    },
+    {
+      "label": "LFBC9",
+      "atari2600": 64457,
+      "atari800": 11332
+    },
+    {
+      "label": "LFBCB",
+      "atari2600": 64459,
+      "atari800": 11334
+    },
+    {
+      "label": "LFBE3",
+      "atari2600": 64483,
+      "atari800": 11358
+    },
+    {
+      "label": "LFBEB",
+      "atari2600": 64491,
+      "atari800": 11366
+    },
+    {
+      "label": "LFBF9",
+      "atari2600": 64505,
+      "atari800": 11380
+    },
+    {
+      "label": "LFC09",
+      "atari2600": 64521,
+      "atari800": 11396
+    },
+    {
+      "label": "LFC0A",
+      "atari2600": 64522,
+      "atari800": 11397
+    },
+    {
+      "label": "LFC0C",
+      "atari2600": 64524,
+      "atari800": 11399
+    },
+    {
+      "label": "LFC18",
+      "atari2600": 64536,
+      "atari800": 12494
+    },
+    {
+      "label": "LFCCD",
+      "atari2600": 64717,
+      "atari800": 11411
+    },
+    {
+      "label": "LFCD7",
+      "atari2600": 64727,
+      "atari800": 11421
+    },
+    {
+      "label": "LFCE6",
+      "atari2600": 64742,
+      "atari800": 12510
+    },
+    {
+      "label": "LFCF0",
+      "atari2600": 64752,
+      "atari800": 12520
+    },
+    {
+      "label": "LFCFB",
+      "atari2600": 64763,
+      "atari800": 12531
+    },
+    {
+      "label": "LFE5B",
+      "atari2600": 65115,
+      "atari800": 12560
+    },
+    {
+      "label": "LFE6B",
+      "atari2600": 65131,
+      "atari800": 12576
+    },
+    {
+      "label": "LFE7B",
+      "atari2600": 65147,
+      "atari800": 12592
+    },
+    {
+      "label": "LFE8B",
+      "atari2600": 65163,
+      "atari800": 12608
+    },
+    {
+      "label": "LFE9B",
+      "atari2600": 65179,
+      "atari800": 12624
+    },
+    {
+      "label": "LFEAB",
+      "atari2600": 65195,
+      "atari800": 12640
+    },
+    {
+      "label": "LFEDB",
+      "atari2600": 65243,
+      "atari800": 11424
+    },
+    {
+      "label": "LFEDD",
+      "atari2600": 65245,
+      "atari800": 11426
+    },
+    {
+      "label": "LFEEB",
+      "atari2600": 65259,
+      "atari800": 12672
+    },
+    {
+      "label": "LFEFC",
+      "atari2600": 65276,
+      "atari800": 12681
+    },
+    {
+      "label": "LFF04",
+      "atari2600": 65284,
+      "atari800": 12689
+    },
+    {
+      "label": "LFF07",
+      "atari2600": 65287,
+      "atari800": 12692
+    },
+    {
+      "label": "LFF0F",
+      "atari2600": 65295,
+      "atari800": 12700
+    },
+    {
+      "label": "LFF17",
+      "atari2600": 65303,
+      "atari800": 12708
+    },
+    {
+      "label": "LFF51",
+      "atari2600": 65361,
+      "atari800": 12732
+    },
+    {
+      "label": "LFF56",
+      "atari2600": 65366,
+      "atari800": 12737
+    },
+    {
+      "label": "LFF5D",
+      "atari2600": 65373,
+      "atari800": 12744
+    },
+    {
+      "label": "LFF66",
+      "atari2600": 65382,
+      "atari800": 12753
+    },
+    {
+      "label": "LFF6B",
+      "atari2600": 65387,
+      "atari800": 12758
+    },
+    {
+      "label": "LFF70",
+      "atari2600": 65392,
+      "atari800": 12763
+    },
+    {
+      "label": "LFFA2",
+      "atari2600": 65442,
+      "atari800": 12768
+    },
+    {
+      "label": "LFFAD",
+      "atari2600": 65453,
+      "atari800": 12784
+    },
+    {
+      "label": "LFFAF",
+      "atari2600": 65455,
+      "atari800": 11440
+    },
+    {
+      "label": "LFFB0",
+      "atari2600": 65456,
+      "atari800": 11441
+    },
+    {
+      "label": "LFFB1",
+      "atari2600": 65457,
+      "atari800": 11442
+    },
+    {
+      "label": "LFFB3",
+      "atari2600": 65459,
+      "atari800": 11444
+    },
+    {
+      "label": "LFFB4",
+      "atari2600": 65460,
+      "atari800": 11445
+    },
+    {
+      "label": "LFFBE",
+      "atari2600": 65470,
+      "atari800": 11455
+    },
+    {
+      "label": "LFFDA",
+      "atari2600": 65498,
+      "atari800": 11483
+    },
+    {
+      "label": "LFFDC",
+      "atari2600": 65500,
+      "atari800": 11485
+    }
+  ]
+}
