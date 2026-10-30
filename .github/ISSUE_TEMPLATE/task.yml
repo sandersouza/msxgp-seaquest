@@ -1,0 +1,40 @@
+name: Project task
+description: A scoped MSX1 port deliverable with evidence-based acceptance.
+title: ''
+labels: [enhancement, 'priority:p2']
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal and scope
+      description: State the concrete result and preserve MSX1 64 KiB RAM / 16 KiB VRAM and original gameplay fidelity.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and Definition of Ready
+      description: Link prerequisite issues, reference revision/region and unresolved inputs.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Definition of Done and validation
+      description: List testable criteria, required evidence and the boundary between automated, emulator and physical-machine acceptance.
+    validations:
+      required: true
+  - type: textarea
+    id: tracking
+    attributes:
+      label: Tracking
+      value: |
+        Type: Task
+        Priority: P2
+        Size: XS/S/M/L/XL
+        Estimate: hours including implementation and validation
+        Project: MSX Game Ports #7
+        Status: Backlog
+        Milestone: none unless explicitly selected
+    validations:
+      required: true

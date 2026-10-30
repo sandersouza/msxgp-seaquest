@@ -26,7 +26,7 @@ boot success must not be described as gameplay fidelity or physical-machine acce
 - [x] Implement version/hash checked macOS environment modes and local tool setup.
 - [x] Build diagnostic cartridge and verify binary structure.
 - [x] Run isolated C-BIOS MSX1 smoke test, record machine/VDP/RAM/signature/VRAM evidence.
-- [ ] Document workflow, review, publish PR and update project.
+- [x] Document workflow, review, publish PR and update project (PR #18; merged 5e41f21; #4 Done).
 
 ## Ledger
 
