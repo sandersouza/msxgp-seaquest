@@ -4,6 +4,6 @@
   "python": "3.14.7",
   "edge_cases": 260,
   "passed": true,
-  "scenarios_count": 467,
+  "scenarios_count": 497,
   "status": "local original raster masks and lettering; no gameplay acceptance"
 }

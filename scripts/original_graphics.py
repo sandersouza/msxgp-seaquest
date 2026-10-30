@@ -84,8 +84,8 @@ def extract(data):
     for selection in range(16):
         rows, addresses = ball(data,selection)
         add(f'ball-{selection}', rows, addresses, anchor='C7+lane; signed row offsets')
-        for animation in (0,15):
-            kind = selection & 7
+        kind = selection & 7
+        for animation in (range(8) if kind<4 else (0,)):
             # Low frame3/7 is never selected by the original's 0..2 animation.
             # Its nonzero tail would persist beyond the lane's 15-row window.
             if kind in (3,7): continue
@@ -113,7 +113,7 @@ def extract(data):
     for name,asset in list(assets.items()):
         if name.startswith(('player-','explosion-')):
             for y in range(13,24):
-                rows = [row if not 53 <= y+33+n <= 56 else []
+                rows = [row[:] if not 53 <= y+33+n <= 56 else []
                         for n,row in enumerate(asset['rows'])]
                 add(f'surface-{name}-{y}',rows,asset['source_addresses'],
                     display_variant_of=name,player_y=y)

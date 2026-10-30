@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from original_graphics import bitmap, ball, scale_rows, sprite_bytes, sprite_bank
+from original_graphics import bitmap, ball, scale_rows, sprite_bytes, sprite_bank, extract
 from graphics_palette import tms_color
 
 
@@ -12,6 +12,18 @@ class OriginalGraphicsTests(unittest.TestCase):
         source = bytes([0b10000001,0b01000000])
         self.assertEqual(bitmap(source,0xf000,2),[[1],[0,7]])
         self.assertEqual(bitmap(source,0xf000,2,True,2),[[12,13],[0,1,14,15]])
+
+    def test_extract_covers_all_reachable_shark_offsets(self):
+        assets = extract(bytes(4096))
+        enemies = [name for name in assets if name.startswith('enemy-')]
+        self.assertEqual(len(enemies),54)
+        self.assertIn('enemy-10-7',assets)
+        self.assertNotIn('enemy-3-0',assets)
+
+    def test_surface_view_cannot_mutate_canonical_mask(self):
+        assets = extract(bytes(4096))
+        assets['surface-player-0-0-13']['rows'][0].append(99)
+        self.assertEqual(assets['player-0-0']['rows'][0],[])
 
     def test_ball_sign_extension_width_and_disabled_rows(self):
         source = bytearray(4096)

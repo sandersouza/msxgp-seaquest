@@ -34,7 +34,8 @@ Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/8
 ## Delivery evidence
 
 - [Graphics contract](../../docs/original-graphics.md) and [metadata-only evidence](../../references/graphics/).
-- 251 assets/display variants; 467 original ALE shape/lettering scenarios plus 260 edge cases pass.
-- 6,526 native/background/sprite/palette cases pass; max 59,211/59,736 cycles, 240 paced frames without skips, 29-cycle minimum VRAM spacing. 27 host tests and 2,707 continuous native cases pass; both corruption controls fail as intended.
+- 281 assets/display variants; 497 original ALE shape/lettering scenarios plus 260 edge cases pass.
+- 6,526 native/background/sprite/palette cases pass; max 59,211/59,736 cycles, 240 paced frames without skips, 29-cycle minimum VRAM spacing. 30 host tests and 2,707 continuous native cases pass; both corruption controls fail as intended.
+- Delivery PR: https://github.com/sandersouza/msxgp-seaquest/pull/24.
 - Original-derived data remain ignored local research outputs. HUD/background color composition, natural gameplay/input/audio, PAL and physical hardware remain unverified.
 - Independent review, remote CI and integrated delivery are still required before closure.

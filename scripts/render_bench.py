@@ -215,7 +215,7 @@ def main():
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
     if args.build_only:
-        variant = 'native' if args.native else 'synthetic'
+        variant = 'graphics' if args.graphics else ('native' if args.native else 'synthetic')
         shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
         manifest = {'rom':variant+'.rom','bytes':32768,'sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
                     'status':'renderer diagnostic only; no emulator acceptance'}

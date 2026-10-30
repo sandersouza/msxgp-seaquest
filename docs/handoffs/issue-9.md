@@ -8,6 +8,7 @@ if present. The #8 chat stops all shared-checkout changes after dispatch.
 - Issue: https://github.com/sandersouza/msxgp-seaquest/issues/9.
 - #8 branch: `codex/feat/8-original-graphics`; verify its merged main commit and
   PR/CI integration before creating the scoped #9 branch.
+- #8 delivery: https://github.com/sandersouza/msxgp-seaquest/pull/24.
 - The owner authorizes routine implementation, review, scoped PRs, integration
   and autonomous succession toward first playable openMSX. Keep one issue per chat.
 - Dependencies #3/#6/#7 are integrated; #8 adds original sprite display assets.
@@ -21,8 +22,8 @@ docs/original-graphics.md and relevant personal Obsidian guidelines first.
 - Native gameplay phase remains F5B8→F00E, canonical RAM at C000+original address.
   No interpreter ships. Source collision masks stay canonical; display scaling
   and clipping must never write movement/collision state.
-- Local `make graphics-reference-check` extracts 251 assets/views and validates
-  467 shape/lettering/death cases plus260 edge cases against ALE/Stella. Includes
+- Local `make graphics-reference-check` extracts 281 assets/views and validates
+  497 shape/lettering/death cases plus260 edge cases against ALE/Stella. Includes
   all ten original digits, life/diver icons and both exact original logos.
 - Source ball raster anchor is C7+2 before signed HMOVE motion: normal diver
   bounds0..7 relative to C7. Earlier handoff's -2..5 omitted positioning bias.

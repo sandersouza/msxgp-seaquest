@@ -35,19 +35,19 @@ tables, listings, ROMs and dumps stay ignored. Public CI uses synthetic inputs.
 | Life / rescued diver | FF5D rows8..0 / FFF2 rows8..0 |
 | Original logos | Six 16-byte columns at FE5B..FEAB; indices15..8 for Activision and7..0 for Seaquest |
 
-There are 75 base assets and 176 surface display variants. The extractor includes
+There are 105 base assets and 176 surface display variants. The extractor includes
 all 16 ball-control selections. Enemy animation indices3/7 are omitted: original
 animation uses0..2 and4..6, and those unused pointers can leave a nonzero GRP1
 latch beyond the 15-row rectangle. The diagnostic's artificial enemy-type sweep
 still checks its explicit 15-row backend contract; it does not make those unused
-selections original gameplay states. DD endpoints0/15 are extracted for provenance;
-the renderer reads the source pointer directly for intermediate DD values.
+selections original gameplay states. Every reachable shark DD offset0..7 is
+extracted and checked; the renderer reads the same source pointer directly.
 
 ## Pixel authority and clipping
 
-`scripts/graphics_reference.py` compares all 251 assets, including every surface
+`scripts/graphics_reference.py` compares all 281 assets, including every surface
 variant, against ALE/Stella output from the original ROM, plus 260 ball/patrol/
-torpedo edge cases and 216 early-death aliases (467 shape/lettering scenarios
+torpedo edge cases and 216 early-death aliases (497 shape/lettering scenarios
 plus260 edge cases). It freezes raster inputs using the original bonus early-exit
 path, avoiding animation/movement changes before capture. ALE's sticky terminal
 state is reset after terminal logo selection. The comparison checks surrounding
@@ -146,7 +146,7 @@ with29-cycle minimum data-port spacing, stack minimumF374, intact RAM guard and
 no skipped paced frames. This is fixture coverage, not a proof over every
 reachable game state. The32KiB diagnostic has256 padding bytes after the linked
 source ROM. Successors must reduce cost/space or demonstrate that their work fits;
-the earlier #7 margin no longer applies.27 synthetic host tests,2,707 native
+the earlier #7 margin no longer applies.30 synthetic host tests,2,707 native
 continuous-contract cases and the local public-CI script pass. Both deliberate
 source-mask and VRAM-pixel corruptions are detected.
 

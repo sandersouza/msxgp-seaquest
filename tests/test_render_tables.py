@@ -23,6 +23,12 @@ class RenderTableTests(unittest.TestCase):
         self.assertEqual(sprite_peak([42,42,42] + divers + [39]), 5)
         self.assertGreater(sprite_peak([49]*3 + [49]*3 + [49]),4)
 
+    def test_original_geometry_respects_scanline_slots(self):
+        for player_y in range(13,109):
+            ys = [player_y+17]*2 + [48+24*n for n in range(4)] + [22]
+            if player_y>=17: ys.append(player_y+24)
+            self.assertLessEqual(sprite_peak(ys),4)
+
     def test_visible_signature_ignores_only_unreferenced_patterns(self):
         before = bytearray(16384)
         after = bytearray(before)
