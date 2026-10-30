@@ -1,8 +1,8 @@
 {
   "cases": 9598,
-  "max_cycles": 58727,
+  "max_cycles": 58757,
   "worst_case": "controls-dense-16-15-1-255",
-  "rom_sha256": "353f147192ff16ac01082d7114b475c2940b3f03ad4190dd506b299f49033a64",
+  "rom_sha256": "b8c60abb803fbc9fab2c4f0c1516d075106204425a63997feaa6a8c10fa2ec8e",
   "io": {
     "min_data_spacing": 29,
     "data_writes": 6238816
@@ -20,15 +20,15 @@
   "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
   "status": "controls integration diagnostic with neutral collision inputs; synthetic HUD/background colors; no full-game or physical-hardware acceptance",
   "input_sweep_cases": 3072,
-  "collision_inputs": "B0..B6=FF and F8=0 before every update; real acquisition belongs to issue #10",
+  "collision_inputs": "isolated adapter regression: neutral B0..B6=FF/F8=0; the controls and collision targets acquire real contacts",
   "rom_padding_bytes": 3840,
-  "cpu_margin_cycles": 1009,
+  "cpu_margin_cycles": 979,
   "pace": {
     "frames": 240,
-    "min_period": 59736,
-    "max_period": 59736,
+    "min_period": 59710,
+    "max_period": 59738,
     "max_commit_cycles": 11039,
-    "max_busy_cycles": 58620,
+    "max_busy_cycles": 58650,
     "stack_min": 62320,
     "min_commit_y": 192,
     "max_commit_end_y": -22

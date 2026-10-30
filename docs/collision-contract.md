@@ -8,7 +8,7 @@ replaces the source instructions.
 
 ## Acquisition contract
 
-The local manifest-verified NTSC4K Atari2600 ROM is the authority. Its display
+The local manifest-verified NTSC 4K Atari2600 ROM is the authority. Its display
 preparation and kernel at F00E–F3B3 determine occupancy; acquisition changes only
 B0..B6 and F8. Canonical player coordinates remain X21..134/Y13..108. MSX scaling,
 clipped sprite variants, palette and the TMS sprite-collision flag do not feed
@@ -29,8 +29,9 @@ Two source details are particularly easy to lose:
   Right-edge object pixels wrap in the TIA's160-pixel domain; repeat coordinates
   first preserve the source byte wrap. X0/inactive balls and missiles also remain
   source hardware geometry; the original resolution applies its own guards.
-- Death counters1..9 leave carry clear for ADC at F1B5, selecting patrol source
-  rows11..4 at raw lines45..52. Other admitted states select rows12..5. Collision
+- With no death, CPY #2 in the lives kernel supplies carry: zero/one reserve
+  selects patrol rows11..4. Death counters1..9 also clear carry, while10..23
+  replace it with set carry. Set carry selects rows12..5 at raw lines45..52. Collision
   and display both preserve this early-death variant. It uses an existing inactive
   scratch slot; resident/scratch VRAM allocation is unchanged.
 
@@ -42,11 +43,12 @@ unmodified original ROM in ALE/Stella. It freezes raster inputs through the orig
 bonus early exit. The Z80 then acquires contacts from the same state with poisoned
 latch outputs; every other canonical byte must remain unchanged. A second pass
 executes normal native resolution and compares all251 shadow bytes with a separate
-py65 original6502 execution.
+py65 original 6502 execution.
 
-Fixtures include all256 base coordinates and eight repeat masks, all reachable
+Fixtures include all 256 base coordinates and eight repeat masks, all reachable
 enemy selections and shark offsets, both reflections, every legal player Y,
 early-death/surface windows, clipping and circular edges, source seeds/waves,
+zero/one-reserve patrols with no death and the reserve/death carry override,
 explicit simultaneous contacts, six-diver pickup suppression and patrol contact
 in normal/refill/bonus states. Unused source animation pointers3/7 are excluded
 from collision authority. The earlier graphics-only probes still exercise their
@@ -62,7 +64,7 @@ independently.
 
 ## Cost and reproduction
 
-The32KiB cartridge retains BIOS page0,64KiB RAM/16KiB VRAM and standard-speed
+The32 KiB cartridge retains BIOS page0,64 KiB RAM/16 KiB VRAM and standard-speed
 MSX1 operation. Local generated tables share identical projection rows and store
 enemy/ball overlap bitsets. The renderer's collision build caches expanded source
 rows FDA4..FDF8 by parity/phase/reflection in32 pages. Stack stores gather those
@@ -74,23 +76,23 @@ empty source player rows. None of these changes reduces objects or tick frequenc
 
 | Current check | Result |
 |---|---|
-| Atari TIA acquisition / native acquisition+resolution |17,074 /34,148 cases |
-| Full-density collision/input/graphics |10,622 cases;59,087/59,736 cycles |
-| Paced worst fixture |240 frames without skips;58,980 busy cycles |
+| Atari TIA acquisition / native acquisition+resolution |20,374 /40,748 cases |
+| Full-density collision/input/graphics |10,622 cases;59,370/59,736 cycles |
+| Paced worst fixture |240 frames without skips;59,263 busy cycles |
 | Visible commit / minimum port spacing |11,039 /29 cycles |
-| Remaining CPU /32KiB cartridge padding |649 cycles /1,536 bytes |
+| Remaining CPU /32 KiB cartridge padding |366 cycles /1,536 bytes |
 | Cold boot, actual controls and Atari/CPU comparison |659 updates, no RAM reloads or skipped VDP frames |
-| Natural maximum busy work |55,224 cycles |
-| Event→state / completed SAT upload |17.5662 /29.7795 ms maximum |
+| Natural maximum busy work |55,284 cycles |
+| Event→state / completed SAT upload |17.5734 /29.7795 ms maximum |
 | Input / native CPU / graphics regressions |5,660 /2,707 /6,526 cases |
-| Isolated neutral-contact input/renderer regression |9,598 cases;58,727 cycles |
-| Synthetic host checks |35 tests and local public CI pass |
+| Isolated neutral-contact input/renderer regression |9,598 cases;58,757 cycles |
+| Synthetic host checks |36 tests and local public CI pass |
 
 The timed collision probe SHA-256 is
-`055fb51c9a12993140838ca04a1a0980098eca6e57dcd3c5d9f441b66cd823ff`.
+`0990365dec54574eb3a17ead3838dd8d064a1d4049052e5c957211bb55ab14f2`.
 The continuous controls/collision cartridge SHA-256 is
-`3f2a05b3d5810d1d74a8753155dfefc69aac3e744e9b0777319c1be2e24750b5`.
-Both use openMSX21.0/C-BIOS_MSX1, NTSC,64KiB RAM and16KiB VRAM.
+`c6fd8c4271d160527ed6e0e3f5459f4eda1fbaa56e66a55d8eb28989da411dee`.
+Both use openMSX21.0/C-BIOS_MSX1, NTSC,64 KiB RAM and 16 KiB VRAM.
 The paced minimum stack is F370 and the RAM guard is intact. These measurements
 bound the named fixtures, not every reachable state; CPU margin remains tight.
 Latency measures device replay events to state/SAT completion, excluding host OS,

@@ -4,5 +4,5 @@
   "python": "3.14.7",
   "edge_cases": 299,
   "passed": true,
-  "shape_scenarios": 500
+  "shape_scenarios": 647
 }

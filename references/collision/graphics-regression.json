@@ -1,8 +1,8 @@
 {
   "cases": 6526,
-  "max_cycles": 52104,
+  "max_cycles": 52134,
   "worst_case": "graphics-mixed-708",
-  "rom_sha256": "1adf0d3c51c374d138302c7534db48bfd0e7921c58d4dc796d491a6734ec3463",
+  "rom_sha256": "ee1de983e998b9beffd7bab6e4b81a7d265f4cb174755b9ca38394d5c6c245b3",
   "io": {
     "min_data_spacing": 29,
     "data_writes": 4121920
@@ -21,10 +21,10 @@
   "status": "original sprite integration probe; synthetic HUD/background colors; no playable or physical-hardware acceptance",
   "pace": {
     "frames": 240,
-    "min_period": 59721,
-    "max_period": 59749,
+    "min_period": 59723,
+    "max_period": 59751,
     "max_commit_cycles": 11039,
-    "max_busy_cycles": 51997,
+    "max_busy_cycles": 52027,
     "stack_min": 62326,
     "min_commit_y": 192,
     "max_commit_end_y": -22
