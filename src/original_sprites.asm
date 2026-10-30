@@ -31,8 +31,8 @@ original_sprite_id:
     EDUP
     LD E,A
     POP HL
-    LD BC,32
-    CALL vram_copy
+    LD B,32
+    CALL vram_copy_short
     POP BC
     RET
 .resident:
@@ -253,6 +253,13 @@ prepare_original_sprites:
     ADD HL,HL
     EDUP
     LD DE,patrol_images
+    LD A,($C0E9)
+    OR A
+    JR Z,.patrol_table
+    CP 10
+    JR NC,.patrol_table
+    LD DE,early_patrol_images
+.patrol_table:
     ADD HL,DE
     LD A,($C0F6)
     CALL original_edge_index

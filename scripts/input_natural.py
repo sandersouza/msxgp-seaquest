@@ -6,6 +6,8 @@ import re
 
 from input_contract import OUT, ROOT, device_events, replay, run
 from native_contract import reference
+from collision_reference import contacts
+from original_graphics import extract
 
 
 def main():
@@ -32,7 +34,7 @@ def main():
         events += device_events(time,controls)
     replay(OUT/'seed.omr',events,17,OUT/'natural.omr')
     script = OUT/'natural-start.tcl'
-    script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit'))+
+    script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_prepared'))+
                       f'set sample_input_return {symbols["core_F6A7"]+3}\n'+
                       'if {[catch {source scripts/input_natural.tcl} detail]} {puts stderr $detail; exit 1}\n')
     (OUT/'natural-complete.txt').unlink(missing_ok=True)
@@ -41,15 +43,28 @@ def main():
         raise ValueError('natural replay incomplete')
     original = (ROOT/'outputs/native/original.rom').read_bytes()
     data = (OUT/'natural.bin').read_bytes()
-    size = 1024+4+251
+    size = 2048+4+251
     if not data or len(data)%size:
         raise ValueError('truncated natural replay')
     states = []
+    assets = extract(original)
+    from graphics_reference import Reference
+    ale = Reference()
+    occupancy_fields = (*range(0x9e,0xa2),*range(0xa4,0xa8),*range(0xc6,0xcb),
+                        0xd6,*range(0xd9,0xde),0xe0,0xe1,0xe7,0xe9,0xf6,0xbb,0x82)
     for n,offset in enumerate(range(0,len(data),size)):
-        before = bytearray(data[offset:offset+1024])
-        ports,console,f1,f2 = data[offset+1024:offset+1028]
+        raster = bytearray(data[offset:offset+1024])
+        before = bytearray(data[offset+1024:offset+2048])
+        acquired = contacts(raster,original,assets)
+        if acquired != before[0xb0:0xb7]+before[0xf8:0xf9]:
+            raise ValueError(f'natural tick {n}: native acquisition differs from occupancy')
+        ale.image(**{f'{i:x}':raster[i] for i in occupancy_fields})
+        source = bytes(ale.ale.getRAM())
+        if acquired != source[0x30:0x37]+source[0x78:0x79]:
+            raise ValueError(f'natural tick {n}: native acquisition differs from Atari TIA')
+        ports,console,f1,f2 = data[offset+2048:offset+2052]
         before[0x280],before[0x282],before[0xc],before[0xd] = ports,console,f1,f2
-        actual = data[offset+1028:offset+size]
+        actual = data[offset+2052:offset+size]
         expected,_ = reference(original,list(before),0xf5b8,0,0x82)
         if actual != expected:
             first = next(i for i,(a,b) in enumerate(zip(actual,expected)) if a!=b)
@@ -61,6 +76,9 @@ def main():
     timing = [json.loads(line) for line in (OUT/'natural-timing.jsonl').read_text().splitlines()]
     frames = [t for t in timing if t['kind']=='state']
     commits = [t for t in timing if t['kind']=='commit']
+    busy = [t['cycles'] for t in timing if t['kind']=='busy']
+    if max(busy)>=59736 or any(b['vdp_frame']-a['vdp_frame']!=1 for a,b in zip(frames,frames[1:])):
+        raise ValueError('natural collision replay exceeded the frame budget or skipped a VDP frame')
     for event in latency:
         # Before press each pulse is neutral, away from boundaries/refill/death.
         previous = max((f for f in frames if f['time']<event['time']),key=lambda f:f['time'])
@@ -72,6 +90,8 @@ def main():
             raise ValueError(f'input latency outside two-frame contract: {event}')
     births = [f for i,f in enumerate(frames) if i and not frames[i-1]['shot'] and f['shot']]
     report = dict(passed=True,continuous_ticks=len(states),ram_reloads_after_boot=0,
+                  original_tia_acquisition_ticks=len(states),
+                  max_busy_cycles=max(busy),skipped_vdp_frames=0,
                   rom_sha256=hashlib.sha256(rom.read_bytes()).hexdigest(),latency=latency,
                   max_state_ms=max(e['state_ms'] for e in latency),
                   max_sat_commit_ms=max(e['sat_commit_ms'] for e in latency),

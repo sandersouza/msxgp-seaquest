@@ -69,6 +69,9 @@ def main():
         elif name.startswith('patrol-'):
             changes = {'e0':int(name.split('-')[1]),'f6':64}
             x,y = 64,45
+        elif name.startswith('early-patrol-'):
+            changes = {'e0':int(name.split('-')[-1]),'f6':64,'e9':1}
+            x,y = 64,45
         elif name.startswith('ball-'):
             changes = {'c7':64,'d9':int(name.split('-')[1])}
             x,y = 64,137
@@ -125,13 +128,16 @@ def main():
         checks.append(dict(asset=name,passed=True,pixels=int(actual.sum())))
     edge_checks = 0
     for name,asset in assets.items():
-        if name.startswith(('ball-','patrol-')) or name=='torpedo':
+        if name.startswith(('ball-','patrol-','early-patrol-')) or name=='torpedo':
             for x in (1,7,8,9,150,153,154,155,156,157,158,159,160):
                 if name.startswith('ball-'):
                     changes = {'c7':x,'d9':int(name.split('-')[1])}
                     y = 137
                 elif name.startswith('patrol-'):
                     changes = {'f6':x,'e0':int(name.split('-')[1])}
+                    y = 45
+                elif name.startswith('early-patrol-'):
+                    changes = {'f6':x,'e0':int(name.split('-')[-1]),'e9':1}
                     y = 45
                 else:
                     changes = {'e7':x,'e1':50}

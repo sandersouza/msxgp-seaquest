@@ -22,3 +22,5 @@ python3 -B scripts/rom.py build
 python3 -B scripts/rom.py check
 python3 -B scripts/render_bench.py --build-only
 python3 -B scripts/render_bench.py --input-synthetic --build-only
+python3 -B scripts/collision_reference.py --synthetic
+.tools/sjasmplus/sjasmplus --nologo --raw=outputs/collision/synthetic.rom src/collision_synthetic.asm

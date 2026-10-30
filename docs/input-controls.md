@@ -1,5 +1,9 @@
 # Original controls — issue #9
 
+Issue #9's measurements below retain their delivery baseline. The current
+`make controls-run` includes [issue #10 collision acquisition](collision-contract.md);
+current combined timing and continuous-replay evidence are in references/collision/.
+
 The controls diagnostic connects MSX input to the existing native gameplay code.
 It preserves the original F5B8→F00E update, byte arithmetic, facing, opposing-key
 order, unnormalized diagonals, boundaries and held-level fire. No replacement
@@ -34,10 +38,11 @@ in page0. VDP IRQ generation is masked because BIOS input calls can execute EI;
 the adapter returns with CPU interrupts disabled before SP-based name clearing.
 Register snapshots, IFF1/2, VDP IRQ masking and PSG15 restoration are checked.
 
-The diagnostic substitutes neutral hardware collision inputs B0..B6=FF/F8=0
+The issue #9 delivery diagnostic substituted neutral hardware collision inputs B0..B6=FF/F8=0
 before **every** update, including after Reset/Select. These are the future
-collision backend's inputs, not persistent game state. Issue #10 must replace
-this hardware phase and remeasure the complete workload.
+collision backend's inputs, not persistent game state. The current cold-boot
+diagnostic replaces this phase with original raster acquisition. Isolated input
+RPC and `make render-input-bench` retain neutral contacts for adapter regression.
 
 ## Reproduce
 

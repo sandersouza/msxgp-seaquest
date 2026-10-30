@@ -92,7 +92,8 @@ def check_original_sprites(ram,vram,assets,rom):
                ('torpedo',ram[0xe7],ram[0xe1]+24,2,ram[0xe1]>=17 and ram[0xe7]!=0)]
     objects += [(f'ball-{ram[0xd9+lane]&15}',ram[0xc7+lane],120-lane*24,3+lane,
                  ram[0xc7+lane]!=0) for lane in range(4)]
-    objects += [(f'patrol-{frame}',ram[0xf6],30,7,ram[0xf6]!=0)]
+    patrol_prefix = 'early-patrol' if 0<ram[0xe9]<10 else 'patrol'
+    objects += [(f'{patrol_prefix}-{frame}',ram[0xf6],30,7,ram[0xf6]!=0)]
     for name,x,y,slot,enabled in objects:
         if not enabled or x>=160: continue
         for row, pixels in enumerate(scale_rows(assets[name]['rows'],x)):
@@ -128,10 +129,12 @@ def main():
     parser.add_argument('--graphics', action='store_true',help='local original sprite integration, includes native core')
     parser.add_argument('--input', action='store_true',help='measure real BIOS input at original sample phase, with graphics')
     parser.add_argument('--controls', action='store_true',help='build an automatically running controls diagnostic')
+    parser.add_argument('--collisions', action='store_true',help='acquire original raster contacts before the native update')
     parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
-    args.input = args.input or args.controls
+    args.collisions = args.collisions or args.controls
+    args.input = args.input or args.controls or args.collisions
     args.graphics = args.graphics or args.input
     args.native = args.native or args.graphics
     OUT.mkdir(parents=True,exist_ok=True)
@@ -146,6 +149,9 @@ def main():
     if args.graphics:
         from original_graphics import generate as graphics_generate
         assets,_,_ = graphics_generate()
+    if args.collisions:
+        from collision_reference import generate as collision_generate
+        collision_generate()
     rom = None
     cases = []
     entries = []
@@ -213,6 +219,22 @@ def main():
                 entries.append((0xf5b8,0,0x82,0,0))
                 reference_states.append(expected)
                 case_names.append(f'graphics-mixed-{n}')
+    if args.collisions:
+        from collision_contract import scenarios as collision_scenarios
+        import itertools
+        for n,(name,changes) in enumerate(itertools.islice(collision_scenarios(),1024)):
+            ram = bytearray(cases[150])
+            for address,value in changes.items(): ram[int(address,16)] = value
+            ram[0xa4:0xa8] = bytes([7]*4)
+            ram[0xe8],ram[0xe6],ram[0xa3],ram[0xbd],ram[0x81] = 0,64,0,n&255,n&255
+            cases.append(ram)
+            entries.append((0xf5b8,0,0x82,0,0))
+            case_names.append('collision-full-'+name)
+        # Earlier renderer probes deliberately include unused frame3/7 pointers.
+        # Keep their density/positions while selecting reachable source frames.
+        for ram in cases:
+            for lane in range(4):
+                if ram[0xd9+lane]&7 in (3,7): ram[0xd9+lane] ^= 1
     if args.input:
         # The emulator has neutral physical devices in this exhaustive renderer
         # pass. Dedicated input replays exercise natural controls separately.
@@ -240,18 +262,27 @@ def main():
                         entries.append((0xf5b8,0,0x82,0,0))
                         case_names.append(f'controls-dense-{variant}-{keys}-{fire}-{switches}')
                         input_controls.append((0,0,row8,switches))
-        reference_states = [reference(rom,list(ram),*entry)[0] for ram,entry in zip(cases,entries)]
+        reference_states = []
+        for ram,entry in zip(cases,entries):
+            sampled = bytearray(ram)
+            if args.collisions:
+                from collision_reference import contacts
+                acquired = contacts(ram,rom,assets)
+                sampled[0xb0:0xb7],sampled[0xf8] = acquired[:7],acquired[7]
+            reference_states.append(reference(rom,list(sampled),*entry)[0])
     subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'), '--nologo',
                     '--raw='+str(OUT/'bench.rom'), '--sym='+str(OUT/'bench.sym'),
                     *(['-DWITH_NATIVE'] if args.native else []),
                     *(['-DWITH_GRAPHICS'] if args.graphics else []),
                     *(['-DWITH_INPUT'] if args.input or args.input_synthetic else []),
+                    *(['-DWITH_COLLISIONS'] if args.collisions else []),
+                    *(['-DCOLLISION_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_COLLISION_CORRUPT')=='1' else []),
                     *(['-DINPUT_CORRUPT_PORT2'] if args.input and os.environ.get('SEAQUEST_INPUT_CORRUPT_PORT2')=='1' else []),
                     *(['-DCONTROL_DEMO'] if args.controls else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
     if args.build_only:
-        variant = 'synthetic-input' if args.input_synthetic else ('controls' if args.controls else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic'))))
+        variant = 'synthetic-input' if args.input_synthetic else ('controls' if args.controls else ('collisions' if args.collisions else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic')))))
         shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
         shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
         manifest = {'rom':variant+'.rom','bytes':32768,'sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
@@ -316,9 +347,13 @@ def main():
     if args.input:
         report.update(status='controls integration diagnostic with neutral collision inputs; synthetic HUD/background colors; no full-game or physical-hardware acceptance',
                       input_sweep_cases=len(cases)-6526,
-                      collision_inputs='B0..B6=FF and F8=0 before every update; real acquisition belongs to issue #10',
+                      collision_inputs='isolated adapter regression: neutral B0..B6=FF/F8=0; the controls and collision targets acquire real contacts',
                       rom_padding_bytes=0xc000-symbols['original_rom']-4096,
                       cpu_margin_cycles=59736-max(cycles))
+    if args.collisions:
+        report.update(status='original collision/input/graphics integration; synthetic HUD/background; full-game and hardware unverified',
+                      collision_inputs='original raster occupancy acquired before F5B8; original resolution order',
+                      input_sweep_cases=len(variants)*128)
     if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])
@@ -342,7 +377,7 @@ def main():
                       'max_commit_end_y':max(pace['commit_end_y'])}
     if pace['max_busy_cycles'] >= 59736: raise ValueError('frame CPU budget exceeded')
     if max(cycles) >= 59736: raise ValueError('unpaced frame CPU budget exceeded')
-    variant = 'input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic'))
+    variant = 'collisions' if args.collisions else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic')))
     shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
     shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
     (OUT/(variant+'-result.json')).write_text(json.dumps(report,indent=2)+'\n')

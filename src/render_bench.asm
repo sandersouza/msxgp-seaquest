@@ -63,17 +63,8 @@ init:
     LD A,1
     LD ($C082),A
     CALL core_FB54
-    ; Collision acquisition belongs to #10. Neutral hardware latches are
-    ; explicit in this controls-only diagnostic, never fake gameplay contacts.
-    LD HL,$C0B0
-    LD B,7
-    LD A,$FF
-.clear_contacts:
-    LD (HL),A
-    INC HL
-    DJNZ .clear_contacts
-    XOR A
-    LD ($C0F8),A
+    ; The first paced hardware phase acquires the original raster contacts.
+    CALL neutral_contacts
     JP paced_start
     ENDIF
 idle:
@@ -96,8 +87,12 @@ rpc_start:
     LD SP,$F380
 frame_start:
     IFDEF WITH_NATIVE
+    IFDEF WITH_COLLISIONS
+    CALL acquire_contacts
+    ELSE
     IFDEF WITH_INPUT
     CALL neutral_contacts
+    ENDIF
     ENDIF
     LD A,($C6F4)
     LD E,A
@@ -125,8 +120,12 @@ paced_commit:
     CALL render_commit
 paced_frame_start:
     IFDEF WITH_NATIVE
+    IFDEF WITH_COLLISIONS
+    CALL acquire_contacts
+    ELSE
     IFDEF WITH_INPUT
     CALL neutral_contacts
+    ENDIF
     ENDIF
     XOR A
     LD E,A
@@ -156,6 +155,24 @@ neutral_contacts:
     XOR A
     LD ($C0F8),A
     RET
+    ENDIF
+
+    IFDEF WITH_COLLISIONS
+collision_rpc_start:
+    LD SP,$F380
+    CALL acquire_contacts
+collision_rpc_done:
+    JP idle
+collision_tick_rpc_start:
+    LD SP,$F380
+    CALL acquire_contacts
+    XOR A
+    LD E,A
+    LD B,$82
+    LD C,A
+    CALL core_F5B8
+    JP collision_rpc_done
+    INCLUDE "collision.asm"
     ENDIF
 
 prepare_shapes:
@@ -244,7 +261,14 @@ benchmark_shape:
     DB $18,$3C,$7E,$FF,$DB,$FF,$7E,$3C,$7E,$DB,$FF,$7E,$3C,$18,$08
     ALIGN 256
 expand_lut:
-    INCBIN "../outputs/render/expand.bin"
+    IFDEF WITH_COLLISIONS
+    INCBIN "../outputs/collision/enemy-cache.bin"
+    ELSE
+    INCBIN "../outputs/render/expand-compact.bin"
+    ENDIF
+expand_pages:
+    INCBIN "../outputs/render/expand-pages.bin"
+    ALIGN 256
 reverse_bits:
     INCBIN "../outputs/render/reverse.bin"
 column_lut:

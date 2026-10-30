@@ -33,6 +33,10 @@ def generate():
             for column in range(3):
                 lut.extend(shifted_row(value, phase, parity)[column] for value in range(256))
     (out / 'expand.bin').write_bytes(lut)
+    pages = [bytes(lut[i:i+256]) for i in range(0,len(lut),256)]
+    unique = list(dict.fromkeys(pages))
+    (out / 'expand-compact.bin').write_bytes(b''.join(unique))
+    (out / 'expand-pages.bin').write_bytes(bytes(unique.index(p) for p in pages))
     reverse = bytes(int(f'{v:08b}'[::-1], 2) for v in range(256))
     (out / 'reverse.bin').write_bytes(reverse)
     (out / 'columns.bin').write_bytes(bytes((8+x*3//2)//8 for x in range(256)))

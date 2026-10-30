@@ -8,9 +8,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #9: Port player movement, input sampling and original firing cadence
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
 - [ ] Reference comparisons cover seeds, spawns, lane transitions, clipping, repeated enemies and simultaneous collisions. Do not replace original collision behavior with unverified bounding boxes.

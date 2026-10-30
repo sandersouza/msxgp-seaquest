@@ -34,12 +34,16 @@ render-graphics-bench:
 render-input-bench:
 	@$(PYTHON) -B scripts/render_bench.py --input
 controls:
-	@$(PYTHON) -B scripts/render_bench.py --controls --build-only
+	@$(PYTHON) -B scripts/render_bench.py --controls --collisions --build-only
 controls-run: controls
 	@openmsx -machine C-BIOS_MSX1 -cart outputs/render/controls.rom
 input-contract:
 	@$(PYTHON) -B scripts/input_contract.py
 input-natural: input-contract
 	@$(PYTHON) -B scripts/input_natural.py
+collision-contract:
+	@$(PYTHON) -B scripts/collision_contract.py
+render-collision-bench:
+	@$(PYTHON) -B scripts/render_bench.py --collisions
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

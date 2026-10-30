@@ -90,6 +90,20 @@ vram_copy:
     JP NZ,.tail
     RET
 
+; Fixed transfers below256 bytes: B count, HL source, DE destination.
+; Same29-cycle data spacing; no general16-bit count/block setup is needed.
+vram_copy_short:
+    LD A,E
+    OUT ($99),A
+    LD A,D
+    OR $40
+    OUT ($99),A
+    LD C,$98
+.tail:
+    OUTI
+    JP NZ,.tail
+    RET
+
 render_begin:
     LD A,(cache_page)
     XOR 64
@@ -173,6 +187,53 @@ draw_enemy_names:
 ; Generate 6 tiles from 15 original bitmap rows, reflected if requested.
 ; source_ptr points to last source row, pattern_base selects lane cache RAM.
 make_lane_patterns:
+    IFDEF WITH_COLLISIONS
+    LD A,(lane_var)
+    LD E,A
+    LD D,0
+    LD HL,$C0D9
+    ADD HL,DE
+    BIT 3,(HL)
+    LD A,(phase_page)
+    JR Z,.cache_page
+    ADD A,16
+.cache_page:
+    ADD A,HIGH expand_lut
+    LD H,A
+    LD A,(source_ptr)
+    SUB $B2
+    LD L,A
+    LD (saved_sp),SP
+    DUP 3,column
+    LD SP,PATBUF+32+8*column
+    LD D,0
+    LD E,(HL)
+    INC L
+    PUSH DE                    ; zero row15 followed by original row14
+    DUP 3
+    LD D,(HL)
+    INC L
+    LD E,(HL)
+    INC L
+    PUSH DE
+    EDUP
+    LD SP,PATBUF+8+8*column
+    DUP 4
+    LD D,(HL)
+    INC L
+    LD E,(HL)
+    INC L
+    PUSH DE
+    EDUP
+    IF column < 2
+    LD A,L
+    ADD A,70                   ; next85-byte column, after consuming15 rows
+    LD L,A
+    ENDIF
+    EDUP
+    LD SP,(saved_sp)
+    RET
+    ELSE
     LD IY,(source_ptr)
     LD A,(lane_var)
     LD E,A
@@ -181,24 +242,22 @@ make_lane_patterns:
     ADD HL,DE
     BIT 3,(HL)
     JP NZ,.reflected
-    LD A,(phase_page)
-    LD D,A
+    CALL expansion_pages
     DUP 15, row
     LD L,(IY-row)
     LD H,D
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)),A
-    INC H
+    LD H,E
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)+8),A
-    INC H
+    LD H,B
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)+16),A
     EDUP
     JP .blank
 .reflected:
-    LD A,(phase_page)
-    LD D,A
+    CALL expansion_pages
     DUP 15, row
     LD L,(IY-row)
     LD H,HIGH reverse_bits
@@ -206,18 +265,38 @@ make_lane_patterns:
     LD H,D
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)),A
-    INC H
+    LD H,E
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)+8),A
-    INC H
+    LD H,B
     LD A,(HL)
     LD (PATBUF+(row/8)*24+(row%8)+16),A
     EDUP
+    ENDIF
 .blank:
     XOR A
     LD (PATBUF+31),A
     LD (PATBUF+39),A
     LD (PATBUF+47),A
+    RET
+
+expansion_pages:
+    LD A,(phase_page)
+    LD L,A
+    LD H,0
+    LD DE,expand_pages
+    ADD HL,DE
+    LD A,(HL)
+    ADD A,HIGH expand_lut
+    LD D,A
+    INC HL
+    LD A,(HL)
+    ADD A,HIGH expand_lut
+    LD E,A
+    INC HL
+    LD A,(HL)
+    ADD A,HIGH expand_lut
+    LD B,A
     RET
 
 ; Render current canonical enemy groups. Shape pointer and colors are provided
@@ -246,9 +325,10 @@ render_enemies:
     AND 7
     OR B
     LD E,A
+    IFNDEF WITH_COLLISIONS
     ADD A,A
     ADD A,E
-    ADD A,HIGH expand_lut
+    ENDIF
     LD (phase_page),A
     LD A,(lane_var)
     LD C,A
@@ -357,14 +437,14 @@ upload_lane_patterns:
     LD A,(lane_var)
     OR A
     JR Z,.split
-    LD BC,48
-    CALL vram_copy
+    LD B,48
+    CALL vram_copy_short
     RET
 .split:
     PUSH HL
     PUSH DE
-    LD BC,24
-    CALL vram_copy
+    LD B,24
+    CALL vram_copy_short
     POP DE
     POP HL
     LD BC,24
@@ -373,8 +453,8 @@ upload_lane_patterns:
     LD BC,$0818
     ADD HL,BC
     EX DE,HL
-    LD BC,24
-    JP vram_copy
+    LD B,24
+    JP vram_copy_short
 lane_vram:
     DW $0900,$0930,$0960,$0190
 lane_name_rows:
@@ -384,8 +464,8 @@ upload_name_strips:
     DUP 4, lane
     LD HL,NAMEBUF+(6+lane*3)*32
     LD DE,$1800+(6+lane*3)*32
-    LD BC,64
-    CALL vram_copy
+    LD B,64
+    CALL vram_copy_short
     EDUP
     RET
 
@@ -403,16 +483,16 @@ render_commit:
     CALL upload_name_strips
     LD HL,HUD_TOP
     LD DE,$1800
-    LD BC,32
-    CALL vram_copy
+    LD B,32
+    CALL vram_copy_short
     LD HL,HUD_BOTTOM
     LD DE,$1AE0
-    LD BC,32
-    CALL vram_copy
+    LD B,32
+    CALL vram_copy_short
     LD HL,SATBUF
     LD DE,$1B00
-    LD BC,32
-    CALL vram_copy
+    LD B,32
+    CALL vram_copy_short
     ; Allow the TMS9918's final queued byte to reach VRAM before returning.
     NOP
     NOP
