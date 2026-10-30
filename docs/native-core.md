@@ -13,8 +13,12 @@ behavior. This is a domain-specific gameplay translator, not a general 6502 emul
 
 6502 A/X/Y map to Z80 A/B/C. Carry is preserved independently in E; Z/N remain
 in the Z80 status register. Loads, stores, compares and carry branches preserve
-the original flag effects. BCD ADC in the original score routine uses decimal
-adjustment while retaining NMOS binary-result Z/N. Overflow flag consumers and
+the original flag effects. The source score routine has a specialized native
+block with the same low/middle/high decimal additions, ordered observable stores,
+reserve checks and A/X/Y/C/N/Z returns. Its no-carry return gets NMOS N/Z from
+adjusted A (e.g.79+01→80/N=1); other paths redefine N/Z before use. Identity high
+stores and terminal dead stores at999999 are omitted under DI, without batching
+calls or changing any A3 increment. Overflow flag consumers and
 unsupported stack/indirect operations are rejected by CFG validation.
 
 Canonical memory lives at MSX `$C000 + original_address`: zero-page state is

@@ -15,6 +15,7 @@ from oxygen_reference import alarm
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--rescue',action='store_true',help='extend device-only replay through natural rescue/death/oxygen cycles')
+    parser.add_argument('--progression',action='store_true',help='device-only alternating-player exhaustion, game over and restart')
     args = parser.parse_args()
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'outputs/render/controls.sym').read_text(),re.M)}
     rom = ROOT/'outputs/render/controls.rom'
@@ -37,14 +38,16 @@ def main():
         latency.append(dict(time=time,source=source,direction=-1 if left else 1))
     for time,controls in sorted(schedule):
         events += device_events(time,controls)
-    replay(OUT/'seed.omr',events,112 if args.rescue else 17,OUT/'natural.omr')
+    extended = args.rescue or args.progression
+    replay(OUT/'seed.omr',events,112 if extended else 17,OUT/'natural.omr')
     script = OUT/'natural-start.tcl'
     tcl = (ROOT/'scripts/input_natural.tcl').read_text()
-    if args.rescue:
+    if extended:
         tcl = tcl.replace('after time 16.5','after time 110').replace(' -viewonly','')
     script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_prepared'))+
                       f'set sample_input_return {symbols["core_F6A7"]+3}\n'+
-                      ('set oxygen_natural 1\nsource scripts/oxygen_natural.tcl\n' if args.rescue else '')+
+                      ('set oxygen_natural 1\nsource scripts/progression_natural.tcl\n' if args.progression else
+                       ('set oxygen_natural 1\nsource scripts/oxygen_natural.tcl\n' if args.rescue else ''))+
                       tcl)
     (OUT/'natural-complete.txt').unlink(missing_ok=True)
     run(script,rom,'natural')
@@ -122,6 +125,24 @@ def main():
         required = ('alarm_ticks','pickups','partial_rescues','deaths','oxygen_depletions','refills')
         if any(not report['natural_events'][event] for event in required):
             raise ValueError(f'incomplete natural rescue/depletion coverage: {report["natural_events"]}')
+    if args.progression:
+        # The controller begins after the common latency/control segment.
+        start = next(i for i,f in enumerate(frames) if f['time']>=17)
+        pairs = list(zip(states[start:],states[start+1:]))
+        report['progression_events'] = dict(
+            player_switches=sum(a[0xb7]!=b[0xb7] for a,b in pairs),
+            death_player_switches=sum(a[0xb7]!=b[0xb7] and a[0xe9]==1 and not b[0xe9]
+                                     and not a[0xa3] and not b[0xa3] for a,b in pairs),
+            attract_player_switches=sum(a[0xb7]!=b[0xb7] and bool(a[0xa3]) and bool(b[0xa3]) for a,b in pairs),
+            gameovers=sum(not a[0xa3] and b[0xa3] and not b[0xe9] for a,b in pairs),
+            restarts=sum(a[0xa3] and not b[0xa3] and b[0xbb]==3 and b[0xc2]==4 for a,b in pairs),
+            deaths=sum(not a[0xe9] and bool(b[0xe9]) for a,b in pairs),
+            active_players=sorted({s[0xb7] for s in states[start:]}),
+            difficulty_settings=sorted({f['switches']&192 for f in frames}))
+        e = report['progression_events']
+        if not (e['death_player_switches']>=2 and e['gameovers'] and e['restarts'] and e['active_players']==[0,1]
+                and e['difficulty_settings']==[0,64,128,192]):
+            raise ValueError(f'incomplete natural progression coverage: {e}')
     (OUT/'natural-result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('latency','shot_births')}))
 
