@@ -19,6 +19,11 @@ def sprite_peak(ys):
     return max(sum(y <= line < y+16 for y in ys if y != 216) for line in range(192))
 
 
+def repeat_masks():
+    return bytes(sum(4>>copy for copy in range(3) if (x+copy*16)&255 < 160)
+                 for x in (*range(128,256,16),0))
+
+
 def generate():
     out = ROOT / 'outputs/render'
     out.mkdir(parents=True, exist_ok=True)
@@ -30,6 +35,8 @@ def generate():
     (out / 'expand.bin').write_bytes(lut)
     reverse = bytes(int(f'{v:08b}'[::-1], 2) for v in range(256))
     (out / 'reverse.bin').write_bytes(reverse)
+    (out / 'columns.bin').write_bytes(bytes((8+x*3//2)//8 for x in range(256)))
+    (out / 'repeat-masks.bin').write_bytes(repeat_masks())
     print(f'Generated {len(lut)}-byte phase/parity expansion LUT.')
 
 

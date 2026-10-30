@@ -7,7 +7,6 @@ HUD_TOP EQU $CF00
 HUD_BOTTOM EQU $CF20
 LANE_SHAPES EQU $C500
 lane_var EQU $C402
-lane_y EQU $C403
 tile_base EQU $C404
 phase_page EQU $C406
 source_ptr EQU $C408
@@ -15,12 +14,16 @@ saved_sp EQU $C40E
 cache_page EQU $C410
 copy_mask EQU $C411
 copy_x EQU $C412
+name_row_ptr EQU $C414
 
 render_init:
     LD A,2
     CALL $005F
     LD A,($F3E0)
     OR 2
+    IFDEF WITH_INPUT
+    AND $DF                     ; BIOS input can EI; keep the VDP IRQ masked
+    ENDIF
     LD B,A
     LD C,1
     CALL $0047
@@ -107,36 +110,18 @@ render_begin:
 ; Draw a six-tile enemy at canonical X in A. Copies share phase because 16
 ; original pixels become exactly 24 MSX pixels. Clip to the 240-pixel viewport.
 draw_enemy_names:
-    CP 160
-    RET NC
-    LD B,A
-    SRL A
-    ADD A,B
-    ADD A,8
-    SRL A
-    SRL A
-    SRL A
-    LD C,A
-    LD A,(lane_y)
-    LD E,A
-    LD D,0
-    LD H,D
-    LD L,E
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    ADD HL,HL
-    LD DE,NAMEBUF
-    ADD HL,DE
+    ; render_enemies intersects the repeat mask with the edge table first:
+    ; every admitted copy has an unsigned canonical X below 160.
+    LD L,A
+    LD H,HIGH column_lut
+    LD C,(HL)
+    LD HL,(name_row_ptr)
     LD B,0
     ADD HL,BC
-    LD A,(tile_base)
-    LD E,A
     LD A,C
     CP 29
-    LD A,E
     JR NC,.clipped
+    LD A,(tile_base)
     LD (HL),A
     INC HL
     INC A
@@ -156,6 +141,7 @@ draw_enemy_names:
     LD (HL),A
     RET
 .clipped:
+    LD A,(tile_base)
     LD B,2
 .rows:
     PUSH BC
@@ -266,13 +252,15 @@ render_enemies:
     LD (phase_page),A
     LD A,(lane_var)
     LD C,A
-    LD A,3
-    SUB C
-    LD B,A
     ADD A,A
-    ADD A,B
-    ADD A,6
-    LD (lane_y),A
+    LD E,A
+    LD D,0
+    LD HL,lane_name_rows
+    ADD HL,DE
+    LD E,(HL)
+    INC HL
+    LD D,(HL)
+    LD (name_row_ptr),DE
     LD A,C
     LD B,A
     ADD A,A
@@ -326,23 +314,20 @@ render_enemies:
     LD A,(HL)
     AND C
     LD (copy_mask),A
-    LD B,3
-.copies:
-    PUSH BC
+    DUP 3, copy
     LD A,(copy_mask)
-    AND 4
-    JR Z,.no_copy
+    AND 4>>copy
+    IF copy > 0
+    JR Z,$+10
+    ELSE
+    JR Z,$+8
+    ENDIF
     LD A,(copy_x)
+    IF copy > 0
+    ADD A,16*copy
+    ENDIF
     CALL draw_enemy_names
-.no_copy:
-    LD A,(copy_x)
-    ADD A,16
-    LD (copy_x),A
-    LD A,(copy_mask)
-    ADD A,A
-    LD (copy_mask),A
-    POP BC
-    DJNZ .copies
+    EDUP
     LD A,(lane_var)
     DEC A
     JP P,.lane
@@ -392,6 +377,8 @@ upload_lane_patterns:
     JP vram_copy
 lane_vram:
     DW $0900,$0930,$0960,$0190
+lane_name_rows:
+    DW NAMEBUF+15*32,NAMEBUF+12*32,NAMEBUF+9*32,NAMEBUF+6*32
 
 upload_name_strips:
     DUP 4, lane
@@ -425,7 +412,11 @@ render_commit:
     LD HL,SATBUF
     LD DE,$1B00
     LD BC,32
-    JP vram_copy
+    CALL vram_copy
+    ; Allow the TMS9918's final queued byte to reach VRAM before returning.
+    NOP
+    NOP
+    RET
 
 wait_vblank:
     IN A,($99)
@@ -438,4 +429,4 @@ vblank_sample:
     RET
 
 repeat_masks:
-    DB 6,4,0,0,0,0,1,3,7
+    INCBIN "../outputs/render/repeat-masks.bin"

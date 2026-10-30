@@ -51,12 +51,54 @@ init:
     LDIR
     LD A,$53
     LD ($C7FD),A
+    IFDEF WITH_INPUT
+    CALL input_init
+    ENDIF
+    IFDEF CONTROL_DEMO
+    LD HL,$C000
+    LD DE,$C001
+    LD BC,1023
+    LD (HL),0
+    LDIR
+    LD A,1
+    LD ($C082),A
+    CALL core_FB54
+    ; Collision acquisition belongs to #10. Neutral hardware latches are
+    ; explicit in this controls-only diagnostic, never fake gameplay contacts.
+    LD HL,$C0B0
+    LD B,7
+    LD A,$FF
+.clear_contacts:
+    LD (HL),A
+    INC HL
+    DJNZ .clear_contacts
+    XOR A
+    LD ($C0F8),A
+    JP paced_start
+    ENDIF
 idle:
     JP idle
+    IFDEF WITH_INPUT
+    IFDEF WITH_NATIVE
+input_rpc_start:
+    LD SP,$F380
+    CALL neutral_contacts
+    XOR A
+    LD E,A
+    LD B,$82
+    LD C,A
+    CALL core_F5B8
+input_rpc_done:
+    JP idle
+    ENDIF
+    ENDIF
 rpc_start:
     LD SP,$F380
 frame_start:
     IFDEF WITH_NATIVE
+    IFDEF WITH_INPUT
+    CALL neutral_contacts
+    ENDIF
     LD A,($C6F4)
     LD E,A
     LD BC,($C6F2)
@@ -83,12 +125,17 @@ paced_commit:
     CALL render_commit
 paced_frame_start:
     IFDEF WITH_NATIVE
+    IFDEF WITH_INPUT
+    CALL neutral_contacts
+    ENDIF
     XOR A
     LD E,A
     LD B,$82
     LD C,A
+paced_core_start:
     CALL core_F5B8
     ENDIF
+paced_core_done:
     CALL prepare_shapes
     CALL prepare_sprites
     IFDEF WITH_GRAPHICS
@@ -97,6 +144,19 @@ paced_frame_start:
     CALL render_prepare
 paced_prepared:
     JP paced_start
+
+    IFDEF WITH_INPUT
+neutral_contacts:
+    LD HL,$FFFF
+    LD ($C0B0),HL
+    LD ($C0B2),HL
+    LD ($C0B4),HL
+    LD A,$FF
+    LD ($C0B6),A
+    XOR A
+    LD ($C0F8),A
+    RET
+    ENDIF
 
 prepare_shapes:
     LD IX,LANE_SHAPES
@@ -135,6 +195,14 @@ prepare_shapes:
     DJNZ .lane
     RET
 
+    ; Inlined conversion avoids seven per-frame CALL/RET pairs.
+    MACRO scale_x
+    LD E,A
+    SRL A
+    ADD A,E
+    ADD A,8
+    ENDM
+
 ; Synthetic shape indices are preloaded; only positions change per frame.
 prepare_sprites:
     LD HL,SATBUF
@@ -145,44 +213,32 @@ prepare_sprites:
     ADD A,5
     LD (SATBUF+8),A
     LD A,($C0C6)
-    CALL scale_x
+    scale_x
     LD (SATBUF+1),A
     ADD A,16
     LD (SATBUF+5),A
     LD A,($C0E7)
-    CALL scale_x
+    scale_x
     LD (SATBUF+9),A
-    LD IX,SATBUF+12
-    LD IY,$C0C7
-    LD B,4
-    LD C,120
-.ball:
-    LD (IX+0),C
-    LD A,(IY+0)
-    CALL scale_x
-    LD (IX+1),A
-    LD A,C
-    SUB 24
-    LD C,A
-    LD DE,4
-    ADD IX,DE
-    INC IY
-    DJNZ .ball
+    DUP 4, lane
+    LD A,120-24*lane
+    LD (SATBUF+12+4*lane),A
+    LD A,($C0C7+lane)
+    scale_x
+    LD (SATBUF+13+4*lane),A
+    EDUP
     ; Original patrol rectangle raw y45..52 -> MSX y30..37. Anchor its
     ; hardware box at y22, using pattern rows8..15 (nonzero source y31..37).
     LD A,21
     LD (SATBUF+28),A
     LD A,($C0F6)
-    CALL scale_x
+    scale_x
     LD (SATBUF+29),A
     RET
 
-scale_x:
-    LD E,A
-    SRL A
-    ADD A,E
-    ADD A,8
-    RET
+    IFDEF WITH_INPUT
+    INCLUDE "input.asm"
+    ENDIF
     INCLUDE "render.asm"
 benchmark_shape:
     DB $18,$3C,$7E,$FF,$DB,$FF,$7E,$3C,$7E,$DB,$FF,$7E,$3C,$18,$08
@@ -191,6 +247,8 @@ expand_lut:
     INCBIN "../outputs/render/expand.bin"
 reverse_bits:
     INCBIN "../outputs/render/reverse.bin"
+column_lut:
+    INCBIN "../outputs/render/columns.bin"
     IFDEF WITH_GRAPHICS
     INCLUDE "original_sprites.asm"
     INCLUDE "../outputs/graphics/sprites.inc"

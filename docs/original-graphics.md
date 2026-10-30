@@ -1,5 +1,9 @@
 # Original graphics and SCREEN 2 mapping — issue #8
 
+The measurements below record issue #8's delivery baseline. See
+[issue #9 controls](input-controls.md) and references/input/ for the later
+translator/renderer optimizations and the current complete input workload.
+
 The local extractor preserves the verified NTSC Atari 2600 revision's silhouettes,
 animations and lettering. The MSX adaptation has a separate display mapping;
 canonical RAM, movement and collision masks remain in original coordinates.

@@ -1,0 +1,120 @@
+{
+  "passed": true,
+  "cases": 5660,
+  "max_sample_cycles": 1879,
+  "detail": "complete",
+  "rom_sha256": "701e3293951b902ef08d81a75bc63c1f5fc5637ffaec02cf5e5992d40198845a",
+  "rom_bytes": 32768,
+  "machine": "C-BIOS_MSX1",
+  "cpu_hz": 3579545,
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "video": "NTSC",
+  "openmsx": "openMSX 21.0",
+  "method": "actual keyboard matrix and standard MSXJoystick device replay; full F5B8 to F00E original CPU comparison",
+  "physical_hardware": false,
+  "held_fire": [
+    {
+      "player": 0,
+      "setting": "B",
+      "ticks": 300,
+      "birth_ticks": [
+        0,
+        16,
+        32,
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        192,
+        208,
+        224,
+        240,
+        256,
+        272,
+        288
+      ],
+      "intervals": [
+        16
+      ]
+    },
+    {
+      "player": 0,
+      "setting": "A",
+      "ticks": 300,
+      "birth_ticks": [
+        0,
+        26,
+        52,
+        78,
+        104,
+        130,
+        156,
+        182,
+        208,
+        234,
+        260,
+        286
+      ],
+      "intervals": [
+        26
+      ]
+    },
+    {
+      "player": 1,
+      "setting": "B",
+      "ticks": 300,
+      "birth_ticks": [
+        0,
+        16,
+        32,
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        192,
+        208,
+        224,
+        240,
+        256,
+        272,
+        288
+      ],
+      "intervals": [
+        16
+      ]
+    },
+    {
+      "player": 1,
+      "setting": "A",
+      "ticks": 300,
+      "birth_ticks": [
+        0,
+        26,
+        52,
+        78,
+        104,
+        130,
+        156,
+        182,
+        208,
+        234,
+        260,
+        286
+      ],
+      "intervals": [
+        26
+      ]
+    }
+  ]
+}
