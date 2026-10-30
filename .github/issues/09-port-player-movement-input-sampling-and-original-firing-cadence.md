@@ -10,14 +10,14 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #7: Benchmark worst-case SCREEN 2 rendering and approve sprite strategy
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] Aligned reference replays match player state, movement and firing events. Verify held fire, reversal, diagonal input and boundaries; measure input latency on the target.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] Aligned reference replays match player state, movement and firing events. Verify held fire, reversal, diagonal input and boundaries; measure input latency on the target.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-09
@@ -32,3 +32,21 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/9
+
+## Implementation and evidence
+
+Delivery PR: https://github.com/sandersouza/msxgp-seaquest/pull/25.
+
+The controls adapter samples actual MSX keyboard/joystick devices at original
+F6A7 and retains the translated movement/firing algorithm. Independent original
+CPU comparisons pass: 5,660 input cases (including both players' A/B held-fire
+chains), 659 uninterrupted cold-boot updates and 2,707 native core cases.
+All 9,598 full-density input/graphics cases pass at up to 59,369/59,736 cycles,
+with 240 paced frames without skips and 29-cycle minimum VRAM spacing.
+Event-to-state latency is at most18.6709 ms; completed SAT upload at most32.2447 ms.
+
+See [controls and reproduction](https://github.com/sandersouza/msxgp-seaquest/blob/main/docs/input-controls.md)
+and [exact evidence](https://github.com/sandersouza/msxgp-seaquest/tree/main/references/input).
+The controls diagnostic uses neutral collision contacts; full collision
+acquisition, audio/HUD integration, PAL and physical MSX remain later gates.
+Source-derived ROMs/art/listings and replay snapshots remain local and ignored.

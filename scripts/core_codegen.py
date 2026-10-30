@@ -82,9 +82,54 @@ def capture_c(inverted=False):
     return ['ld e,0', f"jr {'c' if inverted else 'nc'},$+4", 'ld e,1']
 
 
-def translate(item):
+def translate(item, nz_live=True, carry_relation=None):
     op, mode, address = item['mnemonic'], item['mode'], item['address']
     target = f"core_{item['target']:04X}"
+    if mode in ('zpg', 'abs') and op in ('INC', 'DEC'):
+        return [f"ld hl,{mapped(item['value'])}", f'{op.lower()} (hl)']
+    if mode in ('zpg', 'abs') and op in ('STX', 'STY'):
+        return [f"ld hl,{mapped(item['value'])}", f"ld (hl),{'b' if op=='STX' else 'c'}"]
+    # Direct accumulator accesses need no address-building scratch registers.
+    # OR restores the 6502 N/Z flags; its carry lives independently in E.
+    if mode in ('zpg', 'abs') and op == 'LDA':
+        return [f"ld a,({mapped(item['value'])})"] + (['or a'] if nz_live else [])
+    if mode in ('zpg', 'abs') and op == 'STA':
+        return [f"ld ({mapped(item['value'])}),a"]
+    if op == 'LDA':
+        if mode == 'imm':
+            return [f"ld a,${item['value']:02X}"] + (['or a'] if nz_live else [])
+        return pointer(item) + ['ld a,(hl)'] + (['or a'] if nz_live else [])
+    if mode in ('imm', 'zpg', 'abs') and op in ('LDX', 'LDY', 'CPX', 'CPY'):
+        register = 'b' if op in ('LDX', 'CPX') else 'c'
+        value = f"${item['value']:02X}"
+        lines = ['ld d,a']
+        if op in ('LDX', 'LDY'):
+            if not nz_live:
+                return [f'ld {register},{value}'] if mode=='imm' else [f"ld hl,{mapped(item['value'])}",f'ld {register},(hl)']
+            lines += ([f'ld a,{value}'] if mode == 'imm' else [f"ld a,({mapped(item['value'])})"])
+            return lines + [f'ld {register},a', 'or a', 'ld a,d']
+        lines += [f'ld a,{register}']
+        if mode != 'imm':
+            lines += [f"ld hl,{mapped(item['value'])}"]
+            value = '(hl)'
+        return lines + [f'cp {value}'] + capture_c(inverted=True) + ['ld a,d']
+    if mode in ('imm', 'zpg', 'abs') and op in ('AND', 'ORA', 'EOR', 'CMP', 'ADC', 'SBC'):
+        lines = [] if mode == 'imm' else [f"ld hl,{mapped(item['value'])}"]
+        value = f"${item['value']:02X}" if mode == 'imm' else '(hl)'
+        if op in ('ADC', 'SBC'):
+            lines += ['srl e']
+            if op == 'SBC':
+                lines += ['ccf']
+            lines += [f'{op.lower()} a,{value}']
+            if 0xfb9d <= address < 0xfbc9 and op == 'ADC':
+                lines += ['push af', 'daa'] + capture_c() + ['ld d,a', 'pop af', 'ld a,d']
+            else:
+                lines += capture_c(inverted=(op == 'SBC'))
+        elif op == 'CMP':
+            lines += [f'cp {value}'] + capture_c(inverted=True)
+        else:
+            lines += [f"{dict(AND='and', ORA='or', EOR='xor')[op]} {value}"]
+        return lines
     if op == 'JMP':
         return [f'jp {target}']
     if op == 'JSR':
@@ -94,6 +139,9 @@ def translate(item):
     if op in ('BEQ', 'BNE', 'BMI', 'BPL'):
         return [f"jp {dict(BEQ='z', BNE='nz', BMI='m', BPL='p')[op]},{target}"]
     if op in ('BCC', 'BCS'):
+        if carry_relation is not None:
+            condition = 'c' if (op=='BCS') == carry_relation else 'nc'
+            return [f'jp {condition},{target}']
         # RRCA preserves S/Z; E retains the 6502 carry independently of Z80 F.
         return ['ld d,a', 'ld a,e', 'rrca', 'ld a,d', f"jp {'c' if op == 'BCS' else 'nc'},{target}"]
     if op in ('CLC', 'SEC'):
@@ -154,12 +202,62 @@ def translate(item):
 def generate(rom):
     instructions = reachable(rom)
     addresses = sorted(instructions)
+    carry_defs = {'ADC','SBC','ASL','LSR','ROL','ROR','CMP','CPX','CPY','CLC','SEC'}
+    nz_defs = {'LDA','LDX','LDY','TAX','TAY','TXA','TYA','INX','DEX','INY','DEY',
+               'INC','DEC','ADC','SBC','AND','ORA','EOR','ASL','LSR','ROL','ROR','CMP','CPX','CPY','BIT'}
+    targets = set(ROOTS) | {i['target'] for i in instructions.values() if i['mnemonic'] in BRANCHES|{'JMP','JSR'}}
+    relations = {}
+    for n,address in enumerate(addresses):
+        if not n or address in targets or instructions[address]['mnemonic'] not in ('BCC','BCS'):
+            continue
+        previous = instructions[addresses[n-1]]
+        if previous['address']+previous['size']!=address:
+            continue
+        if previous['mnemonic'] in ('CMP','CPX','CPY','SBC'):
+            relations[address] = False
+        elif previous['mnemonic'] in ('ASL','LSR','ROL','ROR','ADC') and not (0xfb9d<=previous['address']<0xfbc9):
+            relations[address] = True
+    def live_after(defs, uses, native_uses=frozenset()):
+        incoming = {a:False for a in addresses}
+        outgoing = dict(incoming)
+        changed = True
+        while changed:
+            changed = False
+            for a in reversed(addresses):
+                item = instructions[a]
+                op = item['mnemonic']
+                following = a+item['size']
+                successors = ([item['target']] if op=='JMP' else
+                              [following,item['target']] if op in BRANCHES else [following])
+                # Calls/returns are conservative flag barriers. No assumptions
+                # about callee writes or callers' use of a returned status.
+                out = op in ('JSR','RTS') or any(incoming.get(s,True) for s in successors)
+                value = (op in uses and a not in native_uses) or op in ('JSR','RTS') or (out and op not in defs)
+                if value != incoming[a] or out != outgoing[a]:
+                    incoming[a],outgoing[a],changed = value,out,True
+        return outgoing
+    carry_out = live_after(carry_defs,{'ADC','SBC','ROL','ROR','BCC','BCS'},set(relations))
+    nz_out = live_after(nz_defs,{'BEQ','BNE','BMI','BPL'})
     lines = ['; Generated locally from the verified original. Do not commit this file.',
              'CORE_RAM EQU $C000', 'core_F00E:', '    ret']
     for n, address in enumerate(addresses):
         item = instructions[address]
         lines += [f'core_{address:04X}: ; {item["mnemonic"]} {item["mode"]}']
-        lines += ['    ' + s for s in translate(item)]
+        if address == 0xf6a7:
+            lines += ['    IFDEF WITH_INPUT', '    call sample_input', '    ENDIF']
+        emitted = translate(item,nz_out[address],relations.get(address))
+        # Capturing E is unnecessary when every following path replaces the
+        # source carry before reading it. Keep instruction order unchanged.
+        if item['mnemonic'] in carry_defs and not carry_out[address]:
+            if item['mnemonic'] in ('CLC','SEC'):
+                emitted = []
+            else:
+                capture = capture_c(inverted=item['mnemonic'] in ('SBC','CMP','CPX','CPY'))
+                for offset in range(len(emitted)-len(capture)+1):
+                    if emitted[offset:offset+len(capture)] == capture:
+                        emitted = emitted[:offset]+emitted[offset+len(capture):]
+                        break
+        lines += ['    ' + s for s in emitted]
         following = address + item['size']
         if item['mnemonic'] not in ('RTS', 'JMP') and (n + 1 == len(addresses) or addresses[n + 1] != following):
             lines += [f'    jp core_{following:04X}']

@@ -17,6 +17,15 @@ proc fail {detail} {
 }
 proc next_case {} {
     set header [read $::input 6]
+    if {$::input_mode && [string length $header]} {
+        binary scan [read $::input 4] cu* keys
+        foreach row {6 7 8} mask [lrange $keys 0 2] {
+            keymatrixup $row 255
+            keymatrixdown $row $mask
+        }
+        debug write memory 0xC420 [lindex $keys 3]
+        debug write memory 0xC421 0
+    }
     set ram [read $::input 1024]
     if {[string length $ram] == 0} {
         close $::dumps

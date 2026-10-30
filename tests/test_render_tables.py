@@ -2,11 +2,21 @@ import sys
 from pathlib import Path
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from render_tables import shifted_row, sprite_peak
+from render_tables import shifted_row, sprite_peak, repeat_masks
 from render_bench import visible_signature
 
 
 class RenderTableTests(unittest.TestCase):
+    def test_edge_masks_admit_exactly_visible_unsigned_copies(self):
+        masks = repeat_masks()
+        for x in range(256):
+            allowed = masks[8 if x<128 else (x-128)//16]
+            for source_mask in range(8):
+                admitted = source_mask & allowed
+                for copy in range(3):
+                    self.assertEqual(bool(admitted & (4>>copy)),
+                                     bool(source_mask & (4>>copy)) and ((x+16*copy)&255)<160)
+
     def test_scale_keeps_twelve_pixels_and_handles_tile_edges(self):
         for parity in (0, 1):
             for phase in range(8):

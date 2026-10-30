@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 PYTHON ?= .venv/bin/python
-.PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench disassemble
+.PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench render-input-bench controls controls-run input-contract input-natural disassemble
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -31,5 +31,15 @@ graphics-reference-check: graphics
 	@$(PYTHON) -B scripts/graphics_reference.py
 render-graphics-bench:
 	@$(PYTHON) -B scripts/render_bench.py --graphics
+render-input-bench:
+	@$(PYTHON) -B scripts/render_bench.py --input
+controls:
+	@$(PYTHON) -B scripts/render_bench.py --controls --build-only
+controls-run: controls
+	@openmsx -machine C-BIOS_MSX1 -cart outputs/render/controls.rom
+input-contract:
+	@$(PYTHON) -B scripts/input_contract.py
+input-natural: input-contract
+	@$(PYTHON) -B scripts/input_natural.py
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

@@ -19,17 +19,17 @@ original_sprite_id:
     RRCA
     ADD A,SPRITE_RESIDENT
     ADD A,C
-    LD L,A
-    LD H,0
     ADD A,A
     ADD A,A
     LD (IX+2),A
-    DUP 5
-    ADD HL,HL
+    ; A is physical pattern*4. Build 3800 + A*8 directly in DE,
+    ; avoiding a second general 16-bit multiply and base addition.
+    LD D,7
+    DUP 3
+    ADD A,A
+    RL D
     EDUP
-    LD DE,$3800
-    ADD HL,DE
-    EX DE,HL
+    LD E,A
     POP HL
     LD BC,32
     CALL vram_copy

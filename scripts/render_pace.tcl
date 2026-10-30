@@ -29,6 +29,7 @@ proc finish_pace {} {
 }
 after time 5 {
     if {[debug read memory 0xC7FD] != 83} {error cartridge-not-booted}
+    eval $::input_setup
     # Probe stack headroom only after BIOS initialization, with IRQs disabled.
     debug write_block memory 0xD000 [string repeat [binary format c 165] 9088]
     debug set_bp $::paced_commit {} {

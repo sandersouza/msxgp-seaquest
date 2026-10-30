@@ -24,6 +24,10 @@ records full-density renderer and native-core timing. The [original graphics
 pipeline](docs/original-graphics.md) extracts and verifies source silhouettes,
 surface/edge variants and lettering, with measured native sprite integration.
 HUD composition and playable integration remain subsequent work.
+The [controls diagnostic](docs/input-controls.md) runs the original movement and
+firing code with keyboard and both joystick ports, including measured input
+latency. Build/run it locally with `make controls-run`; it still uses neutral
+collision contacts and synthetic HUD/background colors.
 
 ```sh
 python3 -B scripts/reference_inventory.py

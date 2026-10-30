@@ -1,0 +1,175 @@
+{
+  "passed": true,
+  "continuous_ticks": 659,
+  "ram_reloads_after_boot": 0,
+  "rom_sha256": "701e3293951b902ef08d81a75bc63c1f5fc5637ffaec02cf5e5992d40198845a",
+  "latency": [
+    {
+      "time": 12.0,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 3.3434,
+      "sat_commit_ms": 16.9284
+    },
+    {
+      "time": 12.2137,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 6.7573,
+      "sat_commit_ms": 20.178
+    },
+    {
+      "time": 12.4274,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 9.8427,
+      "sat_commit_ms": 23.4199
+    },
+    {
+      "time": 12.6411,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 13.158,
+      "sat_commit_ms": 26.6648
+    },
+    {
+      "time": 12.854800000000001,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 16.3532,
+      "sat_commit_ms": 29.9147
+    },
+    {
+      "time": 13.0685,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 2.8887,
+      "sat_commit_ms": 16.4736
+    },
+    {
+      "time": 13.2822,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 6.295,
+      "sat_commit_ms": 19.7157
+    },
+    {
+      "time": 13.4959,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 9.3938,
+      "sat_commit_ms": 22.9632
+    },
+    {
+      "time": 13.7096,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 12.6999,
+      "sat_commit_ms": 26.2111
+    },
+    {
+      "time": 13.9233,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 15.8906,
+      "sat_commit_ms": 29.4577
+    },
+    {
+      "time": 14.137,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 2.4216,
+      "sat_commit_ms": 16.0122
+    },
+    {
+      "time": 14.3507,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 5.83,
+      "sat_commit_ms": 19.2562
+    },
+    {
+      "time": 14.5644,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 8.9307,
+      "sat_commit_ms": 22.5056
+    },
+    {
+      "time": 14.7781,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 12.2468,
+      "sat_commit_ms": 25.7502
+    },
+    {
+      "time": 14.9918,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 15.4395,
+      "sat_commit_ms": 28.9976
+    },
+    {
+      "time": 15.2055,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 18.6709,
+      "sat_commit_ms": 32.2447
+    }
+  ],
+  "max_state_ms": 18.6709,
+  "max_sat_commit_ms": 32.2447,
+  "shot_births": [
+    {
+      "kind": "state",
+      "time": 6.513097893726717,
+      "x": 76,
+      "y": 49,
+      "shot": 89,
+      "switches": 63
+    },
+    {
+      "kind": "state",
+      "time": 6.780111438744309,
+      "x": 76,
+      "y": 49,
+      "shot": 89,
+      "switches": 63
+    },
+    {
+      "kind": "state",
+      "time": 7.04713923138276,
+      "x": 76,
+      "y": 49,
+      "shot": 87,
+      "switches": 127
+    },
+    {
+      "kind": "state",
+      "time": 7.481012810287341,
+      "x": 76,
+      "y": 49,
+      "shot": 87,
+      "switches": 255
+    },
+    {
+      "kind": "state",
+      "time": 7.914925500308,
+      "x": 71,
+      "y": 49,
+      "shot": 82,
+      "switches": 255
+    },
+    {
+      "kind": "state",
+      "time": 8.365497849587028,
+      "x": 98,
+      "y": 49,
+      "shot": 109,
+      "switches": 255
+    }
+  ],
+  "method": "cold boot; keyboard/joystick replay device events; original 6502 comparison every captured update",
+  "display_measurement": "SAT upload completed; visible scanout and host OS event latency are separate",
+  "physical_hardware": false
+}

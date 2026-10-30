@@ -126,8 +126,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--native', action='store_true')
     parser.add_argument('--graphics', action='store_true',help='local original sprite integration, includes native core')
+    parser.add_argument('--input', action='store_true',help='measure real BIOS input at original sample phase, with graphics')
+    parser.add_argument('--controls', action='store_true',help='build an automatically running controls diagnostic')
+    parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
+    args.input = args.input or args.controls
+    args.graphics = args.graphics or args.input
     args.native = args.native or args.graphics
     OUT.mkdir(parents=True,exist_ok=True)
     lock = (OUT/'.lock').open('w')
@@ -208,15 +213,47 @@ def main():
                 entries.append((0xf5b8,0,0x82,0,0))
                 reference_states.append(expected)
                 case_names.append(f'graphics-mixed-{n}')
+    if args.input:
+        # The emulator has neutral physical devices in this exhaustive renderer
+        # pass. Dedicated input replays exercise natural controls separately.
+        for ram in cases:
+            ram[0x280],ram[0x282],ram[0x0c],ram[0x0d] = 255,63,128,128
+            ram[0xb0:0xb7],ram[0xf8] = bytes([255]*7),0
+        input_controls = [(0,0,0,63)]*len(cases)
+        from input_contract import hardware
+        dense = [cases[case_names.index(f'graphics-mixed-{n}')] for n in (708,109,411,615)]
+        variants = [(ram,None,None,None) for ram in dense]
+        variants += [(dense[0],y,shot,facing) for y in (13,17,18,20,108)
+                     for shot in (0,153) for facing in (0,8)]
+        for variant,(base,y,shot,facing) in enumerate(variants):
+            for keys in range(16):
+                for fire in range(2):
+                    for switches in (63,127,191,255):
+                        ram = bytearray(base)
+                        if y is not None:
+                            ram[0xe1],ram[0xe7],ram[0xd6] = y,shot,facing
+                            ram[0xe8],ram[0xe6],ram[0xe9],ram[0xa3] = 0,64,0,0
+                        row8 = ((keys&1)<<5)|((keys&2)<<5)|((keys&4)<<2)|((keys&8)<<4)|fire
+                        ports,console,f1,f2,_,_ = hardware((0,0,row8,0,0),ram[0xb7],switches,0)
+                        ram[0x280],ram[0x282],ram[0xc],ram[0xd] = ports,console,f1,f2
+                        cases.append(ram)
+                        entries.append((0xf5b8,0,0x82,0,0))
+                        case_names.append(f'controls-dense-{variant}-{keys}-{fire}-{switches}')
+                        input_controls.append((0,0,row8,switches))
+        reference_states = [reference(rom,list(ram),*entry)[0] for ram,entry in zip(cases,entries)]
     subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'), '--nologo',
                     '--raw='+str(OUT/'bench.rom'), '--sym='+str(OUT/'bench.sym'),
                     *(['-DWITH_NATIVE'] if args.native else []),
                     *(['-DWITH_GRAPHICS'] if args.graphics else []),
+                    *(['-DWITH_INPUT'] if args.input or args.input_synthetic else []),
+                    *(['-DINPUT_CORRUPT_PORT2'] if args.input and os.environ.get('SEAQUEST_INPUT_CORRUPT_PORT2')=='1' else []),
+                    *(['-DCONTROL_DEMO'] if args.controls else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
     if args.build_only:
-        variant = 'graphics' if args.graphics else ('native' if args.native else 'synthetic')
+        variant = 'synthetic-input' if args.input_synthetic else ('controls' if args.controls else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic'))))
         shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
+        shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
         manifest = {'rom':variant+'.rom','bytes':32768,'sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
                     'status':'renderer diagnostic only; no emulator acceptance'}
         (OUT/(variant+'-build.json')).write_text(json.dumps(manifest,indent=2)+'\n')
@@ -232,8 +269,10 @@ def main():
         cases.append(ram)
         entries.append((0,0,0,0,0))
         case_names.append(f'position-{x}')
-    (OUT/'cases.bin').write_bytes(b''.join(struct.pack('<HBBBB',symbols.get(f'core_{entry:04X}',0),a,x,y,c)+ram for ram,(entry,a,x,y,c) in zip(cases,entries)))
-    (OUT/'start.tcl').write_text(f'set inject_pixel {int(os.environ.get("SEAQUEST_RENDER_INJECT_PIXEL","-1"))}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nset commit_pc {symbols["render_commit"]}\nsource scripts/render_bench.tcl\n')
+    (OUT/'cases.bin').write_bytes(b''.join(struct.pack('<HBBBB',symbols.get(f'core_{entry:04X}',0),a,x,y,c)+
+                                          (bytes(input_controls[i]) if args.input else b'')+ram
+                                          for i,(ram,(entry,a,x,y,c)) in enumerate(zip(cases,entries))))
+    (OUT/'start.tcl').write_text(f'set input_mode {int(args.input)}\nset inject_pixel {int(os.environ.get("SEAQUEST_RENDER_INJECT_PIXEL","-1"))}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nset commit_pc {symbols["render_commit"]}\nsource scripts/render_bench.tcl\n')
     (OUT/'complete.txt').unlink(missing_ok=True)
     with (OUT/'openmsx.log').open('wb') as log:
         result = subprocess.run(['openmsx', '-control','stdio','-machine','C-BIOS_MSX1',
@@ -274,10 +313,21 @@ def main():
                   original_sha256=hashlib.sha256(rom).hexdigest() if rom else None,
                   status=('original sprite integration probe; synthetic HUD/background colors; no playable or physical-hardware acceptance'
                           if args.graphics else 'renderer feasibility probe; synthetic sprites/HUD, no playable or physical-hardware acceptance'))
+    if args.input:
+        report.update(status='controls integration diagnostic with neutral collision inputs; synthetic HUD/background colors; no full-game or physical-hardware acceptance',
+                      input_sweep_cases=len(cases)-6526,
+                      collision_inputs='B0..B6=FF and F8=0 before every update; real acquisition belongs to issue #10',
+                      rom_padding_bytes=0xc000-symbols['original_rom']-4096,
+                      cpu_margin_cycles=59736-max(cycles))
     if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])
-    (OUT/'pace-start.tcl').write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('paced_commit','paced_frame_start','paced_prepared','vblank_sample','vblank_clear_sample'))+'source scripts/render_pace.tcl\n')
+    input_setup = ''
+    if args.input:
+        r6,r7,r8,switches = input_controls[worst]
+        input_setup = f'keymatrixdown 6 {r6}\nkeymatrixdown 7 {r7}\nkeymatrixdown 8 {r8}\ndebug write memory 0xC420 {switches}\n'
+    (OUT/'pace-start.tcl').write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('paced_commit','paced_frame_start','paced_prepared','vblank_sample','vblank_clear_sample'))+
+                                   'set input_setup {'+input_setup+'}\nsource scripts/render_pace.tcl\n')
     (OUT/'pace.json').unlink(missing_ok=True)
     with (OUT/'pace.log').open('wb') as log:
         result = subprocess.run(['openmsx','-control','stdio','-machine','C-BIOS_MSX1','-cart',str(OUT/'bench.rom'),'-script',str(OUT/'pace-start.tcl')],cwd=ROOT,
@@ -292,7 +342,7 @@ def main():
                       'max_commit_end_y':max(pace['commit_end_y'])}
     if pace['max_busy_cycles'] >= 59736: raise ValueError('frame CPU budget exceeded')
     if max(cycles) >= 59736: raise ValueError('unpaced frame CPU budget exceeded')
-    variant = 'graphics' if args.graphics else ('native' if args.native else 'synthetic')
+    variant = 'input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic'))
     shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
     shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
     (OUT/(variant+'-result.json')).write_text(json.dumps(report,indent=2)+'\n')
