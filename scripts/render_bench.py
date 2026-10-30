@@ -131,9 +131,11 @@ def main():
     parser.add_argument('--controls', action='store_true',help='build an automatically running controls diagnostic')
     parser.add_argument('--collisions', action='store_true',help='acquire original raster contacts before the native update')
     parser.add_argument('--oxygen', action='store_true',help='include the issue #11 oxygen/rescue workload')
+    parser.add_argument('--progression', action='store_true',help='include score/lives/late-game progression and oxygen workloads')
     parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
+    args.oxygen = args.oxygen or args.progression
     args.collisions = args.collisions or args.controls or args.oxygen
     args.input = args.input or args.controls or args.collisions
     args.graphics = args.graphics or args.input
@@ -283,6 +285,25 @@ def main():
                 entries.append((0xf5b8,0,0x82,0,0))
                 case_names.append(f'oxygen-dense-{len(cases)}')
                 input_controls.append((0,0,65,63))
+        if args.progression:
+            progression_start = len(cases)
+            from progression_contract import transition_cases
+            for name,ram,keys,switches in transition_cases(rom):
+                cases.append(ram)
+                entries.append((0xf5b8,0,0x82,0,0))
+                case_names.append('progression-'+name)
+                input_controls.append((0,0,keys,switches))
+            for base,groups,oxygen,value,reserve in itertools.product(
+                    dense,(6,18,19,20,253,254,255),(0,1,64),(9990,999990),(0,5,6)):
+                from progression_contract import bcd
+                ram = bytearray(base)
+                ram[0xbc],ram[0xe6],ram[0xe8],ram[0x81],ram[0xbe] = groups,oxygen,6,15,6
+                ram[0xe9],ram[0xa3],ram[0xbb] = 0,0,reserve
+                ram[0xb8:0xbb] = bcd(value)
+                cases.append(ram)
+                entries.append((0xf5b8,0,0x82,0,0))
+                case_names.append(f'progression-dense-{len(cases)}')
+                input_controls.append((0,0,65,63))
         reference_states = []
         for ram,entry,controls in zip(cases,entries,input_controls):
             sampled = bytearray(ram)
@@ -380,6 +401,9 @@ def main():
                       input_sweep_cases=len(variants)*128)
     if args.oxygen:
         report['oxygen_sweep_cases'] = len(cases)-oxygen_start
+    if args.progression:
+        report['progression_sweep_cases'] = len(cases)-progression_start
+        report['oxygen_sweep_cases'] = progression_start-oxygen_start
     if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])

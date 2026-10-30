@@ -121,10 +121,7 @@ def translate(item, nz_live=True, carry_relation=None):
             if op == 'SBC':
                 lines += ['ccf']
             lines += [f'{op.lower()} a,{value}']
-            if 0xfb9d <= address < 0xfbc9 and op == 'ADC':
-                lines += ['push af', 'daa'] + capture_c() + ['ld d,a', 'pop af', 'ld a,d']
-            else:
-                lines += capture_c(inverted=(op == 'SBC'))
+            lines += capture_c(inverted=(op == 'SBC'))
         elif op == 'CMP':
             lines += [f'cp {value}'] + capture_c(inverted=True)
         else:
@@ -147,7 +144,7 @@ def translate(item, nz_live=True, carry_relation=None):
     if op in ('CLC', 'SEC'):
         return [f"ld e,{int(op == 'SEC')}"]
     if op in ('SED', 'CLD', 'SEI', 'CLI', 'NOP'):
-        # Decimal ADC is emitted only inside the original SED/CLD score block.
+        # The sole SED/CLD score block is specialized by generate().
         return ['nop']
     if op in ('INX', 'DEX', 'INY', 'DEY'):
         return [f"{'inc' if op.startswith('IN') else 'dec'} {'b' if op.endswith('X') else 'c'}"]
@@ -185,11 +182,7 @@ def translate(item, nz_live=True, carry_relation=None):
         if op == 'SBC':
             lines += ['ccf']
         lines += [f'{op.lower()} a,h']
-        if 0xfb9d <= address < 0xfbc9 and op == 'ADC':
-            # NMOS decimal ADC gets N/Z from binary result, C from BCD result.
-            lines += ['push af', 'daa'] + capture_c() + ['ld d,a', 'pop af', 'ld a,d']
-        else:
-            lines += capture_c(inverted=(op == 'SBC'))
+        lines += capture_c(inverted=(op == 'SBC'))
         return lines
     if op == 'BIT':
         # Preserve A/C. N comes from memory; Z from A & memory. V is not used
@@ -201,6 +194,9 @@ def translate(item, nz_live=True, carry_relation=None):
 
 def generate(rom):
     instructions = reachable(rom)
+    for a,item in instructions.items():
+        if item['mnemonic'] in BRANCHES|{'JMP','JSR'} and 0xfb9d<item['target']<=0xfbca and not 0xfb9d<=a<=0xfbca:
+            raise ValueError('external entry into specialized score routine')
     addresses = sorted(instructions)
     carry_defs = {'ADC','SBC','ASL','LSR','ROL','ROR','CMP','CPX','CPY','CLC','SEC'}
     nz_defs = {'LDA','LDX','LDY','TAX','TAY','TXA','TYA','INX','DEX','INY','DEY',
@@ -241,8 +237,45 @@ def generate(rom):
     lines = ['; Generated locally from the verified original. Do not commit this file.',
              'CORE_RAM EQU $C000', 'core_F00E:', '    ret']
     for n, address in enumerate(addresses):
+        if 0xfb9d<address<=0xfbca:
+            continue  # Folded into the verified score block at its sole entry.
         item = instructions[address]
         lines += [f'core_{address:04X}: ; {item["mnemonic"]} {item["mode"]}']
+        if address == 0xfb9d:
+            # Guarded terminal-score specialization. With valid nonzero BCD A
+            # and all three score bytes99, every original ADC overflows, score
+            # stores end at99, B9 is nonzero so no reserve can be added, and A3
+            # increments once. No code observes the intermediate score stores
+            # (DI; no calls/I/O in this path). Retain each call/event and return
+            # the original A/X/Y/C/N/Z; use the regular BCD path otherwise.
+            lines += [
+                '    ld d,a', '    or a', '    jr z,.score_regular',
+                '    ld a,(CORE_RAM+$0BA)', '    cp $99', '    jr nz,.score_restore',
+                '    ld a,(CORE_RAM+$0B9)', '    cp $99', '    jr nz,.score_restore',
+                '    ld a,(CORE_RAM+$0B8)', '    cp $99', '    jr nz,.score_restore',
+                '    ld hl,CORE_RAM+$0A3', '    inc (hl)',
+                '    ld a,$99', '    or a', '    ld e,1', '    ret',
+                '.score_restore:', '    ld a,d', '.score_regular:']
+            # Same low/middle/high BCD additions and ordered observable writes.
+            # Source NZ is dead on both carry paths. A no-carry low return gets
+            # NMOS NZ from adjusted A. If middle addition does not carry, the
+            # high add/store is an identity and B9!=0, so no life check can fire.
+            # No calls, I/O or interrupts can observe the omitted identity stores.
+            lines += [
+                '    ld hl,CORE_RAM+$0BA', '    add a,(hl)', '    daa', '    ld (hl),a',
+                '    jr c,.score_middle', '    ld e,0', '    or a', '    ret',
+                '.score_middle:', '    ld hl,CORE_RAM+$0B9', '    ld a,(hl)',
+                '    adc a,0', '    daa', '    ld (hl),a', '    jr c,.score_high',
+                '    ld e,0', '    or a', '    ret',
+                '.score_high:', '    ld hl,CORE_RAM+$0B8', '    ld a,(hl)',
+                '    adc a,0', '    daa', '    jr nc,.score_high_store',
+                '    ld a,$99', '    ld (CORE_RAM+$0B9),a', '    ld (CORE_RAM+$0BA),a',
+                '    ld hl,CORE_RAM+$0A3', '    inc (hl)', '    ld (CORE_RAM+$0B8),a',
+                '    ld e,1', '    or a', '    ret',
+                '.score_high_store:', '    ld (hl),a',
+                '    ld hl,CORE_RAM+$0BB', '    ld a,(hl)', '    cp 6',
+                '    ld e,1', '    ret nc', '    ld e,0', '    inc (hl)', '    ret']
+            continue
         if address == 0xf6a7:
             lines += ['    IFDEF WITH_INPUT', '    call sample_input', '    ENDIF']
         emitted = translate(item,nz_out[address],relations.get(address))

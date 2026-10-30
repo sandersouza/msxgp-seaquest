@@ -52,6 +52,9 @@ describes the preparation steps without applying changes.
 | `make controls-run` | continuous original input/collision integration diagnostic |
 | `make collision-contract` | original TIA occupancy, Z80 acquisition and ordered resolution |
 | `make render-collision-bench` | full-density collision/input/graphics timing and VRAM checks |
+| `make progression-contract` | original score registers/BCD, lives, late-game and player-state comparisons |
+| `make render-progression-bench` | combined oxygen/progression/graphics density, pixels and frame timing |
+| `make progression-natural` | device-only alternating-player exhaustion, game over and restart |
 
 Use `PYTHON=/path/to/python` with make to override the local venv interpreter.
 `references/tools-lock.json` pins reference research tools; sjasmplus is pinned to

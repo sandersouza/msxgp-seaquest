@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := build
 PYTHON ?= .venv/bin/python
 .PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench render-input-bench controls controls-run input-contract input-natural disassemble
+.PHONY: progression-contract render-progression-bench progression-natural
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -51,5 +52,11 @@ render-oxygen-bench:
 	@$(PYTHON) -B scripts/render_bench.py --oxygen
 oxygen-natural: input-contract
 	@$(PYTHON) -B scripts/input_natural.py --rescue
+progression-contract:
+	@$(PYTHON) -B scripts/progression_contract.py
+render-progression-bench:
+	@$(PYTHON) -B scripts/render_bench.py --progression
+progression-natural: input-contract
+	@$(PYTHON) -B scripts/input_natural.py --progression
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

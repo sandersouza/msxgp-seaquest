@@ -26,8 +26,10 @@ surface/edge variants and lettering, with measured native sprite integration.
 HUD composition and playable integration remain subsequent work.
 The [controls diagnostic](docs/input-controls.md) runs the original movement and
 firing code with keyboard and both joystick ports, including measured input
-latency. Build/run it locally with `make controls-run`; it still uses neutral
-collision contacts and synthetic HUD/background colors.
+latency. Build/run it locally with `make controls-run`; it acquires original raster
+contacts and the logical oxygen alarm, with synthetic HUD/background colors.
+The [score/progression contract](docs/scoring-progression.md) verifies original BCD,
+reserve limits, late-game values, full bonuses and independent alternating players.
 
 ```sh
 python3 -B scripts/reference_inventory.py
