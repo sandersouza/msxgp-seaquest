@@ -5,7 +5,7 @@ import os
 import platform
 import ale_py
 import numpy as np
-from original_graphics import OUT, ROOT, SHA256, extract, read_original
+from original_graphics import OUT, ROOT, SHA256, early_patrol, extract, read_original
 
 
 class Reference:
@@ -170,6 +170,20 @@ def main():
                 if not np.array_equal(actual&roi,expected&roi):
                     raise ValueError(f'early explosion {death}, reflection{reflect}, Y{player_y}')
                 checks.append(dict(asset=name,death_counter=death,passed=True))
+    for reserve in range(7):
+        for death in (0,1,9,10,14,15,23):
+            for frame in range(3):
+                state = bytearray(256)
+                state[0xbb],state[0xe9] = reserve,death
+                prefix = 'early-patrol' if early_patrol(state) else 'patrol'
+                name = f'{prefix}-{frame}'
+                actual = ref.image(bb=reserve,e9=death,e0=frame,e1=0,f6=64) != blank
+                expected = mask(assets[name]['rows'],64,45,actual.shape)
+                roi = np.zeros(actual.shape,dtype=bool)
+                roi[43:55,40:128] = True
+                if not np.array_equal(actual&roi,expected&roi):
+                    raise ValueError(f'patrol carry: reserves{reserve}, death{death}, frame{frame}')
+                checks.append(dict(asset=name,reserves=reserve,death_counter=death,passed=True))
     OUT.mkdir(parents=True,exist_ok=True)
     report = dict(original_sha256=SHA256,ale=ale_py.__version__,python=platform.python_version(),
                   scenarios=checks,edge_cases=edge_checks,passed=all(c['passed'] for c in checks))

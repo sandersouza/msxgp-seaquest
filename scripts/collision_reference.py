@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Local original-coordinate occupancy oracle; source-derived masks stay ignored."""
-from original_graphics import bitmap, extract, read_original
+from original_graphics import bitmap, early_patrol, extract, read_original
 from pathlib import Path
 
 
@@ -18,7 +18,7 @@ def contacts(ram, data=None, assets=None):
               if not 53 <= player_top+y <= 56}
     missile = {(ram[0xe1]+40,(ram[0xe7]+x)%160) for x in range(8)}
     result = [255]*7
-    patrol_rows = (bitmap(data,0xfd00+data[0xcfb+frame]+4,8,True) if 0<death<10
+    patrol_rows = (bitmap(data,0xfd00+data[0xcfb+frame]+4,8,True) if early_patrol(ram)
                    else assets[f'patrol-{frame}']['rows'])
     patrol = {(45+y,((ram[0xf6] if ram[0xf6]<160 else 0)+x)%160)
               for y,row in enumerate(patrol_rows) for x in row}

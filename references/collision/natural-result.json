@@ -3,129 +3,129 @@
   "continuous_ticks": 659,
   "ram_reloads_after_boot": 0,
   "original_tia_acquisition_ticks": 659,
-  "max_busy_cycles": 55224,
+  "max_busy_cycles": 55284,
   "skipped_vdp_frames": 0,
-  "rom_sha256": "3f2a05b3d5810d1d74a8753155dfefc69aac3e744e9b0777319c1be2e24750b5",
+  "rom_sha256": "c6fd8c4271d160527ed6e0e3f5459f4eda1fbaa56e66a55d8eb28989da411dee",
   "latency": [
     {
       "time": 12.0,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 4.5564,
-      "sat_commit_ms": 16.7932
+      "state_ms": 4.5604,
+      "sat_commit_ms": 16.7898
     },
     {
       "time": 12.2137,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 7.9723,
-      "sat_commit_ms": 20.037
+      "state_ms": 7.9751,
+      "sat_commit_ms": 20.0403
     },
     {
       "time": 12.4274,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 11.0596,
-      "sat_commit_ms": 23.2886
+      "state_ms": 11.0691,
+      "sat_commit_ms": 23.283
     },
     {
       "time": 12.6411,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 14.3769,
-      "sat_commit_ms": 26.5276
+      "state_ms": 14.3853,
+      "sat_commit_ms": 26.5287
     },
     {
       "time": 12.854800000000001,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 17.5662,
+      "state_ms": 17.5734,
       "sat_commit_ms": 29.7795
     },
     {
       "time": 13.0685,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 4.1017,
-      "sat_commit_ms": 16.3384
+      "state_ms": 4.1067,
+      "sat_commit_ms": 16.3362
     },
     {
       "time": 13.2822,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 7.5022,
-      "sat_commit_ms": 19.5825
+      "state_ms": 7.5139,
+      "sat_commit_ms": 19.5791
     },
     {
       "time": 13.4959,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 10.6119,
-      "sat_commit_ms": 22.8251
+      "state_ms": 10.6225,
+      "sat_commit_ms": 22.8285
     },
     {
       "time": 13.7096,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 13.8162,
-      "sat_commit_ms": 26.0731
+      "state_ms": 13.8257,
+      "sat_commit_ms": 26.0753
     },
     {
       "time": 13.9233,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 16.9399,
-      "sat_commit_ms": 29.323
+      "state_ms": 16.9483,
+      "sat_commit_ms": 29.3163
     },
     {
       "time": 14.137,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 3.4698,
-      "sat_commit_ms": 15.8764
+      "state_ms": 3.476,
+      "sat_commit_ms": 15.8753
     },
     {
       "time": 14.3507,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 6.8737,
-      "sat_commit_ms": 19.1238
+      "state_ms": 6.8865,
+      "sat_commit_ms": 19.1216
     },
     {
       "time": 14.5644,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 9.9699,
-      "sat_commit_ms": 22.3687
+      "state_ms": 9.9817,
+      "sat_commit_ms": 22.3654
     },
     {
       "time": 14.7781,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 13.2872,
-      "sat_commit_ms": 25.6144
+      "state_ms": 13.2978,
+      "sat_commit_ms": 25.6178
     },
     {
       "time": 14.9918,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 16.486,
-      "sat_commit_ms": 28.8602
+      "state_ms": 16.4955,
+      "sat_commit_ms": 28.8624
     },
     {
       "time": 15.2055,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 3.0301,
+      "state_ms": 3.0374,
       "sat_commit_ms": 15.42
     }
   ],
-  "max_state_ms": 17.5662,
+  "max_state_ms": 17.5734,
   "max_sat_commit_ms": 29.7795,
   "shot_births": [
     {
       "kind": "state",
-      "time": 6.514790008227302,
+      "time": 6.514801741562126,
       "vdp_frame": 390,
       "x": 76,
       "y": 49,
@@ -134,7 +134,7 @@
     },
     {
       "kind": "state",
-      "time": 6.781799921498402,
+      "time": 6.781813889754145,
       "vdp_frame": 406,
       "x": 76,
       "y": 49,
@@ -143,7 +143,7 @@
     },
     {
       "kind": "state",
-      "time": 7.048831904613575,
+      "time": 7.04884028556702,
       "vdp_frame": 422,
       "x": 76,
       "y": 49,
@@ -152,7 +152,7 @@
     },
     {
       "kind": "state",
-      "time": 7.482666093036964,
+      "time": 7.48267223906949,
       "vdp_frame": 448,
       "x": 76,
       "y": 49,
@@ -161,7 +161,7 @@
     },
     {
       "kind": "state",
-      "time": 7.916290198893993,
+      "time": 7.916294110005601,
       "vdp_frame": 474,
       "x": 71,
       "y": 49,
@@ -170,7 +170,7 @@
     },
     {
       "kind": "state",
-      "time": 8.366867297379974,
+      "time": 8.366870091031123,
       "vdp_frame": 501,
       "x": 98,
       "y": 49,

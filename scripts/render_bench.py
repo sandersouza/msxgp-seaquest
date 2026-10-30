@@ -69,7 +69,7 @@ def visible_signature(vram):
 
 
 def check_original_sprites(ram,vram,assets,rom):
-    from original_graphics import scale_rows
+    from original_graphics import early_patrol, scale_rows
     from graphics_palette import sprite_colors
     actual = set()
     ys = []
@@ -92,7 +92,7 @@ def check_original_sprites(ram,vram,assets,rom):
                ('torpedo',ram[0xe7],ram[0xe1]+24,2,ram[0xe1]>=17 and ram[0xe7]!=0)]
     objects += [(f'ball-{ram[0xd9+lane]&15}',ram[0xc7+lane],120-lane*24,3+lane,
                  ram[0xc7+lane]!=0) for lane in range(4)]
-    patrol_prefix = 'early-patrol' if 0<ram[0xe9]<10 else 'patrol'
+    patrol_prefix = 'early-patrol' if early_patrol(ram) else 'patrol'
     objects += [(f'{patrol_prefix}-{frame}',ram[0xf6],30,7,ram[0xf6]!=0)]
     for name,x,y,slot,enabled in objects:
         if not enabled or x>=160: continue

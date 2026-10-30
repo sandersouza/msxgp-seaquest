@@ -25,7 +25,7 @@ def scenarios():
         x = rng.randrange(21,135)
         changes = dict(e1=y,c6=x,e0=rng.randrange(3),d6=rng.choice((0,8)),
                        dd=rng.randrange(8),f6=rng.randrange(160),e7=rng.randrange(160),
-                       e9=rng.choice((0,0,0,*range(1,24))),**{'82':n&255})
+                       e9=rng.choice((0,0,0,*range(1,24))),bb=n%7,**{'82':n&255})
         for lane in range(4):
             near = n%3!=0
             changes.update({f'{0x9e+lane:x}':(x+rng.randrange(-35,24))&255 if near else rng.randrange(256),
@@ -56,6 +56,13 @@ def scenarios():
                         'e1':32+24*(3-lane),'c6':76,'e7':80,'dd':5,'e0':0,'d6':facing,
                         f'{0x9e+lane:x}':80,f'{0xa4+lane:x}':7,
                         f'{0xc7+lane:x}':76,f'{0xd9+lane:x}':kind,'be':divers}
+    for reserve in (0,1):
+        for frame in range(3):
+            for facing in (0,8):
+                for y in range(13,24):
+                    for dx in range(-8,17):
+                        yield f'low-reserve-patrol-{reserve}-{frame}-{facing}-{y}-{dx}',dict(
+                            bb=reserve,e9=0,e0=frame,e1=y,c6=76,f6=76+dx,d6=facing)
     for state in (0,1,6):
         for y in range(13,20):
             for facing in (0,8):

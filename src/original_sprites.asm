@@ -255,9 +255,15 @@ prepare_original_sprites:
     LD DE,patrol_images
     LD A,($C0E9)
     OR A
-    JR Z,.patrol_table
+    JR NZ,.patrol_death
+    LD A,($C0BB)
+    CP 2
+    JR NC,.patrol_table
+    JR .patrol_early
+.patrol_death:
     CP 10
     JR NC,.patrol_table
+.patrol_early:
     LD DE,early_patrol_images
 .patrol_table:
     ADD HL,DE

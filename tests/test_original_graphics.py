@@ -3,11 +3,19 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from original_graphics import bitmap, ball, scale_rows, sprite_bytes, sprite_bank, extract
+from original_graphics import bitmap, ball, early_patrol, scale_rows, sprite_bytes, sprite_bank, extract
 from graphics_palette import tms_color
 
 
 class OriginalGraphicsTests(unittest.TestCase):
+    def test_patrol_carry_includes_low_reserve_and_death_overrides(self):
+        clear_reserves = {0:{0,1},1:set(range(7)),9:set(range(7)),10:set(),14:set(),15:set(),23:set()}
+        state = bytearray(256)
+        for death,expected in clear_reserves.items():
+            for reserve in range(7):
+                state[0xe9],state[0xbb] = death,reserve
+                self.assertEqual(early_patrol(state),reserve in expected)
+
     def test_source_order_reflection_and_double_width(self):
         source = bytes([0b10000001,0b01000000])
         self.assertEqual(bitmap(source,0xf000,2),[[1],[0,7]])

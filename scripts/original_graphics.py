@@ -27,6 +27,12 @@ def bitmap(data, address, height, reflect=False, stretch=1):
     return rows
 
 
+def early_patrol(ram):
+    """Carry at F1B5: CPY lives>=2 unless death's CPX replaces it."""
+    death = ram[0xe9]
+    return 0 < death < 10 or death == 0 and ram[0xbb] < 2
+
+
 def ball(data, selection):
     """Decode the original ball's per-scanline HMOVE and CTRLPF writes."""
     motion = 0xfd00 + data[0xf7e+selection]
@@ -76,8 +82,8 @@ def extract(data):
                 [address], canonical_width=16)
         # Last GRP1 write is suppressed before it reaches the visible scanline.
         add(f'patrol-{frame}', [[]]+bitmap(data,address+5,7,True), [address+5])
-        # F186's carry is clear only for death1..9. F1B5 ADC #2 then selects
-        # one earlier source row throughout the patrol's eight raster writes.
+        # Carry clear at F1B5 (death1..9 or no death/BB<2) selects one earlier
+        # source row throughout the patrol's eight raster writes.
         add(f'early-patrol-{frame}',bitmap(data,address+4,8,True),[address+4])
     for death in range(10,15):
         address = 0xfd00+data[0xdf0+death]

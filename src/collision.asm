@@ -78,8 +78,9 @@ acquire_contacts:
     LD (col_mirror),HL
     RET
 .patrol_setup:
-    ; ADC at F1B5 preserves death's carry: counters1..9 select rows11..4,
-    ; otherwise rows12..5. These eight writes occupy raw lines45..52.
+    ; F100 CPY #2 supplies the carry when E9=0; death's CPX replaces it.
+    ; Clear carry (BB<2 without death, or E9=1..9) selects rows11..4;
+    ; set carry selects rows12..5. Both occupy raw lines45..52.
     LD A,($C0E0)
     LD E,A
     LD D,0
@@ -90,9 +91,15 @@ acquire_contacts:
     LD C,A
     LD A,($C0E9)
     OR A
-    JR Z,.patrol_rows
+    JR NZ,.patrol_death
+    LD A,($C0BB)
+    CP 2
+    JR NC,.patrol_rows
+    JR .patrol_early
+.patrol_death:
     CP 10
     JR NC,.patrol_rows
+.patrol_early:
     DEC C
 .patrol_rows:
     LD A,C

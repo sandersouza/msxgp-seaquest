@@ -1,11 +1,11 @@
 {
   "cases": 10622,
-  "max_cycles": 59087,
-  "worst_case": "controls-dense-12-15-1-255",
-  "rom_sha256": "055fb51c9a12993140838ca04a1a0980098eca6e57dcd3c5d9f441b66cd823ff",
+  "max_cycles": 59370,
+  "worst_case": "collision-full-mixed-399",
+  "rom_sha256": "0990365dec54574eb3a17ead3838dd8d064a1d4049052e5c957211bb55ab14f2",
   "io": {
     "min_data_spacing": 29,
-    "data_writes": 6843456
+    "data_writes": 6844352
   },
   "machine": "C-BIOS_MSX1",
   "cpu_hz": 3579545,
@@ -22,13 +22,13 @@
   "input_sweep_cases": 3072,
   "collision_inputs": "original raster occupancy acquired before F5B8; original resolution order",
   "rom_padding_bytes": 1536,
-  "cpu_margin_cycles": 649,
+  "cpu_margin_cycles": 366,
   "pace": {
     "frames": 240,
-    "min_period": 59732,
-    "max_period": 59760,
+    "min_period": 59735,
+    "max_period": 59763,
     "max_commit_cycles": 11039,
-    "max_busy_cycles": 58980,
+    "max_busy_cycles": 59263,
     "stack_min": 62320,
     "min_commit_y": 192,
     "max_commit_end_y": -22
