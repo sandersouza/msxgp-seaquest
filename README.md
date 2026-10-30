@@ -9,9 +9,11 @@ See the [roadmap](docs/superpowers/specs/2026-10-30-seaquest-msx1-design.md),
 The [reference disassembly](docs/reference-disassembly.md) documents byte-identical
 rebuilds of both supplied binaries and hardware differences in the Atari 800 port.
 
-Current delivery: reference identification and integrity checks. A playable MSX ROM
-is not available yet. Original ROMs/source must be supplied locally; they are not
-distributed here.
+Current delivery: verified references, byte-identical research rebuilds, a macOS
+toolchain and a bootable MSX1 hardware diagnostic. A playable Seaquest ROM is not
+available yet. Original ROMs/source must be supplied locally; they are not distributed here.
+
+See [development setup and commands](docs/development.md) to build/run the diagnostic.
 
 ```sh
 python3 -B scripts/reference_inventory.py

@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "signature": "5351",
+  "pattern": 255,
+  "color": 33,
+  "name": 0,
+  "interrupts": "advancing",
+  "machine": "C-BIOS_MSX1",
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "vdp": "TMS9918A",
+  "video_hz": 60,
+  "rom_sha256": "62131a8d9f569d2799445d94e898df09004797ed292bf12f1b924d0754497791",
+  "emulator": "openMSX 21.0\nflavour: opt\ncomponents: CORE GL LASERDISC",
+  "acceptance": "diagnostic boot only; no gameplay/hardware validation"
+}
