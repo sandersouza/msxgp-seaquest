@@ -1,0 +1,21 @@
+{
+  "distella": {
+    "repository": "https://github.com/johnkharvey/distella",
+    "commit": "1015ae53b2d222320eb706c220186305fcac55dd",
+    "build": "make auto",
+    "version": "3.02-SNAPSHOT",
+    "source_sha256": "fd02c70e40caefde62eac6f28bdff412a0abbe2a2bb7cb8f4c11f0e55d8864ca"
+  },
+  "mads": {
+    "repository": "https://github.com/tebe6502/Mad-Assembler",
+    "commit": "ecc27e941c41d41dedce64de98162101fbef8261",
+    "version": "2.1.8 (2026/04/14)",
+    "macos_aarch64_path": "bin/macos_aarch64/mads",
+    "macos_aarch64_sha256": "ba89693a2881906d9fafca1b2d2ecf800b3d69aa374ce77fe83d9cfba864d1ef"
+  },
+  "dasm": {
+    "homebrew_formula": "dasm",
+    "formula_version_tested": "2.20.17",
+    "binary_banner_tested": "DASM 2.20.16"
+  }
+}

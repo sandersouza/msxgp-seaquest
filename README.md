@@ -6,6 +6,8 @@ Z80 and PSG, with no expansions. The Atari 2600 original is the gameplay authori
 Development is tracked in [MSX Game Ports](https://github.com/users/sandersouza/projects/7).
 See the [roadmap](docs/superpowers/specs/2026-10-30-seaquest-msx1-design.md),
 [reference inventory](docs/reference-inventory.md) and [local issue copies](.github/issues/).
+The [reference disassembly](docs/reference-disassembly.md) documents byte-identical
+rebuilds of both supplied binaries and hardware differences in the Atari 800 port.
 
 Current delivery: reference identification and integrity checks. A playable MSX ROM
 is not available yet. Original ROMs/source must be supplied locally; they are not
@@ -14,4 +16,5 @@ distributed here.
 ```sh
 python3 -B scripts/reference_inventory.py
 python3 -B -m unittest discover -s tests -v
+python3 -B scripts/reference_rebuild.py  # requires the documented research tools
 ```

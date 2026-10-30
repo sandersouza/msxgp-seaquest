@@ -8,14 +8,14 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 None.
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] Reference manifests contain byte sizes and SHA-256 hashes; region/revision conclusions cite evidence or remain explicitly unresolved. Original files are unchanged.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] Reference manifests contain byte sizes and SHA-256 hashes; region/revision conclusions cite evidence or remain explicitly unresolved. Original files are unchanged.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-01
@@ -30,3 +30,9 @@ None.
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/1
+
+## Delivery evidence
+- Implemented and merged in https://github.com/sandersouza/msxgp-seaquest/pull/16.
+- Six synthetic tests passed; all three local originals match hash/structure manifest.
+- Stella 7.0c identifies the exact 2600 hash as NTSC/4K. Measured cadence and source provenance limitations are explicit in docs/reference-inventory.md.
+- Independent review clean. No gameplay or physical-hardware acceptance claimed.
