@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "path": "references/roms/seaquest-atari2600.a26",
+      "format": "atari2600-4k",
+      "size": 4096,
+      "sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+      "md5": "240bfbac5163af4df5ae713985386f92",
+      "structure": {
+        "nmi_vector": 59906,
+        "reset_vector": 61440,
+        "irq_vector": 64768
+      }
+    },
+    {
+      "path": "references/roms/seaquest-atari800.xex",
+      "format": "atari8-xex",
+      "size": 4393,
+      "sha256": "e97cee62f9a99003d78df122eacdd99a24d8e14bd3d0e7d6a497275e4aed86a1",
+      "md5": "8323cfbc15d5d2f2b5110ae8ec283496",
+      "structure": {
+        "segments": [
+          {
+            "start": 8192,
+            "end": 11680,
+            "size": 3489
+          },
+          {
+            "start": 11776,
+            "end": 12161,
+            "size": 386
+          },
+          {
+            "start": 12288,
+            "end": 12785,
+            "size": 498
+          },
+          {
+            "start": 736,
+            "end": 737,
+            "size": 2
+          }
+        ],
+        "run_address": 8384
+      }
+    },
+    {
+      "path": "references/dissasm/seaquest-atari800.s",
+      "format": "source-text",
+      "size": 48182,
+      "sha256": "73769a9681c1ea4ed5e1d9d34b78f68fd2213b08d023ef774af158f0c9299a89",
+      "md5": "8ff2fe542c96321c569c28f92613c2cd"
+    }
+  ]
+}
