@@ -3,6 +3,19 @@
 Work is tracked in [MSX Game Ports #7](https://github.com/users/sandersouza/projects/7).
 Only change Seaquest items. Preserve the project's shared fields and other projects.
 
+## One issue per Codex chat
+
+From the owner's instruction on 2026-10-30, start every new GitHub issue in a
+**separate chat within the same Seaquest project**, titled `ISSUE #<number>`.
+Reuse an existing dedicated issue chat when present. Transfer its URL, scope,
+dependencies, branch/commit, pending changes, evidence and next actions; use
+`docs/handoffs/` for durable implementation context. The previous chat stops
+editing the shared checkout after handoff. Continue autonomously to the next
+dependency-ready issue through another chat, without repeated permission requests.
+The repository's `AGENTS.md` makes this rule visible to future agents.
+
+## Issue and PR lifecycle
+
 - Backlog: planned work; Ready: prerequisite evidence available; In progress:
   implementation underway; In review: delivery checks/review pending; Done:
   acceptance met and delivery integrated.
