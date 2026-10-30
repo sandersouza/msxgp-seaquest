@@ -21,7 +21,7 @@ extraction is not a captured trace or gameplay acceptance. No production behavio
 - [x] Record source addresses, constants and update ordering; enumerate runtime acceptance scenarios.
 - [x] Correct LF689 and LFFDA role descriptions in the reference map.
 - [x] Fresh domain review against original listing; resolve material discrepancies.
-- [ ] Green CI, PR integration and project update; advance #6 after #3 completion.
+- [x] Green CI, PR integration and project update (#20 merged c9ce734; #3 Done); #6 started.
 
 #1/#2/#4/#5 completed first. #3 started once its reference disassembly dependency
 was satisfied. Captured masks/coordinate mapping and actual frame timing remain

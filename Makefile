@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 PYTHON ?= .venv/bin/python
-.PHONY: environment environment-check environment-dry-run build run smoke test reference-check disassemble
+.PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check disassemble
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -17,5 +17,7 @@ test:
 	@$(PYTHON) -B -m unittest discover -s tests -v
 reference-check:
 	@$(PYTHON) -B scripts/reference_inventory.py
+reference-trace-check:
+	@$(PYTHON) -B scripts/verify_reference_trace.py
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py
