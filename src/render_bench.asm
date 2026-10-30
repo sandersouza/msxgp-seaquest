@@ -1,4 +1,4 @@
-; Synthetic renderer probe; original-core calls are injected by the local harness.
+; Renderer diagnostic; original core/art are optional local-only inputs.
     ORG $4000
     DB "AB"
     DW init
@@ -31,9 +31,14 @@ init:
     CALL $0024
     CALL render_init
     DI
+    IFDEF WITH_GRAPHICS
+    LD HL,original_sprite_catalog
+    LD BC,SPRITE_RESIDENT*32
+    ELSE
     LD HL,sprite_patterns
-    LD DE,$3800
     LD BC,256
+    ENDIF
+    LD DE,$3800
     CALL vram_copy
     LD HL,sat_initial
     LD DE,SATBUF
@@ -66,6 +71,9 @@ core_done:
     ENDIF
     CALL prepare_shapes
     CALL prepare_sprites
+    IFDEF WITH_GRAPHICS
+    CALL prepare_original_sprites
+    ENDIF
     CALL render_frame
 rpc_done:
     JP idle
@@ -83,6 +91,9 @@ paced_frame_start:
     ENDIF
     CALL prepare_shapes
     CALL prepare_sprites
+    IFDEF WITH_GRAPHICS
+    CALL prepare_original_sprites
+    ENDIF
     CALL render_prepare
 paced_prepared:
     JP paced_start
@@ -180,6 +191,11 @@ expand_lut:
     INCBIN "../outputs/render/expand.bin"
 reverse_bits:
     INCBIN "../outputs/render/reverse.bin"
+    IFDEF WITH_GRAPHICS
+    INCLUDE "original_sprites.asm"
+    INCLUDE "../outputs/graphics/sprites.inc"
+    ENDIF
+    IFNDEF WITH_GRAPHICS
 sprite_patterns:
     DUP 8, sprite
     DUP 32, pos
@@ -210,6 +226,7 @@ sprite_patterns:
     ENDIF
     EDUP
     EDUP
+    ENDIF
 sat_initial:
     DUP 8, sprite
     DB 216,0,sprite*4,15-sprite
@@ -221,4 +238,6 @@ original_rom:
     INCBIN "../outputs/native/original.rom"
     ENDIF
     ASSERT $ <= $C000
+    IF $ < $C000
     DS $C000-$,$FF
+    ENDIF

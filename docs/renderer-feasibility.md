@@ -1,5 +1,12 @@
 # SCREEN 2 renderer feasibility — issue #7
 
+Historical #7 measurements below remain tied to their recorded ROM hashes.
+[Issue #8's original graphics integration](original-graphics.md) supersedes the
+synthetic sprite shapes, ball/torpedo geometry and192-byte RAM staging: the
+backend now stages one48-byte lane at a time. Current evidence and CPU/ROM
+constraints are in `references/graphics/`; HUD/background color composition is
+still synthetic in these diagnostic probes.
+
 Decision: proceed with a 240-pixel hybrid SCREEN 2 backend on standard MSX1.
 The feasibility gate passes on C-BIOS_MSX1/openMSX 21.0. This is a renderer probe,
 not a playable game or full-game/physical-machine acceptance.

@@ -75,3 +75,9 @@ passed this automated boot check. Snapshot: `references/msx1-smoke.json`.
 No original-BIOS matrix, visual gameplay, PAL behavior or physical-machine
 acceptance is implied. The separate [renderer feasibility benchmark](renderer-feasibility.md)
 records its own performance evidence and limitations.
+
+Local original graphics research uses `make graphics-reference-check` (source
+extraction plus ALE pixels) and `make render-graphics-bench` (native core plus
+original sprites in openMSX). See [the graphics contract](original-graphics.md)
+for palette, clipping, exact evidence and tight CPU/ROM constraints. These targets
+require the verified local original ROM and never run or upload art in public CI.

@@ -1,0 +1,15 @@
+{
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "assets": 281,
+  "rom_catalog_patterns": 213,
+  "rom_catalog_bytes": 6816,
+  "resident_patterns": 47,
+  "scratch_patterns": 16,
+  "vram_sprite_bytes": 2016,
+  "sprite_limit_bytes": 2048,
+  "files": {
+    "canonical.json": "c653b0c036a91ada944366de3fc974b2da2f9c1666c7ed7980aef695adf14fd3",
+    "sprite-patterns.bin": "c29199f1516489d9a552863d5cb2894c60d0dbafdf4561dc6cd74a6781f32276",
+    "sprite-lookup.json": "2b735a5488f114604f34609056d289bc23a176ce533bda26a578e3b6b170d55b"
+  }
+}

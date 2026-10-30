@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 PYTHON ?= .venv/bin/python
-.PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench disassemble
+.PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench disassemble
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -25,5 +25,11 @@ render-bench:
 	@$(PYTHON) -B scripts/render_bench.py
 render-native-bench:
 	@$(PYTHON) -B scripts/render_bench.py --native
+graphics:
+	@$(PYTHON) -B scripts/original_graphics.py
+graphics-reference-check: graphics
+	@$(PYTHON) -B scripts/graphics_reference.py
+render-graphics-bench:
+	@$(PYTHON) -B scripts/render_bench.py --graphics
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

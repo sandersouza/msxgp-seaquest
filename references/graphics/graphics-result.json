@@ -1,0 +1,32 @@
+{
+  "cases": 6526,
+  "max_cycles": 59211,
+  "worst_case": "graphics-mixed-708",
+  "rom_sha256": "42fb3247b2034b5dc625d3a7b556d46c5644d3d170adbd48b98d3bbd596ac666",
+  "io": {
+    "min_data_spacing": 29,
+    "data_writes": 4121088
+  },
+  "machine": "C-BIOS_MSX1",
+  "cpu_hz": 3579545,
+  "vdp": "TMS9918A",
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "video": "NTSC",
+  "rom_bytes": 32768,
+  "python": "3.14.7",
+  "openmsx": "openMSX 21.0",
+  "sjasmplus_revision": "d379eeac9ad3857fb48fd3a3929175d0a56038ce",
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "status": "original sprite integration probe; synthetic HUD/background colors; no playable or physical-hardware acceptance",
+  "pace": {
+    "frames": 240,
+    "min_period": 59716,
+    "max_period": 59744,
+    "max_commit_cycles": 11501,
+    "max_busy_cycles": 59104,
+    "stack_min": 62324,
+    "min_commit_y": 192,
+    "max_commit_end_y": -20
+  }
+}

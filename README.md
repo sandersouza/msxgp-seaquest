@@ -20,8 +20,10 @@ The [original gameplay contract](docs/gameplay-contract.md) records source-deriv
 rules and the scenarios required for later runtime trace acceptance.
 The [native gameplay contract](docs/native-core.md) passes independent original-CPU
 comparisons, including continuous replay. The [SCREEN 2 feasibility gate](docs/renderer-feasibility.md)
-records full-density renderer and native-core timing; complete assets and playable
-integration remain subsequent work.
+records full-density renderer and native-core timing. The [original graphics
+pipeline](docs/original-graphics.md) extracts and verifies source silhouettes,
+surface/edge variants and lettering, with measured native sprite integration.
+HUD composition and playable integration remain subsequent work.
 
 ```sh
 python3 -B scripts/reference_inventory.py

@@ -23,12 +23,27 @@ class RenderTableTests(unittest.TestCase):
         self.assertEqual(sprite_peak([42,42,42] + divers + [39]), 5)
         self.assertGreater(sprite_peak([49]*3 + [49]*3 + [49]),4)
 
+    def test_original_geometry_respects_scanline_slots(self):
+        for player_y in range(13,109):
+            ys = [player_y+17]*2 + [48+24*n for n in range(4)] + [22]
+            if player_y>=17: ys.append(player_y+24)
+            self.assertLessEqual(sprite_peak(ys),4)
+
     def test_visible_signature_ignores_only_unreferenced_patterns(self):
         before = bytearray(16384)
         after = bytearray(before)
         after[96*8] = 255
         self.assertEqual(visible_signature(before),visible_signature(after))
         after[0x1800] = 96
+        self.assertNotEqual(visible_signature(before),visible_signature(after))
+
+    def test_visible_signature_tracks_sprite_patterns_beyond_first_eight(self):
+        before = bytearray(16384)
+        before[0x1b02] = 47*4
+        after = bytearray(before)
+        after[0x3800+55*32] = 128
+        self.assertEqual(visible_signature(before),visible_signature(after))
+        after[0x3800+47*32] = 128
         self.assertNotEqual(visible_signature(before),visible_signature(after))
 
 
