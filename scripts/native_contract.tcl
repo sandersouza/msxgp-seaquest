@@ -16,11 +16,22 @@ proc next_case {} {
     set progress [open "outputs/native/progress.txt" w]
     puts $progress $::case_count
     close $progress
-    set header [read $::cases_file 7]
+    set header [read $::cases_file 8]
     if {[string length $header] == 0} {finish_contract true complete; return}
     binary scan $header c* values
     set entry [expr {([lindex $values 0]&255) | (([lindex $values 1]&255)<<8)}]
-    debug write_block memory 0xC000 [read $::cases_file 1024]
+    set ram [read $::cases_file 1024]
+    if {[lindex $values 7] == 1} {
+        foreach offset {12 13 640 642 644 248 249 176 177 178 179 180 181 182} {
+            binary scan [string index $ram $offset] c byte
+            debug write memory [expr {0xC000+$offset}] [expr {$byte&255}]
+        }
+    } else {
+        debug write_block memory 0xC000 $ram
+    }
+    if {$::case_count == $::inject_case} {
+        debug write memory 0xC0C6 [expr {([debug read memory 0xC0C6]+1)&255}]
+    }
     set ::case_expected [read $::cases_file 251]
     debug write memory 0xC6F0 [expr {[lindex $values 2]&255}]
     debug write memory 0xC6F1 [expr {[lindex $values 3]&255}]

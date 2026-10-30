@@ -43,3 +43,8 @@ remain byte-derived rather than substituted; no diagnostic-only result called pl
 - Preflight: #6 canonical state feeds #9–#11; #7 renderer/collision mask interface
   feeds #8/#10. Keep phase boundaries explicit so hardware replacement cannot silently
   move collision resolution or input sampling to another original tick.
+- #6 review required continuity rather than independently reloading every sampled
+  state. Added a reset plus 480 chained updates with hardware-only injections,
+  rollover, Select/Reset and death/player switching. 2,707 cases pass; intentional
+  X corruption at chain tick 13 is detected. Original CPU/native logical phase is
+  $F5B8→$F00E; raster shape and physical clock remain their separate acceptance gates.

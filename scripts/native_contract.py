@@ -89,6 +89,29 @@ def fixtures():
                 ram[hit], ram[0xd9+lane], ram[0xa4+lane] = lane, enemy_type, 7
                 ram[0xc7+lane], ram[0xe7], ram[0xe1] = 76, 80, 50
                 result.append((f'collision-{lane}-{hit}-{enemy_type}', 0xf5b8, ram, 0, 0x82, 0, 0))
+    # Replay canonical state continuously. Only the environment's named hardware
+    # samples/latches are injected after the first reset; game RAM is NOT reloaded.
+    rom = (ROOT / 'references/roms/seaquest-atari2600.a26').read_bytes()
+    ram = bytearray(template)
+    ram[0x81], ram[0x82] = 252, 87
+    result.append(('chain-reset', 0xfb54, bytearray(ram), 0, 0, 0, 0))
+    previous, _ = reference(rom, list(ram), 0xfb54)
+    ram[:251] = previous
+    for tick in range(480):
+        ram[0xb0:0xb7], ram[0xf8] = b'\xff' * 7, 0
+        ram[0xf9] = 15 if ram[0xe1] != 13 and 0 < ram[0xe6] <= 16 and not ram[0xe9] else 0
+        nibble = 15 if tick < 150 else (7 if tick < 170 else (11 if tick < 190 else (13 if tick < 240 else 14)))
+        ram[0x280], ram[0x282] = (nibble << 4) | nibble, 0x3f
+        ram[0xc] = ram[0xd] = 0 if tick >= 190 else 255
+        if tick == 250:
+            ram[0x282] = 0x3d  # actual original Select path
+        if tick == 251:
+            ram[0x282] = 0x3e  # actual original Reset path, retain seed/phase
+        if tick == 350:
+            ram[0xb5] = 0      # hardware collision input, then native death/player swap
+        result.append((f'chain-{tick}', 0xf5b8, bytearray(ram), 0, 0x82, 0, 0, 1))
+        previous, _ = reference(rom, list(ram), 0xf5b8, 0, 0x82)
+        ram[:251] = previous
     return result
 
 
@@ -106,13 +129,16 @@ def main():
     rom = (ROOT / 'references/roms/seaquest-atari2600.a26').read_bytes()
     cases = fixtures()
     records, count_steps = [], []
-    for name, entry, ram, a, x, y, carry in cases:
+    for case in cases:
+        name, entry, ram, a, x, y, carry = case[:7]
+        chained = case[7] if len(case) > 7 else 0
         expected, steps = reference(rom, list(ram), entry, a, x, y, carry)
-        records.append(struct.pack('<HBBBBB', symbols[f'core_{entry:04X}'], 0, a, y, x, carry) + ram + expected)
+        records.append(struct.pack('<HBBBBBB', symbols[f'core_{entry:04X}'], 0, a, y, x, carry, chained) + ram + expected)
         count_steps.append(steps)
     (out / 'cases.bin').write_bytes(b''.join(records))
     (out / 'case-index.json').write_text(json.dumps([c[0] for c in cases]))
-    (out / 'start.tcl').write_text(f'set rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nsource scripts/native_contract.tcl\n')
+    inject = int(os.environ.get('SEAQUEST_INJECT_CASE', '-1'))
+    (out / 'start.tcl').write_text(f'set inject_case {inject}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nsource scripts/native_contract.tcl\n')
     result_file = out / 'result.json'
     result_file.unlink(missing_ok=True)
     env = {**os.environ, 'SDL_VIDEODRIVER': 'dummy', 'SDL_AUDIODRIVER': 'dummy'}

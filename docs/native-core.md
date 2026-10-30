@@ -37,10 +37,15 @@ executes generated native Z80 in **openMSX 21.0 / C-BIOS_MSX1**, with 64 KiB RAM
 controls and collision-latch results at the named original phase. The harness
 compares all shadow memory bytes `$00..$FA`, excluding stack/return bytes.
 
-On 2026-10-30, **2,226 cases passed**: all 256 PRNG seeds, 256 BCD cases, captured
+On 2026-10-30, **2,707 cases passed**: all 256 PRNG seeds, 256 BCD cases, captured
 baseline states plus five control variants, reset/frame rollover, alternate-player
 and independent switch/reset/select cases, full/partial/zero-diver surfacing,
 oxygen/refill/bonus phase combinations and each lane's hit categories/types.
+The last 481 cases form a reset plus **480 continuously chained updates** through
+frame rollover, held controls, Select/Reset and death/player switching. Only named
+hardware input/latch bytes are supplied after the first reset; native game RAM is
+not reloaded between ticks. Changing native X at chained tick 13 was detected at
+the first divergent byte `$C6` (expected 76, actual 77).
 The maximum original instruction count was 566. Maximum native cost was 16,838
 Z80 cycles, derived from emulated elapsed time × 3,579,545 Hz, including the RPC
 wrapper. This bounds these cases; it is not a full-game performance acceptance.
