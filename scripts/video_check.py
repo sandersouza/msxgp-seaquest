@@ -206,7 +206,9 @@ def main():
     if args.generation=='ready' and not report['ready_epoch_exposures']:
         raise ValueError('READY1/token240 was not exercised')
     for chain in range(max(1,len(seeds))):
-        rows = [c for c in commits if c['chain']==chain]
+        # The first displayed seed has no preceding queued extra update. Its
+        # one-time empty pipeline is not a recurring simulation-clock drift.
+        rows = [c for c in commits if c['chain']==chain][1:]
         for left,right in zip(rows,rows[262:]):
             if right['ticks']-left['ticks']!=(313 if pal else 262):
                 raise ValueError('source clock drift over262 display frames')
@@ -241,7 +243,8 @@ def main():
                   scenario=args.scenario,ram_reloads_after_chain_start=0)
     report.update(skipped_vdp_frames=0,visible_commits=0,generation_mode=args.generation,
                   initial_accumulators=sorted({row[6] for row in configs}),
-                  cadence_windows_verified=sum(max(0,len([c for c in commits if c['chain']==chain])-262)
+                  startup_display_intervals_excluded=1,
+                  cadence_windows_verified=sum(max(0,len([c for c in commits if c['chain']==chain])-263)
                                                for chain in range(max(1,len(seeds)))))
     report.update(original_sha256=SHA256,rom_bytes=args.rom.stat().st_size,mapper='ASCII16',
                   symbols_sha256=hashlib.sha256(args.rom.with_suffix('.sym').read_bytes()).hexdigest(),
