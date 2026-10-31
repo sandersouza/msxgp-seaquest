@@ -1,0 +1,30 @@
+{
+  "verdict": "rejected_timing_or_io",
+  "experiment": "8 KiB exact enemy LUT; 128 KiB ASCII16 diagnostic only",
+  "rom_bytes": 131072,
+  "rom_sha256": "7d4d1fd74fcad6e4ea37e295c38fe066c77393f52300f06fbd18a98d28f8c608",
+  "baseline_sha256": "23f21dbc42bdbc190e8499257e5bfec9bd39148f54c7bdd9c52d0252fea1c7c9",
+  "probe_source_sha256": "10347d0982c46a9cbebc9440a2dd9035817fd0c9b5ffa19849b12cdc86e2b567",
+  "cases": 39328,
+  "canonical_state_and_full_vram_equal": true,
+  "max_cycles": 61243,
+  "worst_case": "graphics-mixed-1990",
+  "cpu_margin_cycles": -1507,
+  "io": {
+    "min_data_spacing": 18,
+    "min_active_spacing": 29,
+    "data_writes": 23017440
+  },
+  "paced_frames": 240,
+  "paced_max_busy_cycles": 60915,
+  "paced_frame_steps": [
+    1,
+    2
+  ],
+  "stack_min": 62320,
+  "min_period_cycles": 59713,
+  "max_period_cycles": 119464,
+  "psg_and_full_game_validated": false,
+  "disk_or_plain32_validated": false,
+  "vdp_registers_and_pages_equal": true
+}

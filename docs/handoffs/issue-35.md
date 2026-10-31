@@ -63,3 +63,35 @@ acceptance and subjective audio remain unrecorded; do not backfill results.
    builds. Continue autonomously within the owner's authorization.
 
 The planning chat stops editing the checkout once the new issue chat starts.
+
+## Implementation checkpoint — 2026-10-31
+
+The dedicated ISSUE #35 chat preserved the incoming docs in commit `14a1360`
+on `codex/feat/35-msxdos-plain32`; the production runtime remains unchanged.
+The live issue is open/In progress. No release/tag/asset changes were made.
+
+Read `docs/compact-delivery.md`, `docs/plans/issue-35.md` and the three receipts
+under `references/compact-delivery/` before continuing. Audit/probe entry points
+are `scripts/compact_audit.py` and `scripts/compact_probe.py`. The latter builds
+`src/experiments/compact_enemy.asm` only into an ignored diagnostic wrapper;
+the production build never includes it.
+
+- Accepted playable rebuild: exact `41ec3b92...` hash, 131,072 bytes.
+- Baseline 39,328 fixtures pass; worst 59,110 cycles, paced 58,782.
+- Corrected enemy-cache probe: 39,328 canonical/VRAM/VDP comparisons pass; worst
+  61,243 cycles, paced 60,915, VDP frame increments 1 or 2. ROM SHA256
+  `7d4d1fd74fcad6e4ea37e295c38fe066c77393f52300f06fbd18a98d28f8c608`.
+  It is still 128 KiB ASCII16 and fails timing; it is not a deliverable.
+- Host storage audit: occupied bank extents 115,903 bytes, not a minimal live
+  working set. XZ 28,632 bytes is storage only; whole-image expansion cannot fit.
+- Independent review: no P1/P2 findings in the narrow audit/rejected-probe scope.
+  Role-based palettes and shared field/forecast data remain plausible reductions,
+  not validated solutions. A failed candidate does not prove impossibility.
+
+Continue this issue in its dedicated chat. Next engineering work is bounded
+role-based RGB construction and field/forecast representation reduction, followed
+by a complete shared DOS64K/plain32 RAM/slot layout. Respect actual DOS TPA or
+design an explicit takeover/reset policy; direct cartridge BIOS calls and mapper
+writes cannot simply be relabeled as a COM program. No real disk/plain32 loading,
+PAL/NTSC full games/rescues or PSG acceptance has been recorded for a new format.
+Do not close #35 or publish any candidate until those conditions are met.

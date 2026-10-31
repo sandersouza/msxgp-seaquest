@@ -43,3 +43,22 @@ Simply changing ASCII16 to Konami does not shrink cartridge capacity. Current ba
 - [ ] Independent review and relevant local/remote checks pass; scoped PR is merged.
 - [ ] Latest release contains verified downloads, distinct manifests/checksums and correct instructions, linked to actual source revisions.
 - [ ] Local issue copy, GitHub status and handoff agree. If a delivery condition is infeasible, document the measured blocker and keep the issue open instead of publishing a degraded build.
+
+## Feasibility checkpoint — 2026-10-31
+
+The unchanged playable rebuild reproduces the accepted 1.0.0 hash. The existing
+renderer passes 39,328 original-state/pixel fixtures at a maximum 59,110 cycles.
+A corrected 8 KiB enemy-cache diagnostic preserves all 39,328 canonical states,
+VRAM images, VDP registers and name pages, but costs 61,243 cycles against the
+59,736-cycle NTSC limit. Its paced test costs 60,915 busy cycles and skips frames.
+That candidate is rejected and remains a 128 KiB ASCII16 diagnostic.
+
+The current expanded layout cannot simply be loaded into 64 KiB RAM. Whole-image
+host XZ compression measures 28,632 bytes but supplies no Z80 decoder or fitting
+runtime. Exact role-based palette reconstruction is a promising next reduction;
+its CPU, shared memory layout and native load paths are unimplemented.
+
+See `docs/compact-delivery.md` and `references/compact-delivery/` for measured
+scope, reproduction and remaining design work. This checkpoint does not prove
+that a redesigned port is impossible. All delivery checkboxes remain pending;
+keep this issue open/In progress, and publish no degraded or unverified binary.
