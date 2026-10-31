@@ -1,0 +1,20 @@
+{
+  "verdict": "pass",
+  "rom_sha256": "41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8",
+  "bench_sha256": "23f21dbc42bdbc190e8499257e5bfec9bd39148f54c7bdd9c52d0252fea1c7c9",
+  "video_frames": 449644,
+  "source_updates": 514802,
+  "pixel_frames": 60937,
+  "audio_stores": 132262,
+  "clock_windows": 210426,
+  "ntsc_max_busy": 58800,
+  "pal_max_busy": 67300,
+  "minimum_stack": 62302,
+  "host_tests": 55,
+  "local_synthetic_ci": "pass;55tests,1optional-py65-skip",
+  "negative_controls": {
+    "missing_extra_update": "rejected by clock-window check",
+    "staged_canonical_mutation": "rejected at tick6/sourceE6"
+  },
+  "physical_hardware": false
+}

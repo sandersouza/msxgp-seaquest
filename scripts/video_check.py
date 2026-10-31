@@ -214,6 +214,10 @@ def main():
                 raise ValueError('source clock drift over262 display frames')
     periods = [round((b['start_time']-a['start_time'])*3579545) for a,b in zip(commits,commits[1:]) if a['chain']==b['chain']]
     report['period_cycles'] = [min(periods),max(periods)]
+    mean_period = sum(periods)/len(periods)
+    if abs(mean_period-(71364 if pal else 59736))>2:
+        raise ValueError('physical display period differs from the selected standard')
+    report['measured_display_hz'] = round(3579545/mean_period,7)
     if any(expected_audio):
         report['audio'] = check_events(s,expected_audio,[str(i) for i in range(len(ticks))],target/'audio-events.bin')
     elif (target/'audio-events.bin').read_bytes():
