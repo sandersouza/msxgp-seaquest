@@ -53,7 +53,8 @@ def main():
         tcl = tcl.replace('[machine_info time] >= 5.5','[machine_info time] >= 0')
         from audio_natural import setup
         tcl = setup(symbols)+tcl
-    script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_prepared'))+
+    script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_wait','paced_prepared'))+
+                      f'set paced_wait {symbols["paced_wait"] if args.audio else symbols["paced_start"]}\n'+
                       f'set sample_input_return {symbols["core_F6A7"]+3}\n'+
                       ('set oxygen_natural 1\nsource scripts/progression_natural.tcl\n' if args.progression else
                        ('set oxygen_natural 1\nsource scripts/oxygen_natural.tcl\n' if args.rescue else ''))+

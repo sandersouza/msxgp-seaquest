@@ -36,6 +36,7 @@ proc next_chain {} {
     set ::seed $data
     set ::tick 0
     set ::last_vdp -1
+    unset -nocomplain ::frame_started
     set ::injected 0
     set ::priming 2
     set ::recording 0
@@ -115,7 +116,7 @@ after time 5 {
     debug set_bp $::paced_core_done {$::recording} {
         puts -nonewline $::native $::raster$::before$::hardware[debug read_block memory 0xC000 251]
     }
-    debug set_bp $::paced_prepared {$::recording} {
+    debug set_bp $::paced_wait {$::recording && [info exists ::frame_started]} {
         set busy [expr {round(([machine_info time]-$::frame_started)*3579545)+$::commit_cycles}]
         if {$busy>$::max_busy} {set ::max_busy $busy}
         puts $::starts "\{\"chain\":$::chain,\"tick\":$::tick,\"busy\":$busy\}"

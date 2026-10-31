@@ -3,6 +3,7 @@ PYTHON ?= .venv/bin/python
 .PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench render-input-bench controls controls-run input-contract input-natural disassemble
 .PHONY: progression-contract render-progression-bench progression-natural
 .PHONY: presentation presentation-run presentation-check presentation-natural
+.PHONY: video-build video-check
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -72,5 +73,20 @@ presentation-check: presentation-natural
 	@$(PYTHON) -B scripts/audio_contract.py
 presentation-natural: presentation
 	@$(PYTHON) -B scripts/input_natural.py --audio --progression
+video-build:
+	@$(PYTHON) -B scripts/video_check.py --build-only
+video-check:
+	@$(MAKE) presentation-check
+	@$(MAKE) video-build
+	@$(PYTHON) -B scripts/video_reference.py
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU --scenario burst --frames 112
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU --generation wrap
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU --generation ready
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU --scenario dense
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1_EU --scenario cold --frames 1200
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1 --scenario dense
+	@$(PYTHON) -B scripts/video_check.py --machine C-BIOS_MSX1 --scenario cold --frames 1200
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

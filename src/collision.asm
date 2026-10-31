@@ -506,9 +506,10 @@ collision_copy_masks:
     DB 4,2,1
 collision_bit_masks:
     DB 1,2,4,8,16,32,64,128
+    IFNDEF WITH_PALETTE
 collision_missile_masks:
     DB 1,3,7,15,31,63,127,255,254,252,248,240,224,192,128
-
+    ENDIF
     INCLUDE "../outputs/collision/masks.inc"
     ALIGN 256
 collision_clip_masks:
