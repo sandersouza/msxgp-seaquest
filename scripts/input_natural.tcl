@@ -21,7 +21,7 @@ debug set_bp $::paced_frame_start {} {
         set ::raster_input [debug read_block memory 0xC000 1024]
     }
 }
-debug set_bp $::paced_prepared {} {
+debug set_bp $::paced_wait {} {
     if {$::recording} {
         set busy [expr {round(([machine_info time]-$::frame_started)*3579545)+$::commit_cycles}]
         puts $::timings "\{\"kind\":\"busy\",\"cycles\":$busy\}"

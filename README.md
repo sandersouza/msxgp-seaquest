@@ -12,8 +12,10 @@ rebuilds of both supplied binaries and hardware differences in the Atari 800 por
 Current integration runs original gameplay/HUD layout/backgrounds, refined MSX
 score/OXYGEN lettering and ordered PSG sound. Build/run with `make presentation-run`;
 original ROMs/source must be supplied locally and are not distributed here.
-Reference cadence/50Hz policy, full-game release and physical-machine acceptance
-remain open in #14/#15. The portable hardware diagnostic is also available.
+The [video timing policy](docs/video-frequency.md) preserves the measured NTSC4K
+simulation speed on both 50 Hz and 60 Hz MSX1, with separately measured input
+and presentation timing. Full-game release and physical-machine acceptance
+remain in #15. The portable hardware diagnostic is also available.
 
 See [development setup and commands](docs/development.md) to build/run the diagnostic.
 See [delivery and CI conventions](docs/project-workflow.md) for automated checks and

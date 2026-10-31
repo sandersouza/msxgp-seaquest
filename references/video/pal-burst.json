@@ -1,0 +1,78 @@
+{
+  "frames": 29344,
+  "ticks": 35005,
+  "max_busy": 66842,
+  "max_commit": 9635,
+  "min_spacing": 12,
+  "min_active_spacing": 29,
+  "stack_min": 62320,
+  "generation_rebases": 2,
+  "ready_epoch_exposures": 0,
+  "period_cycles": [
+    71324,
+    71391
+  ],
+  "measured_display_hz": 50.1590556,
+  "audio": {
+    "cases": 35005,
+    "ordered_stores": 524,
+    "source_sites": [
+      "FB68",
+      "FB6A"
+    ],
+    "controls": [
+      0,
+      8
+    ],
+    "max_hook_cycles": 80,
+    "min_hook_cycles": 80,
+    "dense_bonus_hooks": [],
+    "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
+    "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
+    "limitation": "seeded source ticks; oscillator phase and analog timbre are not identical"
+  },
+  "machine": "C-BIOS_MSX1_EU",
+  "rom_sha256": "41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8",
+  "source_ticks_verified": 35005,
+  "pixel_frames": 5312,
+  "chains": 262,
+  "chain_frames": 112,
+  "seed_tick": 2755,
+  "scenario": "burst",
+  "ram_reloads_after_chain_start": 0,
+  "skipped_vdp_frames": 0,
+  "visible_commits": 0,
+  "generation_mode": "normal",
+  "initial_accumulators": {
+    "first": 0,
+    "last": 261,
+    "distinct": 262
+  },
+  "startup_display_intervals_excluded": 1,
+  "cadence_windows_verified": 0,
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "rom_bytes": 131072,
+  "mapper": "ASCII16",
+  "symbols_sha256": "b8678e849d6169e8efb9e0626c243ef6d5fc8b6f402f24952c595c82f93651c9",
+  "seeds_sha256": "3b15270c65b247f3df09e5cfd4e31a3f04f2f10d013010488010a99acd36a515",
+  "cpu_hz": 3579545,
+  "vdp": "TMS9929A",
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "display_period_cycles": 71364,
+  "python": "3.14.7",
+  "openmsx": "openMSX 21.0\nflavour: opt\ncomponents: CORE GL LASERDISC",
+  "stack_measurement": "A5 marker after BIOS initialization",
+  "physical_hardware": false,
+  "host_event_and_scanout_latency_measured": false,
+  "observed_machine": {
+    "machine": "C-BIOS_MSX1_EU",
+    "cpu_hz": 3579545,
+    "vdp": "TMS9929A",
+    "ram_bytes": 65536,
+    "vram_bytes": 16384,
+    "bios_sha1": "baf2e9c69252fd9b350b488d89c71887b9d05eec"
+  },
+  "verdict": "pass",
+  "scope": "local automated emulator/source/pixel evidence; physical hardware not tested"
+}

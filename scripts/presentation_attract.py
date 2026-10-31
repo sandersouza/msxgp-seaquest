@@ -65,7 +65,7 @@ def main():
     for name,column in (('switches',3),('actions',4),('phases',5)):
         script += 'set '+name+' {'+' '.join(str(row[column]) for row in configs)+'}\n'
     names = ('core_F00E','audio_prime_start','rpc_done','paced_start','paced_commit',
-             'paced_frame_start','paced_core_start','paced_core_done','paced_prepared','sample_input_return')
+             'paced_frame_start','paced_core_start','paced_core_done','paced_prepared','paced_wait','sample_input_return')
     script += ''.join(f'set {name} {symbols[name]}\n' for name in names)
     script += f'set palette_prefetch {symbols["palette_prefetch"]}\n'
     script += 'set profile_stages {'+' '.join(f'{name} {symbols[name]}' for name in

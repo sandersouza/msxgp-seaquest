@@ -74,6 +74,9 @@ init:
     IFDEF WITH_HUD
     CALL hud_init
     ENDIF
+    IFDEF WITH_PALETTE
+    CALL video_init
+    ENDIF
     IFDEF CONTROL_DEMO
     LD HL,$C000
     LD DE,$C001
@@ -174,15 +177,20 @@ rpc_done:
     JP idle
 paced_start:
     CALL wait_vblank
+    JR paced_commit
+paced_wait:
+    CALL wait_vblank_next
 paced_commit:
     IFDEF WITH_PALETTE
     LD A,1
     LD (PAL_FAST_VBLANK),A
     ENDIF
     CALL render_commit
+video_after_commit:
     IFDEF WITH_PALETTE
     XOR A
     LD (PAL_FAST_VBLANK),A
+    CALL video_extra_tick
     ENDIF
 paced_frame_start:
     IFDEF WITH_NATIVE
@@ -219,7 +227,12 @@ paced_core_done:
     ENDIF
     CALL render_prepare
 paced_prepared:
+    IFDEF WITH_PALETTE
+    CALL video_prepare_extra
+    JP paced_wait
+    ELSE
     JP paced_start
+    ENDIF
 
     IFDEF WITH_INPUT
 neutral_contacts:
@@ -485,6 +498,13 @@ palette_stamp_default_memos:
     LD (HUD_FIELD_CACHE+(field+6)*4+2),DE
     EDUP
     RET
+    ENDIF
+    IFDEF WITH_PALETTE
+    INCLUDE "video.asm"
+    ENDIF
+    IFDEF WITH_PALETTE
+collision_missile_masks:
+    DB 1,3,7,15,31,63,127,255,254,252,248,240,224,192,128
     ENDIF
 fixed_bank_end:
     ASSERT $ <= $8000

@@ -1,0 +1,12 @@
+{
+  "cases": 1129,
+  "max_cycles": 64469,
+  "worst": "attract-transition-135",
+  "worst_full_cycles": 59110,
+  "display_only_cases": 1097,
+  "max_dynamic_font_bytes": 24,
+  "min_vram_spacing": 29,
+  "precommit_visible_pixels_unchanged": true,
+  "limitation": "F00E projection fixtures isolate display; first32 execute original full update",
+  "verdict": "pass"
+}

@@ -26,3 +26,5 @@ python3 -B scripts/collision_reference.py --synthetic
 .tools/sjasmplus/sjasmplus --nologo --raw=outputs/collision/synthetic.rom src/collision_synthetic.asm
 python3 -B scripts/audio_reference.py
 .tools/sjasmplus/sjasmplus --nologo --raw=outputs/presentation/audio-synthetic.rom src/audio_synthetic.asm
+mkdir -p outputs/video
+.tools/sjasmplus/sjasmplus --nologo --raw=outputs/video/synthetic.rom src/video_synthetic.asm

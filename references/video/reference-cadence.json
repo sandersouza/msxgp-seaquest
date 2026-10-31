@@ -1,0 +1,55 @@
+{
+  "original_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "ale": "0.12.1",
+  "frame_skip": 1,
+  "random_seed": 0,
+  "repeat_action_probability": 0,
+  "observations": [
+    {
+      "action": "Action.NOOP",
+      "frames": 600,
+      "raster_lines": [
+        262
+      ],
+      "update_counter_delta": [
+        1
+      ]
+    },
+    {
+      "action": "Action.FIRE",
+      "frames": 1800,
+      "raster_lines": [
+        262
+      ],
+      "update_counter_delta": [
+        1
+      ]
+    },
+    {
+      "action": "Action.RIGHTFIRE",
+      "frames": 1800,
+      "raster_lines": [
+        262
+      ],
+      "update_counter_delta": [
+        1
+      ]
+    },
+    {
+      "action": "Action.LEFTFIRE",
+      "frames": 1800,
+      "raster_lines": [
+        262
+      ],
+      "update_counter_delta": [
+        1
+      ]
+    }
+  ],
+  "cpu_cycles_per_line": 76,
+  "cpu_cycles_per_update": 19912,
+  "source_updates_per_frame": 1,
+  "serialization_source": "https://github.com/Farama-Foundation/Arcade-Learning-Environment/blob/v0.12.1/src/ale/emucore/TIA.cxx#L293-L307",
+  "limitation": "observed idle/fire/directional scenarios; measured NTSC4K only",
+  "verdict": "pass"
+}

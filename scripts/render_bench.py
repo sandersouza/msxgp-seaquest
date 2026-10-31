@@ -496,7 +496,8 @@ def main():
     if args.input:
         r6,r7,r8,switches = input_controls[worst]
         input_setup = f'keymatrixdown 6 {r6}\nkeymatrixdown 7 {r7}\nkeymatrixdown 8 {r8}\ndebug write memory 0xC420 {switches}\n'
-    (OUT/'pace-start.tcl').write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('paced_commit','paced_frame_start','paced_prepared','vblank_sample','vblank_clear_sample'))+
+    (OUT/'pace-start.tcl').write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('paced_commit','paced_frame_start','paced_start','paced_wait','paced_prepared','vblank_sample','vblank_clear_sample'))+
+                                   f'set paced_wait {symbols["paced_wait"] if args.palette else symbols["paced_start"]}\n'+
                                    f'set hud_mode {int(args.hud)}\nset prime_entry {symbols.get("core_F00E",0)}\nset prime_start {symbols["audio_prime_start"] if args.audio else symbols["rpc_start"]}\n'+
                                    f'set rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\n'+
                                    'set input_setup {'+input_setup+'}\nsource scripts/render_pace.tcl\n')

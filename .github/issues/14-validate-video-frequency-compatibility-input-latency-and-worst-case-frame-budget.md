@@ -9,14 +9,14 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #13: Reproduce original HUD, attract flow and PSG sound event timing
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] Record exact ROM, machines, rates, cycles, RAM high-water marks, frame pacing and input latency. Preserve simulation speed; document differences in presentation and sampling without claiming identical latency across refresh rates.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] Record exact ROM, machines, rates, cycles, RAM high-water marks, frame pacing and input latency. Preserve simulation speed; document differences in presentation and sampling without claiming identical latency across refresh rates.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-14
@@ -31,3 +31,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/14
+
+## Implementation readiness
+Dependencies #12/#13 are Closed/Done; PR #29 merged at 5a797b6e142c9fc1f946411081dd6a16e37301c3. The verified NTSC4K reference advances one source update per262 raster lines in6,000 ALE0.12.1 observations. Implementation and PAL/NTSC source/pixel/audio/pacing/latency validation are tracked in docs/video-frequency.md on codex/enhancement/14-video-cadence. Physical-machine/full-game release acceptance remains #15.
+
+## Delivery evidence
+PR: https://github.com/sandersouza/msxgp-seaquest/pull/31 . Implementation includes the approved PR #30 lettering. See references/video/verification.md and adjacent concise JSONs for exact ROM/machine/tool identities, measured original 262-line cadence, 514,802 source updates/449,644 video frames, PAL/NTSC budgets and separate input/SAT latency. Automated checks and read-only review pass; final PR checks gate integration. Physical/full-game release acceptance remains #15; docs/handoffs/issue-15.md carries the successor context.

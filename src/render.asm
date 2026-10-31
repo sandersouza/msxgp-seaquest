@@ -795,6 +795,9 @@ render_commit:
 
 wait_vblank:
     IN A,($99)
+; Normal paced iterations already consumed their previous VBlank status. Do
+; not discard a new status that arrives near the end of a dense preparation.
+wait_vblank_next:
 vblank_clear_sample:
 .wait:
     IN A,($99)

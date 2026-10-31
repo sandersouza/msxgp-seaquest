@@ -64,7 +64,7 @@ after time 5 {
         }
         debug write_block memory 0xC000 $::worst
     }
-    debug set_bp $::paced_prepared {} {
+    debug set_bp $::paced_wait {} {
         if {$::count > 0} {
             set busy [expr {round(([machine_info time]-$::last_commit)*3579545)}]
             if {$busy > $::max_busy} {set ::max_busy $busy}
@@ -87,7 +87,7 @@ after time 5 {
             incr ::pace_priming -1
             debug write_block memory 0xC000 $::worst
             set ::last_commit [machine_info time]
-            if {$::pace_priming>0} {reg PC $::prime_start} else {reg PC $::paced_frame_start}
+            if {$::pace_priming>0} {reg PC $::prime_start} else {reg PC $::paced_start}
             debug cont
         }
         debug write_block memory 0xC000 $::worst
