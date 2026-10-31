@@ -18,8 +18,10 @@ score/OXYGEN lettering and ordered PSG sound. Build/run with `make presentation-
 original ROMs/source must be supplied locally and are not distributed here.
 The [video timing policy](docs/video-frequency.md) preserves the measured NTSC4K
 simulation speed on both 50 Hz and 60 Hz MSX1, with separately measured input
-and presentation timing. Full-game release and physical-machine acceptance
-remain in #15. The portable hardware diagnostic is also available.
+and presentation timing. [Complete-game regression and the local acceptance
+package](references/acceptance/verification.md) are prepared by #15. Manual
+emulator gameplay/listening and physical-machine acceptance remain pending actual
+observation. The portable hardware diagnostic is also available.
 
 See [development setup and commands](docs/development.md) to build/run the diagnostic.
 See [delivery and CI conventions](docs/project-workflow.md) for automated checks and
