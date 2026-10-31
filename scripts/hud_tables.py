@@ -1,13 +1,13 @@
-"""Generate original-derived SCREEN2 HUD data locally, compressed for startup.
+"""Generate SCREEN2 HUD data locally, compressed for startup.
 
-Glyph fields move one MSX pixel right to align six8-pixel source glyphs with
-nine tiles. Oxygen retains absolute3:2 horizontal projection. No source state
-is changed by this display mapping.
+Score and OXYGEN use authored MSX-grid lettering. Other original-derived fields
+retain their3:2 projection. No source state changes with the display mapping.
 """
 import hashlib
 import json
 from pathlib import Path
 from original_graphics import ROOT, read_original, extract, bitmap
+from hud_fonts import score_rows, oxygen_rows
 
 OUT = ROOT/'outputs/presentation'
 BASE = 0xd000
@@ -89,12 +89,6 @@ def tiles(rows, width, catalog, descriptor):
         for band in range(0, len(rows), 8) for column in range(width//8))
 
 
-def glyph_rows(assets, digits):
-    return [[8*column+x for column, digit in enumerate(digits)
-             for x in assets['blank-digit' if digit is None else f'digit-{digit}']['rows'][y]]
-            for y in range(8)]
-
-
 def scale(rows):
     return [sorted({dx for x in row for dx in range(x*3//2, (x+1)*3//2)}) for row in rows]
 
@@ -110,16 +104,16 @@ def generate(palette_fast=False):
     fields = {}
     # Roles0..10 are the source FCF0 main palette.11 is the rescued-diver
     # source82 color,12 selects main0/1 according to active B7.
-    fields['hud_pairs'] = b''.join(tiles(scale(glyph_rows(assets, (n//10, n%10))), 24, top,
+    fields['hud_pairs'] = b''.join(tiles(score_rows((n//10, n%10)), 24, top,
                                         [(0,5)]*8) for n in range(100))
-    fields['hud_single'] = b''.join(tiles(scale(glyph_rows(assets, (None, n))), 24, top,
+    fields['hud_single'] = b''.join(tiles(score_rows((None, n)), 24, top,
                                          [(0,5)]*8) for n in range(10))
     fields['hud_blank_pair'] = tiles([[]]*8, 24, top, [(0,5)]*8)
     fields['hud_lives'] = b''.join(tiles(scale([[8*copy+x for copy in range(n) for x in row]
                                                for row in assets['life']['rows'][:8]]), 72,
                                         top, [(0,5)]*8) for n in range(7))
     font_count = len(top.entries)
-    if font_count!=106: raise ValueError('source font atlas changed; revisit VRAM allocation')
+    if font_count!=105: raise ValueError('MSX font atlas changed; revisit VRAM/prewarm allocation')
     # Keep every outer pair tile and life icon resident for player2. Only a
     # middle pair tile can be dynamic, at most three8-byte tiles per update.
     required = set(fields['hud_lives']) | set(fields['hud_blank_pair'])
@@ -140,12 +134,19 @@ def generate(palette_fast=False):
                                             player2[source[n+2]],source[n+1]])
                                       for n in range(0,len(source),3))
     fields['hud_lives1'] = bytes(player2[identifier] for identifier in fields['hud_lives'])
+    # Keep the established scratch IDs and record ordering. Padding belongs
+    # to the hidden player2 font so prewarming includes its six scratch tiles.
+    font_slots = 160 if palette_fast else 172
+    while len(top.entries)<font_slots:
+        identifier = top.free[len(top.entries)]
+        top.entries.append((identifier,bytes(8),tuple([(1,5)]*8)))
     scratch_ids = []
     for _ in range(6):
         identifier = top.free[len(top.entries)]
         top.entries.append((identifier,bytes(8),tuple([(1,5)]*8)))
         scratch_ids.append(identifier)
     if scratch_ids!=list(range(245,251)): raise ValueError('font scratch layout changed')
+    player2_font_count = len(top.entries)-font_count
     fields['hud_divers'] = b''.join(tiles(scale([[8*copy+x for copy in range(n) for x in row]
                                                 for row in assets['rescued-diver']['rows']]),
                                          72, bottom, [(11,8)]*9+[(8,8)]*7) for n in range(7))
@@ -163,6 +164,7 @@ def generate(palette_fast=False):
     roles = {0:6, 6:8, 12:7, 50:9}
     overlays = []
     oxygen = bytearray()
+    label = oxygen_rows()
     for flashing in range(2):
         for value in range(17 if flashing else 65):
             image = ref.image(e6=value, e1=20 if flashing else 13)
@@ -173,6 +175,11 @@ def generate(palette_fast=False):
                 projected[:, 8+3*x//2:8+3*(x+1)//2] = sampled[:, x-8:x-7]
             for column in range(3, 22):
                 pattern, descriptor = [], []
+                if column<9:
+                    oxygen.append(bottom.tile(
+                        [sum(128>>bit for bit in range(8) if (column-3)*8+bit in row) for row in label],
+                        [(6,8)]*8))
+                    continue
                 for y in range(8):
                     pixels = list(map(int, projected[y, column*8:column*8+8]))
                     counts = {v:pixels.count(v) for v in set(pixels)}
@@ -245,7 +252,16 @@ def generate(palette_fast=False):
             if descriptor not in class_ids:
                 class_ids[descriptor] = len(classes)
                 classes.append(descriptor)
-    if len(classes)>32: raise ValueError('class-color staging exceeds C510..C60F')
+    # Palette records reserve31 classes. Keep unused slots explicit rather
+    # than moving RAM or changing the stream when authored lettering merges
+    # formerly distinct source colour descriptors.
+    for role in range(len(sources)):
+        if len(classes)>=31: break
+        descriptor = tuple([(role,role)]*8)
+        if descriptor not in class_ids:
+            class_ids[descriptor] = len(classes)
+            classes.append(descriptor)
+    if len(classes)!=31: raise ValueError('HUD colours exceed the31-class palette layout')
     records = lambda catalog:b''.join(bytes([n])+pattern+bytes([class_ids[descriptor]])
                                      for n, pattern, descriptor in catalog.entries)
     fields['hud_top_records'] = records(top)
@@ -334,7 +350,7 @@ def generate(palette_fast=False):
                               f'HUD_LOGO_CLASS EQU {class_ids[tuple([(10,6)]*8)]}\n'+
                               f'HUD_FONT_SOURCE_FIRST EQU {font_first}\nHUD_FONT_SCRATCH_FIRST EQU {scratch_ids[0]}\n'+
                               f'HUD_BLANK_TILE EQU {fields["hud_blank_pair"][0]}\n'+
-                              f'HUD_FONT_P0_COUNT EQU {font_count}\nHUD_FONT_P1_COUNT EQU {resident_count+6}\n'+
+                              f'HUD_FONT_P0_COUNT EQU {font_count}\nHUD_FONT_P1_COUNT EQU {player2_font_count}\n'+
                               f'HUD_RIPPLE_ROLE EQU {sources.index(0x92)}\n'+
                               ('hud_packed EQU $A200\n' if palette_fast else 'hud_packed:\n    INCBIN "hud-packed.bin"\n'))
     if palette_fast:

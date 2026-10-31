@@ -1,0 +1,89 @@
+{
+  "cases": 7982,
+  "ordered_stores": 34692,
+  "source_sites": [
+    "F5E8",
+    "F5EC",
+    "F5F0",
+    "F5FD",
+    "F601",
+    "F603",
+    "F60C",
+    "F613",
+    "F617",
+    "F730",
+    "F735",
+    "F739",
+    "F73B",
+    "F74C",
+    "F74E",
+    "F762",
+    "F764",
+    "F785",
+    "F787",
+    "F78B",
+    "F78D",
+    "F78F",
+    "F792",
+    "F7E4",
+    "F91E",
+    "F932",
+    "F936",
+    "F93A",
+    "F93E",
+    "F942",
+    "F946",
+    "F94E",
+    "F950",
+    "FAD6",
+    "FAEF",
+    "FAF9",
+    "FB04",
+    "FB33",
+    "FFC3",
+    "FFC8",
+    "FFCC",
+    "FFCE",
+    "FFD1",
+    "FFD3"
+  ],
+  "controls": [
+    0,
+    4,
+    8,
+    12,
+    15
+  ],
+  "max_hook_cycles": 934,
+  "min_hook_cycles": 72,
+  "dense_bonus_hooks": [
+    [
+      "F785",
+      302
+    ],
+    [
+      "F787",
+      302
+    ],
+    [
+      "F78B",
+      651
+    ],
+    [
+      "F78D",
+      651
+    ],
+    [
+      "F78F",
+      328
+    ],
+    [
+      "F792",
+      328
+    ]
+  ],
+  "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
+  "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
+  "limitation": "seeded source ticks; oscillator phase and analog timbre are not identical",
+  "rom_sha256": "958f554c81a8ccae0a8f14fe434308cbed16662e5c02cd95f97672da23d1cd84"
+}
