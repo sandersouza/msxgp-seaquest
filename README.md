@@ -9,8 +9,8 @@ See the [roadmap](docs/superpowers/specs/2026-10-30-seaquest-msx1-design.md),
 The [reference disassembly](docs/reference-disassembly.md) documents byte-identical
 rebuilds of both supplied binaries and hardware differences in the Atari 800 port.
 
-Current integration runs the original gameplay with original HUD/background
-and ordered PSG sound on MSX1. Build/run locally with `make presentation-run`;
+Current integration runs original gameplay/HUD layout/backgrounds, refined MSX
+score/OXYGEN lettering and ordered PSG sound. Build/run with `make presentation-run`;
 original ROMs/source must be supplied locally and are not distributed here.
 Reference cadence/50Hz policy, full-game release and physical-machine acceptance
 remain open in #14/#15. The portable hardware diagnostic is also available.
@@ -25,7 +25,7 @@ comparisons, including continuous replay. The [SCREEN 2 feasibility gate](docs/r
 records full-density renderer and native-core timing. The [original graphics
 pipeline](docs/original-graphics.md) extracts and verifies source silhouettes,
 surface/edge variants and lettering, with measured native sprite integration.
-The [HUD/audio contract](docs/hud-audio.md) explains the original lettering,
+The [HUD/audio contract](docs/hud-audio.md) explains the MSX lettering adaptation,
 palette/layout adaptation, PSG event fidelity and explicit timbre differences.
 The [controls diagnostic](docs/input-controls.md) runs the original movement and
 firing code with keyboard and both joystick ports, including measured input

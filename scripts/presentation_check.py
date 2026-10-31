@@ -1,4 +1,9 @@
-"""Source pixels versus actual SCREEN2 colors; never read native HUD buffers."""
+"""Original scene and authorized MSX lettering versus actual SCREEN2 colours.
+
+Canonical source state determines content/colours. Only the score and oxygen
+label masks use the explicit MSX font specification; no native HUD buffers feed
+the expected image.
+"""
 from functools import lru_cache
 from pathlib import Path
 import struct
@@ -6,6 +11,7 @@ import zlib
 import numpy as np
 from graphics_palette import tms_color
 from hud_reference import masks
+from hud_fonts import displayed_score, oxygen_rows
 
 
 def decode_colors(vram, name_base, backdrop=0):
@@ -69,6 +75,10 @@ class PresentationOracle:
             if name=='divers': height=16
             result[top:top+height,96:168] = tms_color(field['background'])
             foreground = tms_color(field['foreground'])
+            if name=='score':
+                for y,row in enumerate(displayed_score(ram)):
+                    for x in row: result[top+y,96+x] = foreground
+                continue
             for y,row in enumerate(field['rows']):
                 for x in row: result[top+y,96+3*x//2:96+3*(x+1)//2] = foreground
         oxygen = min(ram[0xe6],64)
@@ -76,6 +86,9 @@ class PresentationOracle:
         gauge = self.gauges[blink,oxygen]
         for x in range(8,160):
             result[152:157,8+3*x//2:8+3*(x+1)//2] = color[gauge[:,x]][:,None]
+        result[152:160,24:72] = color[6]
+        for y,row in enumerate(oxygen_rows()):
+            for x in row: result[152+y,24+x] = color[0]
         return result
 
     def check(self, ram, vram, name_base, backdrop=0, display_enabled=True):
