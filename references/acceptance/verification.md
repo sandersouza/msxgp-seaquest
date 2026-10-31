@@ -81,7 +81,8 @@ hashes, ASCII16 configuration, reproduction commands, controls, scenarios and
 machine/cartridge requirements. [Observation template](../../docs/acceptance-observations.md)
 separates manual emulator viewing/listening and physical sessions. The ZIP is
 local-only and includes the exact candidate, symbols, all verified replay routes,
-reports and instructions. Its receipt is `outputs/acceptance/package.json`.
+reports and instructions. The [verified ZIP receipt](package.json) records its
+hash and size; the ignored copy is `outputs/acceptance/package.json`.
 
 An ignored static VRAM preview was inspected for score/OXYGEN layout and an
 eight-second local WAV was captured for owner listening. These do not establish
