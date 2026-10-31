@@ -1,0 +1,41 @@
+{
+  "cases": 6422,
+  "ordered_stores": 15807,
+  "source_sites": [
+    "F7E4",
+    "F91E",
+    "F932",
+    "F936",
+    "F93A",
+    "F93E",
+    "F942",
+    "F946",
+    "F94E",
+    "F950",
+    "FAD6",
+    "FAEF",
+    "FAF9",
+    "FB04",
+    "FB33",
+    "FB68",
+    "FB6A",
+    "FFC3",
+    "FFC8",
+    "FFCC",
+    "FFCE",
+    "FFD1",
+    "FFD3"
+  ],
+  "controls": [
+    0,
+    8,
+    15
+  ],
+  "max_hook_cycles": 807,
+  "min_hook_cycles": 72,
+  "dense_bonus_hooks": [],
+  "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
+  "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
+  "limitation": "all cold source updates recorded; waveform phase and analog timbre remain approximate",
+  "rom_sha256": "f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3"
+}

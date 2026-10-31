@@ -55,6 +55,12 @@ original_edge_index:
     RET
 
 prepare_original_sprites:
+    LD A,($C0E1)
+    OR A
+    JP Z,.hide_player
+    LD A,($C0C6)
+    CP 160
+    JP NC,.hide_player
     LD A,($C0D6)
     AND 8
     RRCA
@@ -123,22 +129,37 @@ prepare_original_sprites:
     INC C
     LD A,(HL)
     CALL original_sprite_id
-    LD A,($C0E1)
-    OR A
-    JR Z,.hide_player
-    LD A,($C0C6)
-    CP 160
-    JR C,.player_color
+    JR .player_color
 .hide_player:
     LD A,216
     LD (SATBUF),A
     LD (SATBUF+4),A
+    XOR A
+    LD (SATBUF+2),A
+    LD (SATBUF+6),A
 .player_color:
+    IFDEF WITH_PALETTE
+    LD A,($C0E9)
+    OR A
+    JR NZ,.source_player_color
+    LD A,($C0B7)
+    ADD A,3
+    ADD A,LOW HUD_ROLES
+    LD L,A
+    LD H,HIGH HUD_ROLES
+    LD A,(HL)
+    JR .ready_color
+.source_player_color:
+    ENDIF
     LD A,($C0B7)
     AND 1
     LD E,A
     LD D,0
+    IFDEF WITH_PALETTE
+    LD HL,sprite_player_colors
+    ELSE
     LD HL,original_rom+$CF3
+    ENDIF
     ADD HL,DE
     LD A,($C085)
     XOR (HL)
@@ -154,17 +175,34 @@ prepare_original_sprites:
     LD A,23
 .death_color:
     LD E,A
+    IFDEF WITH_PALETTE
+    LD HL,sprite_death_colors
+    ELSE
     LD HL,original_rom+$F17
+    ENDIF
     ADD HL,DE
     LD B,(HL)
 .normal_color:
     LD E,B
+    IFDEF WITH_PALETTE
+    LD HL,original_tia_to_tms
+    ELSE
     LD HL,tia_to_tms
+    ENDIF
     ADD HL,DE
     LD A,(HL)
+.ready_color:
     LD (SATBUF+3),A
     LD (SATBUF+7),A
     LD (SATBUF+11),A
+    LD A,($C0E7)
+    OR A
+    JR Z,.hide_shot
+    CP 160
+    JR NC,.hide_shot
+    LD A,($C0E1)
+    CP 17
+    JR C,.hide_shot
     LD A,($C0E7)
     CALL original_edge_index
     LD E,A
@@ -178,29 +216,36 @@ prepare_original_sprites:
     LD A,($C0E1)
     ADD A,23
     LD (SATBUF+8),A
-    LD A,($C0E7)
-    OR A
-    JR Z,.hide_shot
-    CP 160
-    JR NC,.hide_shot
-    LD A,($C0E1)
-    CP 17
-    JR NC,.balls
+    JR .balls
 .hide_shot:
     LD A,216
     LD (SATBUF+8),A
+    XOR A
+    LD (SATBUF+10),A
 .balls:
+    IFDEF WITH_PALETTE
+    LD A,(HUD_ROLES+10)
+    ELSE
     LD A,($C085)
+    IFDEF WITH_PALETTE
+    LD HL,sprite_diver_color
+    ELSE
     LD HL,original_rom+$CFA
+    ENDIF
     XOR (HL)
     LD B,A
     LD A,($C086)
     AND B
     LD E,A
     LD D,0
+    IFDEF WITH_PALETTE
+    LD HL,original_tia_to_tms
+    ELSE
     LD HL,tia_to_tms
+    ENDIF
     ADD HL,DE
     LD A,(HL)
+    ENDIF
     LD (SATBUF+15),A
     LD (SATBUF+19),A
     LD (SATBUF+23),A
@@ -210,17 +255,18 @@ prepare_original_sprites:
     LD B,4
     LD C,3
 .ball:
-    PUSH BC
-    DEC (IX+0)
+    LD A,(IY+0)
+    OR A
+    JR Z,.hide_ball
+    CP 160
+    JR NC,.hide_ball
     LD A,(IY+$12)
     AND 15
-    LD L,A
-    LD H,0
     DUP 4
-    ADD HL,HL
+    RLCA
     EDUP
-    LD DE,ball_images
-    ADD HL,DE
+    LD L,A
+    LD H,HIGH ball_images
     LD A,(IY+0)
     CALL original_edge_index
     LD E,A
@@ -228,20 +274,23 @@ prepare_original_sprites:
     ADD HL,DE
     LD A,(HL)
     CALL original_sprite_id
-    LD A,(IY+0)
-    OR A
-    JR Z,.hide_ball
-    CP 160
-    JR C,.next_ball
+    JR .next_ball
 .hide_ball:
     LD (IX+0),216
+    LD (IX+2),0
 .next_ball:
     LD DE,4
     ADD IX,DE
     INC IY
-    POP BC
     INC C
     DJNZ .ball
+    ; Four four-byte advances already leave IX at the patrol SAT slot.
+    LD (IX+3),14
+    LD A,($C0F6)
+    OR A
+    JP Z,.hide_patrol
+    CP 160
+    JP NC,.hide_patrol
     LD A,($C0E0)
     CP 3
     JR C,.patrol_frame
@@ -273,15 +322,10 @@ prepare_original_sprites:
     LD D,0
     ADD HL,DE
     LD A,(HL)
-    LD IX,SATBUF+28
     LD C,7
     CALL original_sprite_id
-    LD (IX+3),14
-    LD A,($C0F6)
-    OR A
-    JR Z,.hide_patrol
-    CP 160
-    RET C
+    RET
 .hide_patrol:
     LD (IX+0),216
+    LD (IX+2),0
     RET

@@ -2,6 +2,7 @@
 PYTHON ?= .venv/bin/python
 .PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench render-input-bench controls controls-run input-contract input-natural disassemble
 .PHONY: progression-contract render-progression-bench progression-natural
+.PHONY: presentation presentation-run presentation-check presentation-natural
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -58,5 +59,18 @@ render-progression-bench:
 	@$(PYTHON) -B scripts/render_bench.py --progression
 progression-natural: input-contract
 	@$(PYTHON) -B scripts/input_natural.py --progression
+presentation:
+	@$(PYTHON) -B scripts/render_bench.py --palette --controls --build-only
+presentation-run: presentation
+	@openmsx -machine C-BIOS_MSX1 -cart outputs/render/presentation-controls.rom -romtype ASCII16
+presentation-check: presentation-natural
+	@$(PYTHON) -B scripts/render_bench.py --palette --progression
+	@$(PYTHON) -B scripts/presentation_sweep.py
+	@$(PYTHON) -B scripts/presentation_attract.py
+	@$(PYTHON) -B scripts/presentation_attract.py --force-generation-wrap
+	@$(PYTHON) -B scripts/presentation_attract.py --ready-generation-wrap
+	@$(PYTHON) -B scripts/audio_contract.py
+presentation-natural: presentation
+	@$(PYTHON) -B scripts/input_natural.py --audio --progression
 disassemble:
 	@$(PYTHON) -B scripts/reference_rebuild.py

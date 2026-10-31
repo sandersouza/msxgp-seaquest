@@ -37,7 +37,9 @@ sjasmplus commit on Ubuntu 24.04 with Python 3.12. It runs synthetic unit tests 
 builds/validates the diagnostic cartridge and assembles the synthetic renderer
 probe without original reference inputs. It also assembles the synthetic
 hardware-input adapter without a native original core or reference assets, and
-assembles the collision backend with synthetic zero data. It rejects accidentally
+assembles the collision backend with synthetic zero data. It additionally
+assembles the PSG adapter using mathematical tables, with no original sound/graphics
+bytes. It rejects accidentally
 tracked original ROM inputs. The ROM and hash manifest
 are uploaded as an explicitly named diagnostic artifact with a 14-day retention.
 

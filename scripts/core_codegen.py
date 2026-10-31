@@ -49,6 +49,12 @@ def reachable(rom, roots=ROOTS, stops=STOPS):
 
 
 def mapped(address):
+    if address == 0xf7ed:
+        return 'original_patrol_masks'
+    if address == 0xfb52:
+        return 'original_shot_steps'
+    if 0xf000 <= address < 0xfc00:
+        raise ValueError(f'unmapped source code/data reference: {address:04X}')
     if address >= 0xf000:
         return f'original_rom+${address-0xf000:03X}'
     if address < 0x400:
@@ -149,9 +155,9 @@ def translate(item, nz_live=True, carry_relation=None):
     if op in ('INX', 'DEX', 'INY', 'DEY'):
         return [f"{'inc' if op.startswith('IN') else 'dec'} {'b' if op.endswith('X') else 'c'}"]
     if op in ('TAX', 'TAY'):
-        return [f"ld {'b' if op == 'TAX' else 'c'},a", 'or a']
+        return [f"ld {'b' if op == 'TAX' else 'c'},a"] + (['or a'] if nz_live else [])
     if op in ('TXA', 'TYA'):
-        return [f"ld a,{'b' if op == 'TXA' else 'c'}", 'or a']
+        return [f"ld a,{'b' if op == 'TXA' else 'c'}"] + (['or a'] if nz_live else [])
     if op in ('STA', 'STX', 'STY'):
         return ["ex af,af'"] + pointer(item) + ["ex af,af'", f"ld (hl),{dict(STA='a', STX='b', STY='c')[op]}"]
     if op in ('INC', 'DEC'):
@@ -194,9 +200,23 @@ def translate(item, nz_live=True, carry_relation=None):
 
 def generate(rom):
     instructions = reachable(rom)
+    if any(start<root<end for root in ROOTS for start,end in ((0xf619,0xf633),(0xffda,0xffe7),(0xf875,0xf894),(0xf8de,0xf905),(0xf644,0xf654),(0xf992,0xf99c))):
+        raise ValueError('direct root enters specialized colour/swap body')
+    if any(0xf794<root<=0xf7a4 for root in ROOTS):
+        raise ValueError('direct root bypasses bonus dispatch initialization')
+    if any(0xfb56<root<0xfb5f for root in ROOTS):
+        raise ValueError('direct root enters specialized zero-clear body')
     for a,item in instructions.items():
+        if item['mnemonic'] in BRANCHES|{'JMP','JSR'}:
+            for start,end in ((0xf619,0xf633),(0xffda,0xffe7),(0xf875,0xf894),(0xf8de,0xf905),(0xf644,0xf654),(0xf992,0xf99c)):
+                if start<item['target']<end and not start<=a<end:
+                    raise ValueError('external entry into specialized colour/swap loop')
         if item['mnemonic'] in BRANCHES|{'JMP','JSR'} and 0xfb9d<item['target']<=0xfbca and not 0xfb9d<=a<=0xfbca:
             raise ValueError('external entry into specialized score routine')
+        if item['mnemonic'] in BRANCHES|{'JMP','JSR'} and 0xfb56<item['target']<0xfb5f and not 0xfb56<=a<0xfb5f:
+            raise ValueError('external entry into specialized zero-clear loop')
+        if item['mnemonic'] in BRANCHES|{'JMP','JSR'} and 0xf794<item['target']<=0xf7a4 and not 0xf794<=a<=0xf7a4:
+            raise ValueError('external entry bypasses bonus dispatch initialization')
     addresses = sorted(instructions)
     carry_defs = {'ADC','SBC','ASL','LSR','ROL','ROR','CMP','CPX','CPY','CLC','SEC'}
     nz_defs = {'LDA','LDX','LDY','TAX','TAY','TXA','TYA','INX','DEX','INY','DEY',
@@ -235,12 +255,108 @@ def generate(rom):
     carry_out = live_after(carry_defs,{'ADC','SBC','ROL','ROR','BCC','BCS'},set(relations))
     nz_out = live_after(nz_defs,{'BEQ','BNE','BMI','BPL'})
     lines = ['; Generated locally from the verified original. Do not commit this file.',
-             'CORE_RAM EQU $C000', 'core_F00E:', '    ret']
+             'CORE_RAM EQU $C000', 'core_F00E:', '    ret',
+             'score_bonus_dispatch:', '    jp (iy)']
     for n, address in enumerate(addresses):
+        if any(start<address<end for start,end in ((0xf619,0xf633),(0xffda,0xffe7),(0xf875,0xf894),(0xf8de,0xf905),(0xf644,0xf654),(0xf992,0xf99c))):
+            continue
         if 0xfb9d<address<=0xfbca:
             continue  # Folded into the verified score block at its sole entry.
+        if 0xfb56<address<0xfb5f:
+            continue  # Source ascending zero-clear is specialized at FB56.
         item = instructions[address]
         lines += [f'core_{address:04X}: ; {item["mnemonic"]} {item["mode"]}']
+        if address==0xf619:
+            if (instructions[0xf633]['mnemonic'],instructions[0xf635]['mnemonic'])!=('LDA','CLC'):
+                raise ValueError('colour-loop continuation changed')
+            # Four lanes share the wave and old-phase palette. Hoist those two
+            # invariant results while retaining the source AC3..AC0 store order.
+            # X/Y/A/NZ/C are redefined before their next observable use.
+            lines += ['    ld a,(CORE_RAM+$0BD)','    and 7','    ld c,a',
+                      '    ld l,a','    ld h,0','    ld de,original_rom+$F0F',
+                      '    add hl,de','    ld a,(hl)','    ld hl,CORE_RAM+$085',
+                      '    xor (hl)','    ld hl,CORE_RAM+$086','    and (hl)','    ld d,a',
+                      '    ld a,8','    ld hl,CORE_RAM+$085','    xor (hl)',
+                      '    ld hl,CORE_RAM+$086','    and (hl)','    ld e,a']
+            for lane in reversed(range(4)):
+                lines += [f'    ld a,(CORE_RAM+${0xd9+lane:03X})','    and 4',
+                          '    ld a,d','    jr z,$+3','    ld a,e',
+                          f'    ld (CORE_RAM+${0xac+lane:03X}),a']
+            lines += ['    ld b,$FF','    jp core_F633']
+            continue
+        if address==0xf644:
+            for index in reversed(range(1,5)):
+                lines += [f'    ld b,{index}',f'    ld a,(CORE_RAM+${0xf0+index:03X})',
+                          '    or a','    jp p,core_F654']
+            lines += ['    ld b,0','    ld c,$FF','    ld hl,CORE_RAM+$0F4']
+            for index in range(4):
+                lines += ['    ld (hl),0']+(['    dec l'] if index<3 else [])
+            lines += ['    jp core_F654']
+            continue
+        if address==0xf992:
+            # Three fixed indices call the same source fractional-speed split.
+            # Retain FA, quotient, optional increment and remainder store order.
+            for index in reversed(range(3)):
+                lines += [f'    ld a,(CORE_RAM+${0xe2+index:03X})','    ld (CORE_RAM+$0FA),a',
+                          '    ld d,a']+['    srl a']*4
+                lines += [f'    ld (CORE_RAM+${0x92+index:03X}),a','    ld a,d','    and 15',
+                          f'    ld hl,CORE_RAM+${0xcf+index:03X}','    add a,(hl)','    cp 16']
+                lines += ['    '+line for line in capture_c(inverted=True)]
+                lines += [f'    jr c,.speed_remainder_{index}',
+                          f'    ld hl,CORE_RAM+${0x92+index:03X}','    inc (hl)',
+                          f'.speed_remainder_{index}:','    and 15',f'    ld (CORE_RAM+${0xcf+index:03X}),a']
+            lines += ['    ld b,$FF','    jp core_F99C']
+            continue
+        if address==0xf875:
+            # Keep each hurry-up store and the exact carry of the last executed
+            # comparison; direct lane addresses replace indexed pointer rebuilds.
+            for lane in reversed(range(4)):
+                end = f'.hurry_done_{lane}'
+                lines += [f'    ld a,(CORE_RAM+${0xb0+lane:03X})','    or a',f'    jp m,{end}',
+                          f'    ld a,(CORE_RAM+${0xd9+lane:03X})','    and 4',f'    jr nz,{end}',
+                          f'    ld a,(CORE_RAM+${0xc7+lane:03X})','    cp 8']
+                lines += ['    '+line for line in capture_c(inverted=True)]
+                lines += [f'    jr c,{end}','    cp $97']
+                lines += ['    '+line for line in capture_c(inverted=True)]
+                lines += [f'    jr nc,{end}',f'    ld a,(CORE_RAM+${0xd9+lane:03X})',
+                          '    or $10',f'    ld (CORE_RAM+${0xd9+lane:03X}),a',end+':']
+            lines += ['    ld b,$FF','    jp core_F894']
+            continue
+        if address==0xf8de:
+            # Every lane has the same three animation selectors. Preserve the
+            # source signed fallbacks, ordered writes, final Y and carry.
+            for lane in reversed(range(4)):
+                shark,normal,store = [f'.animation_{part}_{lane}' for part in ('shark','normal','store')]
+                lines += [f'    ld a,(CORE_RAM+${0xd9+lane:03X})','    ld c,a','    and 4',
+                          f'    jr z,{shark}','    ld a,c','    and $0C',
+                          '    ld hl,CORE_RAM+$0E0','    or (hl)',f'    jp p,{store}',
+                          shark+':','    ld a,c','    cp $10']
+                lines += ['    '+line for line in capture_c(inverted=True)]
+                lines += [f'    jr c,{normal}','    and $18','    ld hl,CORE_RAM+$0E2',
+                          '    or (hl)',f'    jp p,{store}',normal+':','    ld a,c','    and 8',
+                          '    ld hl,CORE_RAM+$0DE','    or (hl)',store+':',
+                          f'    ld (CORE_RAM+${0xd9+lane:03X}),a']
+            lines += ['    ld b,$FF','    jp core_F905']
+            continue
+        if address==0xffda:
+            # Source swaps bytes6..0, writing saved then active for EACH byte.
+            # Direct addresses remove indexed-pointer rebuilding, not stores.
+            for index in reversed(range(7)):
+                lines += [f'    ld a,(CORE_RAM+${0xb8+index:03X})',
+                          f'    ld hl,CORE_RAM+${0xbf+index:03X}','    ld c,(hl)',
+                          '    ld (hl),a','    ld a,c',
+                          f'    ld (CORE_RAM+${0xb8+index:03X}),a']
+            lines += ['    ld b,$FF','    jp core_FFE7']
+            continue
+        if address==0xfb56:
+            # Preserve ascending zero stores, including X=FB wrapping through
+            # all256 addresses. DI makes intermediate scratch registers private.
+            # Source continuation sees A0/XFB/Y unchanged/C1/N0/Z1.
+            lines += ['    ld h,HIGH CORE_RAM','    ld l,b',
+                      '.clear:', '    ld (hl),0','    inc l','    ld a,l',
+                      '    cp $FB','    jr nz,.clear','    ld b,l',
+                      '    xor a','    ld e,1','    jp core_FB5F']
+            continue
         if address == 0xfb9d:
             # Guarded terminal-score specialization. With valid nonzero BCD A
             # and all three score bytes99, every original ADC overflows, score
@@ -253,9 +369,12 @@ def generate(rom):
                 '    ld a,(CORE_RAM+$0BA)', '    cp $99', '    jr nz,.score_restore',
                 '    ld a,(CORE_RAM+$0B9)', '    cp $99', '    jr nz,.score_restore',
                 '    ld a,(CORE_RAM+$0B8)', '    cp $99', '    jr nz,.score_restore',
+                '    ld iy,core_FB9D.score_terminal_return',
+                '.score_terminal_return:',
                 '    ld hl,CORE_RAM+$0A3', '    inc (hl)',
                 '    ld a,$99', '    or a', '    ld e,1', '    ret',
-                '.score_restore:', '    ld a,d', '.score_regular:']
+                '.score_restore:', '    ld a,d', '.score_regular:',
+                '    ld iy,core_FB9D.score_regular_direct', '.score_regular_direct:']
             # Same low/middle/high BCD additions and ordered observable writes.
             # Source NZ is dead on both carry paths. A no-carry low return gets
             # NMOS NZ from adjusted A. If middle addition does not carry, the
@@ -263,13 +382,14 @@ def generate(rom):
             # No calls, I/O or interrupts can observe the omitted identity stores.
             lines += [
                 '    ld hl,CORE_RAM+$0BA', '    add a,(hl)', '    daa', '    ld (hl),a',
-                '    jr c,.score_middle', '    ld e,0', '    or a', '    ret',
+                '    jr c,.score_middle', '    ld e,0', '    ret',
                 '.score_middle:', '    ld hl,CORE_RAM+$0B9', '    ld a,(hl)',
                 '    adc a,0', '    daa', '    ld (hl),a', '    jr c,.score_high',
-                '    ld e,0', '    or a', '    ret',
+                '    ld e,0', '    ret',
                 '.score_high:', '    ld hl,CORE_RAM+$0B8', '    ld a,(hl)',
                 '    adc a,0', '    daa', '    jr nc,.score_high_store',
                 '    ld a,$99', '    ld (CORE_RAM+$0B9),a', '    ld (CORE_RAM+$0BA),a',
+                '    ld iy,core_FB9D.score_terminal_return',
                 '    ld hl,CORE_RAM+$0A3', '    inc (hl)', '    ld (CORE_RAM+$0B8),a',
                 '    ld e,1', '    or a', '    ret',
                 '.score_high_store:', '    ld (hl),a',
@@ -278,7 +398,22 @@ def generate(rom):
             continue
         if address == 0xf6a7:
             lines += ['    IFDEF WITH_INPUT', '    call sample_input', '    ENDIF']
-        emitted = translate(item,nz_out[address],relations.get(address))
+        if address==0xf794:
+            # This source loop calls score20times at most. Nothing between its
+            # calls writes score/player state. IY selects the ordinary routine
+            # until a verified saturation, then its exact single-call terminal
+            # return. Reinitialize on EVERY loop entry; never cache across ticks.
+            lines += ['    ld iy,core_FB9D']
+        if address==0xf79e:
+            emitted = ['call score_bonus_dispatch']
+        elif address==0xf79c:
+            emitted = ['ld a,$50']  # both bonus callees define NZ before use
+        elif item['mnemonic']=='JSR' and item['target']==0xffaf:
+            if any((instructions[0xffaf+i]['mnemonic'],instructions[0xffaf+i]['mode'])!=('LSR','acc') for i in range(4)) or instructions[0xffb3]['mnemonic']!='RTS':
+                raise ValueError('source four-bit shift helper changed')
+            emitted = ['srl a']*4 + capture_c()
+        else:
+            emitted = translate(item,nz_out[address],relations.get(address))
         # Capturing E is unnecessary when every following path replaces the
         # source carry before reading it. Keep instruction order unchanged.
         if item['mnemonic'] in carry_defs and not carry_out[address]:
@@ -291,9 +426,21 @@ def generate(rom):
                         emitted = emitted[:offset]+emitted[offset+len(capture):]
                         break
         lines += ['    ' + s for s in emitted]
+        if item['mnemonic'] in ('STA','STX','STY') and item['mode'] in ('zpg','abs') and 0x15<=item['value']<=0x1a:
+            lines += ['    IFDEF WITH_AUDIO',f"    call audio_event_{item['value']:02X}",'    ENDIF']
         following = address + item['size']
         if item['mnemonic'] not in ('RTS', 'JMP') and (n + 1 == len(addresses) or addresses[n + 1] != following):
             lines += [f'    jp core_{following:04X}']
+    lines += ['    IFDEF WITH_PACKED_DATA',
+              '; Source F7B4 admits Y2..6 only; omitted prefix is never read.',
+              'original_patrol_masks EQU $-2',
+              '    INCBIN "original.rom",$7EF,5',
+              'original_shot_steps:',
+              '    INCBIN "original.rom",$B52,2',
+              '    ELSE',
+              'original_patrol_masks EQU original_rom+$7ED',
+              'original_shot_steps EQU original_rom+$B52',
+              '    ENDIF']
     return '\n'.join(lines) + '\n', instructions
 
 

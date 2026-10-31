@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "cases": 2963,
+  "max_z80_cycles": 11353,
+  "detail": "complete",
+  "total_cases": 2963,
+  "max_reference_instructions": 1053
+}

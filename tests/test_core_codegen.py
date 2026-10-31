@@ -3,10 +3,17 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from core_codegen import decode, reachable
+from core_codegen import decode, reachable, mapped
 
 
 class CodegenTests(unittest.TestCase):
+    def test_packed_data_rejects_new_reads_into_omitted_code(self):
+        self.assertEqual(mapped(0xf7ed), 'original_patrol_masks')
+        self.assertEqual(mapped(0xfb52), 'original_shot_steps')
+        self.assertEqual(mapped(0xfc18), 'original_rom+$C18')
+        with self.assertRaises(ValueError):
+            mapped(0xf900)
+
     def test_relative_target_wraps_as_6502_address(self):
         rom = bytearray(4096)
         rom[0:4] = bytes([0xa9, 0, 0xd0, 0xfc])

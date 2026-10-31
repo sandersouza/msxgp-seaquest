@@ -1,0 +1,17 @@
+{
+  "chains": 183,
+  "max_busy": 59583,
+  "max_commit": 10324,
+  "skipped": 0,
+  "visible_commit": 0,
+  "generation_rebases": 139,
+  "ready_epoch_exposures": 9723,
+  "pixel_frames": 5490,
+  "source_ticks_verified": 70272,
+  "rom_sha256": "0942a040aa4bc4cb72df7db39445c2f96f237719bf8e63d1ed962ca13eca0910",
+  "source": "real cold game-over post-state; one RAM seed per384-update chain",
+  "source_acceptance": true,
+  "seed_tick": 2755,
+  "chain_ticks": 384,
+  "generation_seed": 239
+}

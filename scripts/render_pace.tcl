@@ -11,12 +11,23 @@ set frame_counts {}
 set last_commit 0
 set busy_start 0
 set max_busy 0
+set guard_start [expr {$hud_mode?0xF000:0xD000}]
+set guard_size [expr {0xF300-$guard_start}]
+set pace_priming 0
+if {$hud_mode} {
+    set f [open outputs/presentation/hud.bin rb]
+    set hud_static [read $f]
+    close $f
+}
 set input [open outputs/render/worst-case.bin rb]
 set worst [read $input]
 close $input
 proc finish_pace {} {
-    set guard [debug read_block memory 0xD000 8960]
-    if {$guard ne [string repeat [binary format c 165] 8960]} {puts stderr ram-guard-corrupt; exit 1}
+    set guard [debug read_block memory $::guard_start $::guard_size]
+    if {$guard ne [string repeat [binary format c 165] $::guard_size]} {puts stderr ram-guard-corrupt; exit 1}
+    if {$::hud_mode && [debug read_block memory 0xD000 [string length $::hud_static]] ne $::hud_static} {
+        puts stderr immutable-hud-data-corrupt; exit 1
+    }
     binary scan [debug read_block memory 0xF300 128] c* stack
     set stack_min 62336
     for {set i 0} {$i < 128} {incr i} {
@@ -31,7 +42,7 @@ after time 5 {
     if {[debug read memory 0xC7FD] != 83} {error cartridge-not-booted}
     eval $::input_setup
     # Probe stack headroom only after BIOS initialization, with IRQs disabled.
-    debug write_block memory 0xD000 [string repeat [binary format c 165] 9088]
+    debug write_block memory $::guard_start [string repeat [binary format c 165] [expr {$::guard_size+128}]]
     debug set_bp $::paced_commit {} {
         set now [machine_info time]
         set y [machine_info VDP_msx_y_pos]
@@ -64,9 +75,28 @@ after time 5 {
             if {[reg A] & 64} {puts stderr sprite-overflow; exit 1}
         }
     }
-    debug write_block memory 0xC000 $::worst
-    reg PC $::paced_frame_start
-    set ::last_commit [machine_info time]
+    if {$::hud_mode} {
+        if {[debug read_block memory 0xD000 [string length $::hud_static]] ne $::hud_static} {
+            puts stderr startup-hud-data-mismatch; exit 1
+        }
+        set ::pace_priming 2
+        debug write memory 0xC6FE [expr {$::prime_entry&255}]
+        debug write memory 0xC6FF [expr {$::prime_entry>>8}]
+        foreach address {0xC6F0 0xC6F1 0xC6F2 0xC6F3 0xC6F4} {debug write memory $address 0}
+        debug set_bp $::rpc_done {$::pace_priming>0} {
+            incr ::pace_priming -1
+            debug write_block memory 0xC000 $::worst
+            set ::last_commit [machine_info time]
+            if {$::pace_priming>0} {reg PC $::prime_start} else {reg PC $::paced_frame_start}
+            debug cont
+        }
+        debug write_block memory 0xC000 $::worst
+        reg PC $::prime_start
+    } else {
+        debug write_block memory 0xC000 $::worst
+        reg PC $::paced_frame_start
+        set ::last_commit [machine_info time]
+    }
     debug cont
 }
 after time 12 {puts stderr "pace-timeout count=$::count PC=[reg PC] SP=[reg SP] A=[reg A] R1=[vdpreg 1]"; exit 1}

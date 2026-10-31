@@ -44,31 +44,31 @@ def expected_pixels(ram, rom=None):
     return pixels
 
 
-def decode(vram):
+def decode(vram, name_base=0x1800):
     pixels = bytearray(256*192)
     for y in range(192):
         for column in range(32):
-            tile = vram[0x1800+(y//8)*32+column]
+            tile = vram[name_base+(y//8)*32+column]
             value = vram[(y//64)*2048+tile*8+y%8]
             for bit in range(8):
                 pixels[y*256+column*8+bit] = (value >> (7-bit)) & 1
     return pixels
 
 
-def visible_signature(vram):
-    signature = bytearray(vram[0x1800:0x1b20])
+def visible_signature(vram, name_base=0x1800, slots=8):
+    signature = bytearray(vram[name_base:name_base+768]+vram[0x1b00:0x1b00+4*slots+1])
     for bank in range(3):
-        for tile in set(vram[0x1800+bank*256:0x1900+bank*256]):
+        for tile in set(vram[name_base+bank*256:name_base+(bank+1)*256]):
             start = bank*2048+tile*8
             signature.extend(vram[start:start+8])
             signature.extend(vram[start+8192:start+8200])
-    for slot in range(8):
+    for slot in range(slots):
         pattern = vram[0x1b00+slot*4+2] & 252
         signature.extend(vram[0x3800+pattern*8:0x3820+pattern*8])
     return signature
 
 
-def check_original_sprites(ram,vram,assets,rom):
+def check_original_sprites(ram,vram,assets,rom,hud=False):
     from original_graphics import early_patrol, scale_rows
     from graphics_palette import sprite_colors
     actual = set()
@@ -103,7 +103,8 @@ def check_original_sprites(ram,vram,assets,rom):
                 if 0 <= y+row < 192: expected.add((px,y+row,slot+part))
     if actual != expected:
         raise ValueError(f'original sprite pixel mismatch: extra={list(actual-expected)[:3]}, missing={list(expected-actual)[:3]}')
-    if vram[0x1b20]!=208 or sprite_peak(ys)>4:
+    if hud: ys.append((vram[0x1b20]+1)&255)
+    if vram[0x1b00+(36 if hud else 32)]!=208 or sprite_peak(ys)>4:
         raise ValueError('original sprite terminator/scanline budget exceeded')
     if list(vram[0x1b03:0x1b20:4]) != sprite_colors(ram,rom):
         raise ValueError('original sprite palette selection mismatch')
@@ -132,11 +133,22 @@ def main():
     parser.add_argument('--collisions', action='store_true',help='acquire original raster contacts before the native update')
     parser.add_argument('--oxygen', action='store_true',help='include the issue #11 oxygen/rescue workload')
     parser.add_argument('--progression', action='store_true',help='include score/lives/late-game progression and oxygen workloads')
+    parser.add_argument('--stream', action='store_true',help='stream expanded enemy rows directly to inactive VRAM')
+    parser.add_argument('--packed', action='store_true',help='link only original data tables used by the native code')
+    parser.add_argument('--hud', action='store_true',help='original HUD and double-buffered name tables')
+    parser.add_argument('--audio', action='store_true',help='ordered source audio stores translated to PSG, includes HUD')
+    parser.add_argument('--palette', action='store_true',help='128KiB prepared palette experiment, includes audio')
+    parser.add_argument('--banked', action='store_true',help='64KiB ASCII16 with fully expanded enemy patterns')
     parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
+    args.audio = args.audio or args.palette
+    args.hud = args.hud or args.audio
+    args.banked = args.banked or args.hud
+    args.stream = args.stream or args.banked
+    args.packed = args.packed or args.banked
     args.oxygen = args.oxygen or args.progression
-    args.collisions = args.collisions or args.controls or args.oxygen
+    args.collisions = args.collisions or args.controls or args.oxygen or args.stream
     args.input = args.input or args.controls or args.collisions
     args.graphics = args.graphics or args.input
     args.native = args.native or args.graphics
@@ -152,9 +164,21 @@ def main():
     if args.graphics:
         from original_graphics import generate as graphics_generate
         assets,_,_ = graphics_generate()
+        if args.palette:
+            from original_graphics import build_sprite_bank
+            build_sprite_bank()
     if args.collisions:
         from collision_reference import generate as collision_generate
         collision_generate()
+    if args.banked:
+        from enemy_patterns import generate as enemy_generate
+        enemy_generate(args.palette)
+    if args.hud:
+        from hud_tables import generate as hud_generate
+        hud_generate(args.palette)
+    if args.audio:
+        from audio_reference import generate as audio_generate
+        audio_generate()
     rom = None
     cases = []
     entries = []
@@ -320,17 +344,29 @@ def main():
                     *(['-DWITH_GRAPHICS'] if args.graphics else []),
                     *(['-DWITH_INPUT'] if args.input or args.input_synthetic else []),
                     *(['-DWITH_COLLISIONS'] if args.collisions else []),
+                    *(['-DWITH_STREAM'] if args.stream else []),
+                    *(['-DWITH_PACKED_DATA'] if args.packed else []),
+                    *(['-DWITH_HUD'] if args.hud else []),
+                    *(['-DWITH_AUDIO'] if args.audio else []),
+                    *(['-DWITH_PALETTE'] if args.palette else []),
+                    *(['-DWITH_BANKED'] if args.banked else []),
                     *(['-DCOLLISION_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_COLLISION_CORRUPT')=='1' else []),
                     *(['-DOXYGEN_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_OXYGEN_CORRUPT')=='1' else []),
                     *(['-DINPUT_CORRUPT_PORT2'] if args.input and os.environ.get('SEAQUEST_INPUT_CORRUPT_PORT2')=='1' else []),
                     *(['-DCONTROL_DEMO'] if args.controls else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
+    if args.palette and (OUT/'bench.rom').stat().st_size!=131072:
+        raise ValueError('palette cartridge must contain exactly eight16KiB banks')
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
+    if args.audio and not args.controls:
+        for suffix in ('rom','sym'):
+            shutil.copyfile(OUT/f'bench.{suffix}',ROOT/f'outputs/presentation/audio64.{suffix}')
     if args.build_only:
-        variant = 'synthetic-input' if args.input_synthetic else ('controls' if args.controls else ('collisions' if args.collisions else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic')))))
+        variant = 'presentation-controls' if args.audio and args.controls else ('synthetic-input' if args.input_synthetic else ('controls' if args.controls else ('collisions' if args.collisions else ('input' if args.input else ('graphics' if args.graphics else ('native' if args.native else 'synthetic'))))))
         shutil.copyfile(OUT/'bench.rom',OUT/(variant+'.rom'))
         shutil.copyfile(OUT/'bench.sym',OUT/(variant+'.sym'))
-        manifest = {'rom':variant+'.rom','bytes':32768,'sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
+        manifest = {'rom':variant+'.rom','bytes':len((OUT/'bench.rom').read_bytes()),'mapper':'ASCII16' if args.banked else 'plain32',
+                    'sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
                     'status':'renderer diagnostic only; no emulator acceptance'}
         (OUT/(variant+'-build.json')).write_text(json.dumps(manifest,indent=2)+'\n')
         print(json.dumps(manifest))
@@ -348,32 +384,65 @@ def main():
     (OUT/'cases.bin').write_bytes(b''.join(struct.pack('<HBBBB',symbols.get(f'core_{entry:04X}',0),a,x,y,c)+
                                           (bytes(input_controls[i]) if args.input else b'')+ram
                                           for i,(ram,(entry,a,x,y,c)) in enumerate(zip(cases,entries))))
-    (OUT/'start.tcl').write_text(f'set input_mode {int(args.input)}\nset inject_pixel {int(os.environ.get("SEAQUEST_RENDER_INJECT_PIXEL","-1"))}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nset commit_pc {symbols["render_commit"]}\nsource scripts/render_bench.tcl\n')
+    (OUT/'case-index.json').write_text(json.dumps(case_names)+'\n')
+    (OUT/'start.tcl').write_text(f'set input_mode {int(args.input)}\nset hud_mode {int(args.hud)}\nset palette_mode {int(args.palette)}\n'+
+        f'set prime_entry {symbols.get("core_F00E",0)}\nset prime_start {symbols["audio_prime_start"] if args.audio else symbols["rpc_start"]}\n'+
+        f'set inject_pixel {int(os.environ.get("SEAQUEST_RENDER_INJECT_PIXEL","-1"))}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nset commit_pc {symbols["render_commit"]}\nsource scripts/render_bench.tcl\n')
     (OUT/'complete.txt').unlink(missing_ok=True)
     with (OUT/'openmsx.log').open('wb') as log:
         result = subprocess.run(['openmsx', '-control','stdio','-machine','C-BIOS_MSX1',
-                                 '-cart',str(OUT/'bench.rom'),'-script',str(OUT/'start.tcl')],
+                                 '-cart',str(OUT/'bench.rom'),*(['-romtype','ASCII16'] if args.banked else []),
+                                 '-script',str(OUT/'start.tcl')],
                                 cwd=ROOT, env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},
-                                stdout=log,stderr=subprocess.STDOUT,timeout=60)
+                                stdout=log,stderr=subprocess.STDOUT,timeout=240 if args.hud else 60)
     if result.returncode or not (OUT/'complete.txt').exists() or int((OUT/'complete.txt').read_text()) != len(cases):
         raise ValueError('renderer harness incomplete; see outputs/render/openmsx.log')
     dumps = (OUT/'vram.bin').read_bytes()
     states = (OUT/'state.bin').read_bytes()
     prepared = (OUT/'prepared.bin').read_bytes()
+    baseline = (OUT/'baseline.bin').read_bytes() if args.hud else None
+    pages = (OUT/'name-pages.bin').read_bytes() if args.hud else None
+    registers = (OUT/'registers.bin').read_bytes() if args.hud else None
+    phase_registers = (OUT/'phase-registers.bin').read_bytes() if args.hud else None
+    if args.hud and (len(baseline)!=len(dumps) or len(pages)!=3*len(cases) or len(registers)!=8*len(cases) or len(phase_registers)!=4*len(cases)):
+        raise ValueError('truncated HUD phase/VDP evidence')
+    if args.hud:
+        from presentation_check import PresentationOracle
+        presentation = PresentationOracle(rom)
     if len(dumps) != len(cases)*16384 or len(prepared) != len(dumps) or len(states) != len(cases)*1024:
         raise ValueError('truncated emulator evidence')
     for index,ram in enumerate(cases):
-        if index and visible_signature(prepared[index*16384:(index+1)*16384]) != visible_signature(dumps[(index-1)*16384:index*16384]):
+        if args.hud:
+            if phase_registers[index*4:index*4+2]!=phase_registers[index*4+2:index*4+4]:
+                raise ValueError(f'R1/R7 changed before VBlank in case {index}')
+            old_page,prepared_page,final_page = pages[index*3:index*3+3]
+            if old_page!=prepared_page or old_page not in (6,7) or final_page!=(old_page^1):
+                raise ValueError(f'HUD name-table phase mismatch in case {index}')
+            if visible_signature(prepared[index*16384:(index+1)*16384],old_page*1024,9)!=visible_signature(baseline[index*16384:(index+1)*16384],old_page*1024,9):
+                raise ValueError(f'visible HUD/scene VRAM changed before VBlank in case {index}')
+            regs = registers[index*8:index*8+8]
+            state = states[index*1024:(index+1)*1024]
+            blackout = args.palette and not state[0x86] and not any(state[a] for a in (0xe9,0xf6,0xac,0xad,0xae,0xaf))
+            if regs[1]&32 or bool(regs[1]&64)==blackout or regs[3]!=255:
+                raise ValueError(f'HUD VDP/display/IRQ contract mismatch in case {index}')
+        elif index and visible_signature(prepared[index*16384:(index+1)*16384]) != visible_signature(dumps[(index-1)*16384:index*16384]):
             raise ValueError(f'visible VRAM changed before VBlank commit in case {index}')
         ram = states[index*1024:(index+1)*1024]
         if args.native and ram[:251] != reference_states[index]:
             raise ValueError(f'native state mismatch in render case {index}')
-        actual = decode(dumps[index*16384:(index+1)*16384])
+        block = dumps[index*16384:(index+1)*16384]
+        actual = decode(block,final_page*1024 if args.hud else 0x1800)
         if args.graphics:
-            check_original_sprites(ram,dumps[index*16384:(index+1)*16384],assets,rom)
+            check_original_sprites(ram,block,assets,rom,args.hud)
         else:
             check_sprites(ram,dumps[index*16384:(index+1)*16384])
         expected = expected_pixels(ram,rom)
+        if args.hud:
+            try: presentation.check(ram,block,final_page*1024,regs[7]&15,bool(regs[1]&64))
+            except ValueError as error: raise ValueError(f'presentation case {index} {case_names[index]}: {error}') from error
+            for y in range(192):
+                if not any(top<=y<top+15 for top in (48,72,96,120)):
+                    actual[y*256:(y+1)*256] = bytes(256)
         if actual != expected:
             first = next(i for i,(a,b) in enumerate(zip(actual,expected)) if a!=b)
             raise ValueError(f'case {index} pixel ({first%256},{first//256}): actual={actual[first]} expected={expected[first]}')
@@ -383,7 +452,8 @@ def main():
               'rom_sha256':hashlib.sha256((OUT/'bench.rom').read_bytes()).hexdigest(),
               'io':json.loads((OUT/'io.json').read_text())}
     report.update(machine='C-BIOS_MSX1',cpu_hz=3579545,vdp='TMS9918A',ram_kib=64,vram_kib=16,
-                  video='NTSC',rom_bytes=32768,python=platform.python_version(),
+                  video='NTSC',rom_bytes=len((OUT/'bench.rom').read_bytes()),mapper='ASCII16' if args.banked else 'plain32',
+                  python=platform.python_version(),
                   openmsx=subprocess.check_output(['openmsx','-v'],text=True).splitlines()[0],
                   sjasmplus_revision=subprocess.check_output(['git','-C',str(ROOT/'.tools/sjasmplus'),'rev-parse','HEAD'],text=True).strip(),
                   original_sha256=hashlib.sha256(rom).hexdigest() if rom else None,
@@ -404,7 +474,22 @@ def main():
     if args.progression:
         report['progression_sweep_cases'] = len(cases)-progression_start
         report['oxygen_sweep_cases'] = progression_start-oxygen_start
-    if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
+    if args.hud:
+        report.update(status='original HUD/scene integration; full-game, PAL and hardware unverified',
+                      presentation_fixture_setup='two display-only F00E cache preparations from the supplied input state; exact input RAM restored before timing F5B8',
+                      cold_display_initialization='input86=0 has no preceding valid display; presentation init uses boot0/FF before exact input RAM restoration',
+                      palette_authority='original ROM/ALE pixels and source AC; no native HUD buffers feed expected values',
+                      hud_data_bytes=len((ROOT/'outputs/presentation/hud.bin').read_bytes()))
+    if args.banked:
+        report['fixed_bank_padding_bytes'] = 0x8000-symbols['fixed_bank_end']
+    if args.palette:
+        report.pop('rom_padding_bytes',None)
+        report['source_bank_padding_bytes'] = 0x9b00-symbols['data_bank_end']
+    if args.audio:
+        report.update(audio='ordered source AUDC/AUDF/AUDV hooks; event/PSG acceptance is the separate audio contract',
+                      status='original HUD/scene/PSG integration; full-game, source clock/PAL and physical hardware unverified')
+    if report['io'].get('min_active_spacing',report['io']['min_data_spacing']) < 29 or report['io']['min_data_spacing'] < (12 if args.palette else 29):
+        raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])
     input_setup = ''
@@ -412,10 +497,13 @@ def main():
         r6,r7,r8,switches = input_controls[worst]
         input_setup = f'keymatrixdown 6 {r6}\nkeymatrixdown 7 {r7}\nkeymatrixdown 8 {r8}\ndebug write memory 0xC420 {switches}\n'
     (OUT/'pace-start.tcl').write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('paced_commit','paced_frame_start','paced_prepared','vblank_sample','vblank_clear_sample'))+
+                                   f'set hud_mode {int(args.hud)}\nset prime_entry {symbols.get("core_F00E",0)}\nset prime_start {symbols["audio_prime_start"] if args.audio else symbols["rpc_start"]}\n'+
+                                   f'set rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\n'+
                                    'set input_setup {'+input_setup+'}\nsource scripts/render_pace.tcl\n')
     (OUT/'pace.json').unlink(missing_ok=True)
     with (OUT/'pace.log').open('wb') as log:
-        result = subprocess.run(['openmsx','-control','stdio','-machine','C-BIOS_MSX1','-cart',str(OUT/'bench.rom'),'-script',str(OUT/'pace-start.tcl')],cwd=ROOT,
+        result = subprocess.run(['openmsx','-control','stdio','-machine','C-BIOS_MSX1','-cart',str(OUT/'bench.rom'),
+                                 *(['-romtype','ASCII16'] if args.banked else []),'-script',str(OUT/'pace-start.tcl')],cwd=ROOT,
                                 env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},stdout=log,stderr=subprocess.STDOUT,timeout=30)
     if result.returncode or not (OUT/'pace.json').exists(): raise ValueError('pacing failed; see outputs/render/pace.log')
     pace = json.loads((OUT/'pace.json').read_text())
