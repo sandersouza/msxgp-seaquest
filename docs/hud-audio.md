@@ -1,7 +1,7 @@
 # Original HUD and ordered PSG sound
 
 Issue [#13](https://github.com/sandersouza/msxgp-seaquest/issues/13) integrates
-the original score/font/leading blanks, reserves, rescued divers and flash,
+the source-owned score/leading blanks, reserves, rescued divers and flash,
 oxygen gauge, Seaquest/Activision logo transition, sky/water/seabed, and sound.
 The local reference remains the verified NTSC4K Atari2600 ROM. No original
 ROM, extracted bitmap, generated font table or playable cartridge is published.
@@ -24,12 +24,26 @@ retain their two expanded ROM banks. Fixed bank0 owns mapper-changing helpers;
 source code/data run in bank1, and every temporary mapping restores bank1 before
 returning. No runtime6502 interpreter is present.
 
-Original glyphs shift one MSX pixel right to align six projected source glyphs
-with nine tiles. Score/lives start atY0/8, all colored sky rows are retained with
+Score/lives start atY0/8, all colored sky rows are retained with
 blank gaps compressed, actor geometry stays unchanged, oxygen starts at152,
 divers at160 and logo at176. The original full160-pixel viewport policy removes
 the TIA HMOVE strip. TIA hue/luminance maps to fixed TMS indices; analog RGB is
 not claimed identical. Seed-dependent water rows are projected independently.
+
+The owner requested an MSX lettering refinement after the original presentation
+delivery. Score digits now use an authored8x8 mask in each existing12x8cell,
+with even two-pixel stems, balanced round digits and consistent four-pixel gaps.
+This removes the alternating stroke widths from3:2 horizontal enlargement.
+OXYGEN uses six complete6x7glyphs in its existing six8x8tiles. Its bottom row
+closes O/G/E instead of being cut by the old five-line source sampling window.
+Leading-zero blanking, values, player colours, life/diver/logo art and oxygen-bar
+geometry remain source-owned. The display oracle applies these two explicit
+font adaptations; the original Atari HUD/alarm reference remains unchanged.
+
+The source-font block now has105records instead of106. One reserved player2
+padding tile keeps scratchIDs245..250 fixed, and its61-record prewarm bound
+includes the padding and all six scratch tiles. Unused uniform colour classes
+fill the fixed31-class palette format; RAM/VRAM budgets remain unchanged.
 
 Two name tables at1800/1C00 alternate. Names/patterns prepare into inactive
 storage; VBlank flips R2 and commits changed colours/SAT. Seven enemy slots use

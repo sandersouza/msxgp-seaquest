@@ -1,5 +1,10 @@
 # Issue13 verification
 
+This records the initial delivery baseline at5a797b6. The current owner-authorized
+MSX font refinement and its acceptance are recorded [separately](fonts/verification.md).
+Check out5a797b6 to reproduce the old hashes below; the current default build
+includes the refined fonts.
+
 Local automated acceptance is complete for the frozen128KiBASCII16 candidate.
 Independent read-only review found no remaining material issue after corrections.
 Remote CI/integration is tracked in [PR29](https://github.com/sandersouza/msxgp-seaquest/pull/29).
