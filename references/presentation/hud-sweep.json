@@ -1,0 +1,9 @@
+{
+  "cases": 1000,
+  "max_cycles": 59489,
+  "worst": "full-worst-38860",
+  "worst_full_cycles": 59489,
+  "display_only_cases": 968,
+  "max_dynamic_font_bytes": 24,
+  "limitation": "F00E projection fixtures isolate display; first32 execute original full update"
+}

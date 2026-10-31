@@ -24,3 +24,5 @@ python3 -B scripts/render_bench.py --build-only
 python3 -B scripts/render_bench.py --input-synthetic --build-only
 python3 -B scripts/collision_reference.py --synthetic
 .tools/sjasmplus/sjasmplus --nologo --raw=outputs/collision/synthetic.rom src/collision_synthetic.asm
+python3 -B scripts/audio_reference.py
+.tools/sjasmplus/sjasmplus --nologo --raw=outputs/presentation/audio-synthetic.rom src/audio_synthetic.asm

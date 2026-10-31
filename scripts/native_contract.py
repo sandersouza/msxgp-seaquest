@@ -61,6 +61,11 @@ def fixtures():
         ram = bytearray(1024)
         ram[0x81], ram[0x82] = frame, 87
         result.append((f'reset-{frame}', 0xfb54, ram, 0, 0, 0, 0))
+    # The specialized ascending clear must retain zero-page wrap at every X,
+    # especially X=FB (256 stores), rather than becoming a bounded host memset.
+    for start in range(256):
+        ram = bytearray((address*37+11)&255 for address in range(1024))
+        result.append((f'clear-{start}',0xfb56,ram,0xa5,start,0x5a,start&1))
     template = bytearray(1024)
     template[0x80:0x100] = bytes(frames[150]['ram'])
     template[0xb0:0xb7] = b'\xff' * 7

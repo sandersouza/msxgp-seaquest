@@ -9,9 +9,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - #12: Port scoring, difficulty progression, lives and alternating-player modes
 
 ## Definition of Ready
-- [ ] Required dependency evidence is available; unresolved inputs are documented.
-- [ ] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
-- [ ] Scope and acceptance criteria below are understood.
+- [x] Required dependency evidence is available; unresolved inputs are documented.
+- [x] Reference ROM revision/region, relevant source inputs and validation scenarios are identified.
+- [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
 - [ ] HUD matches canonical state and original layout as hardware permits. Audio event onset, duration and priority match traces; document timbre differences and verify alerts, rescue, firing, death and bonus.
@@ -31,3 +31,24 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 Original ROMs are local research inputs; do not publish them accidentally. This issue excludes work owned by dependent roadmap items.
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/13
+
+## Progress — implementation ongoing
+
+Dependencies #8 and #12 are closed. Work is on `codex/feat/13-original-hud-psg`.
+The #12 baseline was reproduced at39,328 cases/240paced frames and59,311 cycles.
+Direct source-row streaming, data-only linking and shared group-column setup
+preserve pixels and192 enemy/352 visible transfer bytes. The64KiB ASCII16
+baseline passes the same suite at53,443/59,736 cycles,29-cycle port spacing and
+stackF370. No enemies, visibility or simulation frequency were reduced.
+
+HUD work requires more than the original32KiB target: the first prototype
+overflowed by1,536 bytes even after recovering3KiB from unused source code.
+The measured successor uses64KiB ASCII16 on the same unexpanded MSX1/64KiB RAM/
+16KiB VRAM target. Independent read-only review checked all608 pre-expanded
+image vectors,19 source-window mappings, packed source tables and bank restoration.
+
+The original HUD model passes1,284 Atari TIA pixel comparisons. An isolated
+native prototype also matches source HUD/background colors, including the
+oxygen edge restored through the last free sprite pattern. Full timing/color
+integration, audio playback/event-order evidence, cold controls replay, final CI
+and review remain open. This issue is not delivered or closed.

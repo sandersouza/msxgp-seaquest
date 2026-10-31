@@ -199,6 +199,7 @@ def write_assembly(bank,lookup,resident):
     text += table('early_patrol_images',[entry(f'early-patrol-{n}',64+i if i<2 else min(159,151+i))
                                         for n in range(3) for i in range(16)])
     from graphics_palette import tms_color
+    text += '    ALIGN 256\n'
     text += table('tia_to_tms',[tms_color(n) for n in range(256)])
     (OUT/'sprites.inc').write_text(text)
 

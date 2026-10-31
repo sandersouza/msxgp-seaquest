@@ -1,0 +1,245 @@
+{
+  "passed": true,
+  "continuous_ticks": 6420,
+  "ram_reloads_after_boot": 0,
+  "original_tia_acquisition_ticks": 6420,
+  "max_busy_cycles": 53405,
+  "skipped_vdp_frames": 0,
+  "rom_sha256": "3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5",
+  "latency": [
+    {
+      "time": 12.0,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 18.6163,
+      "sat_commit_ms": 30.8129
+    },
+    {
+      "time": 12.2137,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 5.3239,
+      "sat_commit_ms": 17.3718
+    },
+    {
+      "time": 12.4274,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 8.4149,
+      "sat_commit_ms": 20.6192
+    },
+    {
+      "time": 12.6411,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 11.676,
+      "sat_commit_ms": 23.8647
+    },
+    {
+      "time": 12.854800000000001,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 14.9144,
+      "sat_commit_ms": 27.111
+    },
+    {
+      "time": 13.0685,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 18.1538,
+      "sat_commit_ms": 30.3581
+    },
+    {
+      "time": 13.2822,
+      "source": "keyboard",
+      "direction": 1,
+      "state_ms": 4.8647,
+      "sat_commit_ms": 16.9126
+    },
+    {
+      "time": 13.4959,
+      "source": "keyboard",
+      "direction": -1,
+      "state_ms": 7.9571,
+      "sat_commit_ms": 20.1631
+    },
+    {
+      "time": 13.7096,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 11.1022,
+      "sat_commit_ms": 23.406
+    },
+    {
+      "time": 13.9233,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 14.2784,
+      "sat_commit_ms": 26.6526
+    },
+    {
+      "time": 14.137,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 17.509,
+      "sat_commit_ms": 29.8989
+    },
+    {
+      "time": 14.3507,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 4.2233,
+      "sat_commit_ms": 16.4567
+    },
+    {
+      "time": 14.5644,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 7.3165,
+      "sat_commit_ms": 19.7064
+    },
+    {
+      "time": 14.7781,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 10.5773,
+      "sat_commit_ms": 22.9471
+    },
+    {
+      "time": 14.9918,
+      "source": "joystick",
+      "direction": 1,
+      "state_ms": 13.827,
+      "sat_commit_ms": 26.1967
+    },
+    {
+      "time": 15.2055,
+      "source": "joystick",
+      "direction": -1,
+      "state_ms": 17.2529,
+      "sat_commit_ms": 29.4427
+    }
+  ],
+  "max_state_ms": 18.6163,
+  "max_sat_commit_ms": 30.8129,
+  "shot_births": [
+    {
+      "kind": "state",
+      "time": 6.512595315885119,
+      "vdp_frame": 390,
+      "x": 76,
+      "y": 49,
+      "shot": 89,
+      "switches": 63
+    },
+    {
+      "kind": "state",
+      "time": 6.77940436563865,
+      "vdp_frame": 406,
+      "x": 76,
+      "y": 49,
+      "shot": 89,
+      "switches": 63
+    },
+    {
+      "kind": "state",
+      "time": 7.046434951928248,
+      "vdp_frame": 422,
+      "x": 76,
+      "y": 49,
+      "shot": 87,
+      "switches": 127
+    },
+    {
+      "kind": "state",
+      "time": 7.480313559404896,
+      "vdp_frame": 448,
+      "x": 76,
+      "y": 49,
+      "shot": 87,
+      "switches": 255
+    },
+    {
+      "kind": "state",
+      "time": 7.913890731922632,
+      "vdp_frame": 474,
+      "x": 71,
+      "y": 49,
+      "shot": 82,
+      "switches": 255
+    },
+    {
+      "kind": "state",
+      "time": 8.36446419866212,
+      "vdp_frame": 501,
+      "x": 98,
+      "y": 49,
+      "shot": 109,
+      "switches": 255
+    }
+  ],
+  "method": "cold boot; keyboard/joystick replay device events; original 6502 comparison every captured update",
+  "display_measurement": "SAT upload completed; visible scanout and host OS event latency are separate",
+  "physical_hardware": false,
+  "progression_events": {
+    "player_switches": 28,
+    "death_player_switches": 14,
+    "attract_player_switches": 13,
+    "gameovers": 2,
+    "restarts": 1,
+    "deaths": 16,
+    "active_players": [
+      0,
+      1
+    ],
+    "difficulty_settings": [
+      0,
+      64,
+      128,
+      192
+    ]
+  },
+  "audio": {
+    "cases": 6420,
+    "ordered_stores": 15807,
+    "source_sites": [
+      "F7E4",
+      "F91E",
+      "F932",
+      "F936",
+      "F93A",
+      "F93E",
+      "F942",
+      "F946",
+      "F94E",
+      "F950",
+      "FAD6",
+      "FAEF",
+      "FAF9",
+      "FB04",
+      "FB33",
+      "FB68",
+      "FB6A",
+      "FFC3",
+      "FFC8",
+      "FFCC",
+      "FFCE",
+      "FFD1",
+      "FFD3"
+    ],
+    "controls": [
+      0,
+      8,
+      15
+    ],
+    "max_hook_cycles": 807,
+    "min_hook_cycles": 72,
+    "dense_bonus_hooks": [],
+    "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
+    "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
+    "limitation": "all cold source updates recorded; waveform phase and analog timbre remain approximate",
+    "rom_sha256": "3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5"
+  },
+  "startup_prepare_cycles": 48071,
+  "startup_policy": "first cache preparation runs with display disabled; every subsequent visible frame is timed"
+}

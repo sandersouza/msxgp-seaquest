@@ -10,7 +10,8 @@ set recording 0
 debug set_bp $::paced_commit {} {set ::commit_started [machine_info time]}
 debug set_bp $::paced_frame_start {} {
     set ::frame_started [machine_info time]
-    set ::commit_cycles [expr {round(($::frame_started-$::commit_started)*3579545)}]
+    set ::commit_cycles 0
+    if {[info exists ::commit_started]} {set ::commit_cycles [expr {round(($::frame_started-$::commit_started)*3579545)}]}
     if {$::recording} {
         puts $::timings "\{\"kind\":\"commit\",\"time\":[machine_info time],\"x\":[debug read VRAM 0x1B01]\}"
     }

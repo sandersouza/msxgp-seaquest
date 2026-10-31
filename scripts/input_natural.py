@@ -16,9 +16,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--rescue',action='store_true',help='extend device-only replay through natural rescue/death/oxygen cycles')
     parser.add_argument('--progression',action='store_true',help='device-only alternating-player exhaustion, game over and restart')
+    parser.add_argument('--audio',action='store_true',help='verify cold original HUD/PSG cartridge and ordered continuous audio')
     args = parser.parse_args()
-    symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'outputs/render/controls.sym').read_text(),re.M)}
-    rom = ROOT/'outputs/render/controls.rom'
+    rom = ROOT/('outputs/render/presentation-controls.rom' if args.audio else 'outputs/render/controls.rom')
+    symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',rom.with_suffix('.sym').read_text(),re.M)}
+    if args.audio:
+        seed_script = OUT/'seed.tcl'
+        seed_script.write_text('set renderer none\nset throttle off\nset power true\nplug joyporta msxjoystick1\nplug joyportb msxjoystick2\nreverse start\nafter time 1 {reverse savereplay outputs/input/seed.omr; exit}\n')
+        run(seed_script,rom,'seed',mapper='ASCII16')
     events = []
     # Real controls only, beginning after cold boot/refill. Two different
     # held-fire settings and facing reversal, then Select/Reset and fresh refill.
@@ -44,13 +49,17 @@ def main():
     tcl = (ROOT/'scripts/input_natural.tcl').read_text()
     if extended:
         tcl = tcl.replace('after time 16.5','after time 110').replace(' -viewonly','')
+    if args.audio:
+        tcl = tcl.replace('[machine_info time] >= 5.5','[machine_info time] >= 0')
+        from audio_natural import setup
+        tcl = setup(symbols)+tcl
     script.write_text(''.join(f'set {n} {symbols[n]}\n' for n in ('sample_input','paced_core_start','paced_core_done','paced_frame_start','paced_commit','paced_prepared'))+
                       f'set sample_input_return {symbols["core_F6A7"]+3}\n'+
                       ('set oxygen_natural 1\nsource scripts/progression_natural.tcl\n' if args.progression else
                        ('set oxygen_natural 1\nsource scripts/oxygen_natural.tcl\n' if args.rescue else ''))+
                       tcl)
     (OUT/'natural-complete.txt').unlink(missing_ok=True)
-    run(script,rom,'natural')
+    run(script,rom,'natural',mapper='ASCII16' if args.audio else None)
     if not (OUT/'natural-complete.txt').exists():
         raise ValueError('natural replay incomplete')
     original = (ROOT/'outputs/native/original.rom').read_bytes()
@@ -91,7 +100,9 @@ def main():
     frames = [t for t in timing if t['kind']=='state']
     commits = [t for t in timing if t['kind']=='commit']
     busy = [t['cycles'] for t in timing if t['kind']=='busy']
-    if max(busy)>=59736 or any(b['vdp_frame']-a['vdp_frame']!=1 for a,b in zip(frames,frames[1:])):
+    startup_busy = busy.pop(0) if args.audio else None
+    visible_frames = frames[1:] if args.audio else frames
+    if max(busy)>=59736 or any(b['vdp_frame']-a['vdp_frame']!=1 for a,b in zip(visible_frames,visible_frames[1:])):
         raise ValueError('natural collision replay exceeded the frame budget or skipped a VDP frame')
     for event in latency:
         # Before press each pulse is neutral, away from boundaries/refill/death.
@@ -143,6 +154,11 @@ def main():
         if not (e['death_player_switches']>=2 and e['gameovers'] and e['restarts'] and e['active_players']==[0,1]
                 and e['difficulty_settings']==[0,64,128,192]):
             raise ValueError(f'incomplete natural progression coverage: {e}')
+    if args.audio:
+        from audio_natural import verify
+        report['audio'] = verify(symbols,rom,data)
+        report['startup_prepare_cycles'] = startup_busy
+        report['startup_policy'] = 'first cache preparation runs with display disabled; every subsequent visible frame is timed'
     (OUT/'natural-result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('latency','shot_births')}))
 

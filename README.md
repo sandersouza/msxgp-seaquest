@@ -9,9 +9,11 @@ See the [roadmap](docs/superpowers/specs/2026-10-30-seaquest-msx1-design.md),
 The [reference disassembly](docs/reference-disassembly.md) documents byte-identical
 rebuilds of both supplied binaries and hardware differences in the Atari 800 port.
 
-Current delivery: verified references, byte-identical research rebuilds, a macOS
-toolchain and a bootable MSX1 hardware diagnostic. A playable Seaquest ROM is not
-available yet. Original ROMs/source must be supplied locally; they are not distributed here.
+Current integration runs the original gameplay with original HUD/background
+and ordered PSG sound on MSX1. Build/run locally with `make presentation-run`;
+original ROMs/source must be supplied locally and are not distributed here.
+Reference cadence/50Hz policy, full-game release and physical-machine acceptance
+remain open in #14/#15. The portable hardware diagnostic is also available.
 
 See [development setup and commands](docs/development.md) to build/run the diagnostic.
 See [delivery and CI conventions](docs/project-workflow.md) for automated checks and
@@ -23,7 +25,8 @@ comparisons, including continuous replay. The [SCREEN 2 feasibility gate](docs/r
 records full-density renderer and native-core timing. The [original graphics
 pipeline](docs/original-graphics.md) extracts and verifies source silhouettes,
 surface/edge variants and lettering, with measured native sprite integration.
-HUD composition and playable integration remain subsequent work.
+The [HUD/audio contract](docs/hud-audio.md) explains the original lettering,
+palette/layout adaptation, PSG event fidelity and explicit timbre differences.
 The [controls diagnostic](docs/input-controls.md) runs the original movement and
 firing code with keyboard and both joystick ports, including measured input
 latency. Build/run it locally with `make controls-run`; it acquires original raster

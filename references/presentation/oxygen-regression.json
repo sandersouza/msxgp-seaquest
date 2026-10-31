@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "cases": 24605,
+  "max_cycles": [
+    178,
+    19048,
+    19588
+  ],
+  "stack_min": 62320,
+  "detail": "complete",
+  "alarm_cases": 12288,
+  "transition_cases": 6125,
+  "chain_ticks": 6192,
+  "original_raster_alarm_cases": 768,
+  "rom_sha256": "897005edd51b95ebe7893493880b14ca7d39b4213d112796bcdd47f7c0ce7b20",
+  "source_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
+  "machine": "C-BIOS_MSX1",
+  "ram_kib": 64,
+  "vram_kib": 16,
+  "video": "NTSC",
+  "method": "original F44F..F473 CPU execution; acquired raster contacts; original F5B8..F00E; actual BIOS controls",
+  "physical_hardware": false
+}

@@ -23,10 +23,10 @@ OUT = ROOT / 'outputs/input'
 MASTER_HZ = 3436363200  # NTSC Z80 3579545 Hz * serialized clock period 960
 
 
-def run(script, rom, name, timeout=60):
+def run(script, rom, name, timeout=60, mapper=None):
     with (OUT / (name+'.log')).open('wb') as log:
         subprocess.run(['openmsx','-control','stdio','-machine','C-BIOS_MSX1',
-                        '-cart',str(rom),'-script',str(script)],cwd=ROOT,
+                        '-cart',str(rom),*(['-romtype',mapper] if mapper else []),'-script',str(script)],cwd=ROOT,
                        env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},
                        stdout=log,stderr=subprocess.STDOUT,timeout=timeout,check=True)
 
