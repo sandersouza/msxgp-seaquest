@@ -1,5 +1,11 @@
 # Seaquest issue #15 acceptance candidate
 
+The owner authorized publication of this exact cartridge as **1.0.0** on
+2026-10-31. See the [release notes](releases/1.0.0.md). Publication does not change
+the manual/physical acceptance status below. The original issue #15 ZIP remains
+a local research package; the public release contains only the MSX cartridge,
+release identity manifest and checksums.
+
 This is a **test candidate**, not a physically accepted release. The package stays
 local under `outputs/acceptance/`; original-derived cartridges and replay snapshots
 must not be uploaded to GitHub without the owner's authorization. Automated results
