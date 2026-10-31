@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "verdict": "audit only; no native DOS or plain32 artifact validated",
+  "source_commit": "14a1360a63c48a61dc7c37d05aa09177927dbe9a",
+  "python": "3.14.7",
+  "zlib_runtime": "1.2.12",
+  "rom": {
+    "raw_bytes": 131072,
+    "sha256": "41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8",
+    "zlib9_bytes": 40925,
+    "lzma6_xz_bytes": 28632,
+    "runtime_fit_proven": false
+  },
+  "matches_accepted_release": true,
+  "banks": [
+    {
+      "bank": 0,
+      "occupied_extent_bytes": 16117,
+      "raw_bytes": 16384,
+      "sha256": "05ef3564058fd4fc4e2655316f7ccc9e9b83ef9f9658ae81451398b250d9d22c",
+      "zlib9_bytes": 9071,
+      "lzma6_xz_bytes": 6988,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 1,
+      "occupied_extent_bytes": 15844,
+      "raw_bytes": 16384,
+      "sha256": "634f85ba37b27cbe82f54eefbd6f0c0dd7a9582c8122c054e41ffb89ddfc3d39",
+      "zlib9_bytes": 7037,
+      "lzma6_xz_bytes": 5952,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 2,
+      "occupied_extent_bytes": 16384,
+      "raw_bytes": 16384,
+      "sha256": "42097d59ff37fcc2d888716e5599089e95dc226fafcba2caa32cb547df5c0ad5",
+      "zlib9_bytes": 2731,
+      "lzma6_xz_bytes": 1628,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 3,
+      "occupied_extent_bytes": 12816,
+      "raw_bytes": 16384,
+      "sha256": "a4e04e7181c546b2600512630c423d0eabac27b71c700f2ab0daf0dbc238f1cc",
+      "zlib9_bytes": 2505,
+      "lzma6_xz_bytes": 1400,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 4,
+      "occupied_extent_bytes": 10545,
+      "raw_bytes": 16384,
+      "sha256": "fcca1a5f1157abe8189732ec87dec3ece0c4687257a9a5aed428d3a5c7e59955",
+      "zlib9_bytes": 3103,
+      "lzma6_xz_bytes": 2212,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 5,
+      "occupied_extent_bytes": 13053,
+      "raw_bytes": 16384,
+      "sha256": "1f3dfda09feba451269f7592b16fa65fdac9c4e18e60638f4827754424fec2b8",
+      "zlib9_bytes": 5309,
+      "lzma6_xz_bytes": 4532,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 6,
+      "occupied_extent_bytes": 16375,
+      "raw_bytes": 16384,
+      "sha256": "5beadfe5ee6fa0605dfdc3fb69656b00c91c5b24ed1699fb4afc8bafff190cb5",
+      "zlib9_bytes": 4720,
+      "lzma6_xz_bytes": 3700,
+      "runtime_fit_proven": false
+    },
+    {
+      "bank": 7,
+      "occupied_extent_bytes": 14769,
+      "raw_bytes": 16384,
+      "sha256": "f9d87a89a8f048b8240c796a42458601a14f40f939756af4b4c7fe895fc3dd41",
+      "zlib9_bytes": 5949,
+      "lzma6_xz_bytes": 4612,
+      "runtime_fit_proven": false
+    }
+  ],
+  "occupied_extents_total_bytes": 115903,
+  "occupied_extents_note": "Includes internal alignment and bank-boundary padding; not a minimal runtime lower bound.",
+  "upper_ram_reservation_bytes": 13184,
+  "ram_regions": [
+    {
+      "start": "0xc000",
+      "end_exclusive": "0xc400",
+      "owner": "canonical state, hardware mirrors, palette forecast shadows"
+    },
+    {
+      "start": "0xc400",
+      "end_exclusive": "0xc800",
+      "owner": "renderer, input, clock, palette queue and colour state"
+    },
+    {
+      "start": "0xc800",
+      "end_exclusive": "0xcf00",
+      "owner": "name staging, enemy palette lookup, sprite attributes and scratch"
+    },
+    {
+      "start": "0xcf00",
+      "end_exclusive": "0xd000",
+      "owner": "HUD state and field/class signatures"
+    },
+    {
+      "start": "0xd000",
+      "end_exclusive": "0xec00",
+      "owner": "unpacked read-only HUD atlas and field data"
+    },
+    {
+      "start": "0xec00",
+      "end_exclusive": "0xf000",
+      "owner": "HUD caches and two palette RGB buffers"
+    },
+    {
+      "start": "0xf000",
+      "end_exclusive": "0xf380",
+      "owner": "stack reservation; measured usage is smaller"
+    },
+    {
+      "start": "0xf380",
+      "end_exclusive": "0x10000",
+      "owner": "BIOS/system work area; DOS also owns memory below this boundary"
+    }
+  ],
+  "unchanged_layout_accounting_bytes": 129087,
+  "enemy": {
+    "variants": 608,
+    "prepared_transfer_bytes": 29184,
+    "bank_boundary_padding_bytes": 16,
+    "compact_cache_bytes": 8192,
+    "payload_reduction_bytes": 21008
+  },
+  "palette": {
+    "records": 196,
+    "record_bytes": 125,
+    "compact_records_bytes": 24500,
+    "compiled_field_program_bytes": 10545,
+    "forecast_bytes": 6644,
+    "role_factorization": {
+      "exact_rgb_nibble_columns": 70,
+      "roles_bytes": 4704,
+      "retained_class_ids_bytes": 6076,
+      "combined_bytes": 10780,
+      "explicit_two_index_descriptor_bytes": 140,
+      "generated_decoder_and_runtime_validated": false
+    }
+  },
+  "hud": {
+    "unpacked_bytes": 7168,
+    "packed_bytes": 4349
+  },
+  "constraints": {
+    "plain32_max_bytes": 32768,
+    "physical_ram_bytes": 65536,
+    "vram_bytes": 16384,
+    "mapper_or_turbo_expansion_allowed": false
+  },
+  "limitations": [
+    "Host compression sizes exclude a Z80 decoder, its state and destination working set.",
+    "A smaller storage image does not establish timing, slots, DOS TPA safety or a real load path.",
+    "The unchanged expanded layout exceeds 64 KiB; this does not prove a redesigned port impossible.",
+    "DOS1 TPA ends at the word at 0006h; preserving DOS requires respecting it.",
+    "A DOS takeover would need an explicit BIOS/slot/stack contract and reset/exit policy."
+  ]
+}
