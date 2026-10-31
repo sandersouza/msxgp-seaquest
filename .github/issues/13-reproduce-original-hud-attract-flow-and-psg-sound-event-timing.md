@@ -56,7 +56,7 @@ Reproduced on timed SHA256
  counter boundaries, input/Reset/Select exits, B/W, cache rebases and a prepared
  token240 across activation into the next epoch.10,980RGB/spriteframes, no skips
  or visible commits; max59,583busy/10,324commitcycles.
-- 7,982audio ticks/34,692ordered stores/45sites, including2,400persistent chain ticks.
+- 7,982audio ticks/34,692ordered stores/44observed sites, including2,400persistent chain ticks.
 - 6,422cold device-only CPU/TIA updates/15,807sound stores, noRAMreload/skip,
  max49,007busycycles on controls SHA256
  `f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3`.

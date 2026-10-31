@@ -21,7 +21,7 @@ Atari2600 NTSC4K reference SHA256:
 | Forced cache generation rebase |183×112=20,496updates;180actual rebases;2,745RGB/spriteframes; zero skips |
 | Prepared token240 across activation/next epoch |183×384=70,272updates;139rebases;9,723READY1/token240 prefetch entries;5,490RGB/spriteframes; zero skips |
 | All continuous attract modes |max59,583/59,736busycycles,153free; max10,324commitcycles |
-| Ordered source/PSG |7,982ticks/34,692stores/45source sites;2,400persistent chain ticks |
+| Ordered source/PSG |7,982ticks/34,692stores/44observed source sites;2,400persistent chain ticks |
 | Cold device-only original CPU/TIA/HUD/PSG |6,422updates;15,807sound stores; noRAMreload/skip; max49,007busycycles |
 | Native clear/RNG/core |2,963cases, including all256initial zero-clear X values |
 | Actual keyboard/joystick/held fire |5,660cases, bothplayers/ports and16/26-tick firing |
@@ -40,7 +40,8 @@ Both are131,072bytesASCII16 and differ by bootstrap/build variant. No original
 ROM, generated art/table or playable cartridge is published. Named local artifacts
 remain ignored; concise JSON summaries beside this document identify each run.
 The renderer summary drops the obsolete64KiB rom_padding field and derives the
-source-bank gap from the matching saved symbols:512bytes before9B00 helpers.
+source-bank gap from matching saved symbols:0bytes before9B00 helpers.
+The9900/9A00 pages contain live window-pointer tables, not padding.
 Fixedbank0 has117padding bytes. Stack minimumF370 and memory/VRAM guards pass.
 
 ## Continuous transition evidence

@@ -37,7 +37,7 @@ implementation is superseded by the final128KiB backend below.
   display/name bytes/frame, allsource actors/updates retained. No runtime6502.
 - Fixedbank0 mapper helpers; native core/source and constant writers runbank1.
   Temporary mappings restore1. All bank assertions/exact131072-byte host check
-  pass. Fixedbankpadding117; source-data gap512before9B00. Use current symbols.
+  pass. Fixedbankpadding117; source-data gap0before9B00(windowtablesat9900/9A00). Use current symbols.
 - Compact138-byte palette records expand303logicalbytes in bounded prefetch.
   Seven enemy slots: private0 plus6global foreground-only slots. Never prewarm0;
   validate mappingownership before invalidation/protection. Water usescolour0/R7,
