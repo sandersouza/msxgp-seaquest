@@ -16,6 +16,8 @@ of what comes next!
 
 ![Seaquest running on the MSX1 renderer](docs/gameplay.png)
 
+[▶ Play Seaquest 1.0.0 directly in WebMSX](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2Fseaquest.rom&ROM_FORMAT=ASCII16)
+
 MSX1 port of Activision's Atari 2600 Seaquest, focused on preserving the original
 gameplay, rules and simulation timing on standard MSX hardware.
 
