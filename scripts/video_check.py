@@ -42,32 +42,40 @@ def main():
     parser.add_argument('--machine', choices=('C-BIOS_MSX1','C-BIOS_MSX1_EU'),default='C-BIOS_MSX1_EU')
     parser.add_argument('--quick', action='store_true')
     parser.add_argument('--frames', type=int, default=525)
-    parser.add_argument('--scenario', choices=('attract','burst','dense','cold'), default='attract')
+    parser.add_argument('--scenario', choices=('attract','burst','dense','cold','fullgame'), default='attract')
+    parser.add_argument('--mode', type=int, choices=(0,1), default=0)
+    parser.add_argument('--difficulty', type=int, choices=(0,64,128,192), default=0)
+    parser.add_argument('--controller', choices=('exhaust','rescue'), default='exhaust')
+    parser.add_argument('--output-root', type=Path, default=OUT)
     parser.add_argument('--generation', choices=('normal','wrap','ready'),default='normal')
     parser.add_argument('--build-only', action='store_true')
     parser.add_argument('--inject-clock-error', action='store_true',help='negative control: disable extra PAL updates')
     parser.add_argument('--inject-canonical-error', action='store_true',help='negative control: mutate a staged source byte')
     args = parser.parse_args()
+    cold_start = args.scenario in ('cold','fullgame')
     if args.build_only:
         build()
         return
     if args.frames<1:
         parser.error('--frames must be positive')
-    if (args.inject_clock_error or args.inject_canonical_error) and (args.scenario=='cold' or args.machine!='C-BIOS_MSX1_EU'):
+    if (args.inject_clock_error or args.inject_canonical_error) and (cold_start or args.machine!='C-BIOS_MSX1_EU'):
         parser.error('negative controls require a seeded PAL scenario')
     s = symbols(args.rom.with_suffix('.sym'))
     pal = args.machine.endswith('_EU')
     suffix = ('-clock-negative' if args.inject_clock_error else '')+('-state-negative' if args.inject_canonical_error else '')
-    target = OUT/args.machine/(args.scenario+'-'+args.generation+('-quick' if args.quick else '')+suffix)
+    route = f'-m{args.mode}-d{args.difficulty}-{args.controller}' if args.scenario=='fullgame' else ''
+    target = args.output_root/args.machine/(args.scenario+route+'-'+args.generation+('-quick' if args.quick else '')+suffix)
     target.mkdir(parents=True,exist_ok=True)
     rom = read_original()
     # Same real game-over source seed used by issue13; one seed per chain.
-    cold = (ROOT/'outputs/input/natural.bin').read_bytes()
-    seed_tick = next(t for t in range(1000,len(cold)//2303)
-                     if (state:=cold[t*2303+2052:(t+1)*2303])[0xa3]
-                     and not any(state[a] for a in (0xe9,0xbb,0xc2)))
+    seed_tick = None
     seed = bytearray(1024)
-    seed[:251] = cold[seed_tick*2303+2052:(seed_tick+1)*2303]
+    if not cold_start:
+        cold = (ROOT/'outputs/input/natural.bin').read_bytes()
+        seed_tick = next(t for t in range(1000,len(cold)//2303)
+                         if (state:=cold[t*2303+2052:(t+1)*2303])[0xa3]
+                         and not any(state[a] for a in (0xe9,0xbb,0xc2)))
+        seed[:251] = cold[seed_tick*2303+2052:(seed_tick+1)*2303]
     configs = [(n,240,1,63,0,255,0) for n in ([199] if args.quick else range(127,256))]
     if not args.quick:
         configs += [(n,240,1,63,action,phase,0) for n in (127,199,215,255)
@@ -98,7 +106,7 @@ def main():
         seeds = [records[i*1034+10:(i+1)*1034] for i in indexes]
         configs = [(0,0,0,63,0,0,0) for _ in seeds]
         (target/'case-index.json').write_text(json.dumps([names[i] for i in indexes]))
-    if args.scenario=='cold':
+    if cold_start:
         seeds = []
         configs = []
     (target/'configs.json').write_text(json.dumps(configs)+'\n')
@@ -106,7 +114,7 @@ def main():
     names = ('rpc_done','core_F00E','core_F5B8','audio_prime_start','acquire_frame_state',
              'paced_frame_start','paced_start','paced_wait','paced_commit','video_after_commit','video_extra_core_start')
     script = ''.join(f'set {n} {s[n]}\n' for n in names)
-    script += f'set sample_input_return {s["core_F6A9"]}\nset out {target}\nset frames {args.frames}\nset budget {71364 if pal else 59736}\nset cold {int(args.scenario=="cold")}\nset guard_ready 0\n'
+    script += f'set sample_input_return {s["core_F6A9"]}\nset out {target}\nset frames {args.frames}\nset budget {71364 if pal else 59736}\nset cold {int(cold_start)}\nset guard_ready 0\n'
     script += f'set expected_vdp {"TMS9929A" if pal else "TMS9918A"}\n'
     for name,column in (('switches',3),('actions',4),('phases',5),('accumulators',6)):
         script += 'set '+name+' {'+' '.join(str(row[column]) for row in configs)+'}\n'
@@ -116,6 +124,9 @@ def main():
     audio_hooks = audio_hooks.replace('$::count','$::tick')
     audio_hooks = audio_hooks.replace('{$::recording}', '{$::recording && $::active_tick}')
     harness = (ROOT/'scripts/video_check.tcl').read_text()
+    if args.scenario=='fullgame':
+        script += f'set game_mode {args.mode}\nset game_difficulty {args.difficulty}\nset game_controller {args.controller}\n'
+        harness += '\nsource scripts/full_game.tcl\n'
     latency = []
     if args.scenario=='cold':
         # Capture a separate machine snapshot; replay device events carry both
@@ -147,7 +158,7 @@ def main():
         result = subprocess.run(['openmsx','-control','stdio','-machine',args.machine,
                                 '-cart',str(args.rom),'-romtype','ASCII16','-script',str(target/'start.tcl')],
                                cwd=ROOT,env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},
-                               stdout=log,stderr=subprocess.STDOUT,timeout=240)
+                           stdout=log,stderr=subprocess.STDOUT,timeout=600)
     if result.returncode or not (target/'raw.json').exists():
         raise ValueError((target/'openmsx.log').read_text()[-2000:])
     data = (target/'native.bin').read_bytes()
@@ -256,9 +267,14 @@ def main():
                   cpu_hz=3579545,vdp='TMS9929A' if pal else 'TMS9918A',ram_kib=64,vram_kib=16,
                   display_period_cycles=71364 if pal else 59736,
                   python=platform.python_version(),openmsx=subprocess.check_output(['openmsx','-v'],text=True).strip(),
-                  stack_measurement='C-BIOS init_ram C9 reserve, including startup' if args.scenario=='cold' else 'A5 marker after BIOS initialization',
+                  stack_measurement='C-BIOS init_ram C9 reserve, including startup' if cold_start else 'A5 marker after BIOS initialization',
                   physical_hardware=False,host_event_and_scanout_latency_measured=False)
     report['observed_machine'] = json.loads((target/'machine.json').read_text())
+    if args.scenario=='fullgame':
+        from full_game_reference import coverage
+        report['full_game'] = coverage(data,timing,args.mode,args.difficulty,args.controller)
+        report['replay_sha256'] = hashlib.sha256((target/'game.omr').read_bytes()).hexdigest()
+    report['verdict'] = 'pass'
     (target/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('latency','audio')}))
 

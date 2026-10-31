@@ -1,5 +1,9 @@
 # Seaquest MSX1
 
+Issue #15: [acceptance candidate and hardware procedure](docs/hardware-acceptance.md),
+[observation record](docs/acceptance-observations.md). The frozen playable candidate
+is 128 KiB ASCII16; physical acceptance and subjective sound remain pending.
+
 Native Seaquest port targeting MSX1 with **64 KiB RAM, 16 KiB VRAM**, standard
 Z80 and PSG, with no expansions. The Atari 2600 original is the gameplay authority.
 
