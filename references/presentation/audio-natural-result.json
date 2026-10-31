@@ -1,5 +1,5 @@
 {
-  "cases": 6420,
+  "cases": 6422,
   "ordered_stores": 15807,
   "source_sites": [
     "F7E4",
@@ -37,5 +37,5 @@
   "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
   "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
   "limitation": "all cold source updates recorded; waveform phase and analog timbre remain approximate",
-  "rom_sha256": "3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5"
+  "rom_sha256": "f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3"
 }

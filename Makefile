@@ -60,12 +60,15 @@ render-progression-bench:
 progression-natural: input-contract
 	@$(PYTHON) -B scripts/input_natural.py --progression
 presentation:
-	@$(PYTHON) -B scripts/render_bench.py --audio --controls --build-only
+	@$(PYTHON) -B scripts/render_bench.py --palette --controls --build-only
 presentation-run: presentation
 	@openmsx -machine C-BIOS_MSX1 -cart outputs/render/presentation-controls.rom -romtype ASCII16
-presentation-check:
-	@$(PYTHON) -B scripts/render_bench.py --audio --progression
+presentation-check: presentation-natural
+	@$(PYTHON) -B scripts/render_bench.py --palette --progression
 	@$(PYTHON) -B scripts/presentation_sweep.py
+	@$(PYTHON) -B scripts/presentation_attract.py
+	@$(PYTHON) -B scripts/presentation_attract.py --force-generation-wrap
+	@$(PYTHON) -B scripts/presentation_attract.py --ready-generation-wrap
 	@$(PYTHON) -B scripts/audio_contract.py
 presentation-natural: presentation
 	@$(PYTHON) -B scripts/input_natural.py --audio --progression

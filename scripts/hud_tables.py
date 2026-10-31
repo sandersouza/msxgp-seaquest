@@ -99,13 +99,14 @@ def scale(rows):
     return [sorted({dx for x in row for dx in range(x*3//2, (x+1)*3//2)}) for row in rows]
 
 
-def generate():
+def generate(palette_fast=False):
     rom = read_original()
     assets = extract(rom)
     # Six normal source foregrounds have their own enemy pattern slots. Only
     # the black slot is recolored for other attract hues/backgrounds.
-    top = Catalog(set(range(1,73)))
-    bottom = Catalog(set(range(1,37)))
+    font_first = 85 if palette_fast else 73
+    top = Catalog(set(range(1,font_first)))
+    bottom = Catalog(set(range(1,43 if palette_fast else 37)))
     fields = {}
     # Roles0..10 are the source FCF0 main palette.11 is the rescued-diver
     # source82 color,12 selects main0/1 according to active B7.
@@ -125,10 +126,11 @@ def generate():
     for name in ('hud_pairs','hud_single'):
         required.update(identifier for offset,identifier in enumerate(fields[name]) if offset%3!=1)
     selected = set(required)
+    resident_count = 54 if palette_fast else 66
     for identifier,_,_ in top.entries:
-        if len(selected)==66: break
+        if len(selected)==resident_count: break
         selected.add(identifier)
-    if len(selected)!=66: raise ValueError('player2 resident font selection exceeded66 tiles')
+    if len(selected)!=resident_count: raise ValueError('player2 resident font selection exceeded budget')
     player2 = {}
     for identifier,pattern,_ in top.entries[:font_count]:
         if identifier in selected: player2[identifier] = top.tile(pattern,[(1,5)]*8)
@@ -257,12 +259,20 @@ def generate():
         fields[name] = bytes(lookup)
     image, labels = bytearray(), {}
     for name, data in fields.items():
+        if palette_fast and name in ('hud_top_class_ids','hud_bottom_class_ids'):
+            if name=='hud_top_class_ids':
+                if len(image)>0x1a00: raise ValueError('HUD data overlaps fixedclass lookup')
+                image.extend(bytes(0x1a00-len(image)))
+            image.extend(bytes((-len(image))%256))
         labels[name] = BASE+len(image)
         image.extend(data)
     labels['hud_data_end'] = BASE+len(image)
     labels['hud_top_cache'] = BASE+len(image)
-    labels['hud_bottom_cache'] = labels['hud_top_cache']+512
-    labels['hud_ram_end'] = labels['hud_bottom_cache']+512
+    labels['hud_bottom_cache'] = labels['hud_top_cache']+(256 if palette_fast else 512)
+    labels['hud_ram_end'] = labels['hud_bottom_cache']+(768 if palette_fast else 512)
+    if palette_fast:
+        labels['hud_rgb0'] = labels['hud_bottom_cache']+256
+        labels['hud_rgb1'] = labels['hud_rgb0']+256
     if labels['hud_ram_end'] > 0xf000: raise ValueError('HUD data/cache exceed declared RAM region')
     packed = compress(bytes(image))
     if decompress(packed) != image: raise ValueError('HUD compression roundtrip failed')
@@ -322,9 +332,14 @@ def generate():
                               f'HUD_SCORE_CLASS1 EQU {class_ids[tuple([(1,5)]*8)]}\n'+
                               f'HUD_DIVER_CLASS EQU {class_ids[tuple([(11,8)]*8)]}\n'+
                               f'HUD_LOGO_CLASS EQU {class_ids[tuple([(10,6)]*8)]}\n'+
-                              f'HUD_FONT_SOURCE_FIRST EQU 73\nHUD_FONT_SCRATCH_FIRST EQU {scratch_ids[0]}\n'+
+                              f'HUD_FONT_SOURCE_FIRST EQU {font_first}\nHUD_FONT_SCRATCH_FIRST EQU {scratch_ids[0]}\n'+
+                              f'HUD_BLANK_TILE EQU {fields["hud_blank_pair"][0]}\n'+
+                              f'HUD_FONT_P0_COUNT EQU {font_count}\nHUD_FONT_P1_COUNT EQU {resident_count+6}\n'+
                               f'HUD_RIPPLE_ROLE EQU {sources.index(0x92)}\n'+
-                              'hud_packed:\n    INCBIN "hud-packed.bin"\n')
+                              ('hud_packed EQU $A200\n' if palette_fast else 'hud_packed:\n    INCBIN "hud-packed.bin"\n'))
+    if palette_fast:
+        from palette_tables import generate as palette_generate
+        palette_generate(sources,pairs,classes,fields,labels)
     metadata = dict(top_tiles=len(top.entries), bottom_tiles=len(bottom.entries),
                     color_classes=len(classes), uncompressed_bytes=len(image), packed_bytes=len(packed),
                     ram_end=hex(labels['hud_ram_end']), labels={n:hex(a) for n,a in labels.items()},

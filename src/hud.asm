@@ -43,6 +43,25 @@ HUD_SCORE_SOURCE_PTRS EQU $C4F2
 HUD_FONT_BANK EQU $C4F8
 HUD_SCORE_CHANGED EQU $C4F9
 
+    MACRO hud_class_signature identifier
+    IFDEF WITH_PALETTE
+    LD A,(HUD_CLASS_SIGNATURES+identifier)
+    LD E,A
+    LD D,0
+    ELSE
+    LD DE,(HUD_CLASS_SIGNATURES+2*identifier)
+    ENDIF
+    ENDM
+    MACRO hud_global_signature
+    IFDEF WITH_PALETTE
+    LD A,(PAL_CUR_INDEX)
+    LD E,A
+    LD D,0
+    ELSE
+    LD DE,(HUD_KEY)
+    ENDIF
+    ENDM
+
     MACRO hud_store_pointer offset
     LD DE,(HUD_PTRS+offset)
     LD A,L
@@ -67,7 +86,15 @@ hud_init:
     OUT ($99),A
     LD HL,hud_packed
     LD DE,$D000
+    IFDEF WITH_PALETTE
+    LD A,5
+    LD ($7000),A
+    ENDIF
     CALL hud_unpack
+    IFDEF WITH_PALETTE
+    LD A,1
+    LD ($7000),A
+    ENDIF
     XOR A
     LD HL,hud_top_cache
     LD DE,hud_top_cache+1
@@ -94,8 +121,15 @@ hud_init:
     LD DE,HUD_ROLES
     LD BC,HUD_ROLE_COUNT
     LDIR
+    IFDEF WITH_PALETTE
+    CALL palette_init
+    ELSE
     CALL hud_build_colors
+    ENDIF
     CALL hud_enemy_init
+    IFDEF WITH_PALETTE
+    CALL palette_enemy_init
+    ELSE
     ; The banked renderer streams ROM patterns, so CC00's old staging page is
     ; free. Predecode each source hue's normal slot*8;255 selects the fallback.
     LD HL,tia_to_tms
@@ -118,7 +152,12 @@ hud_init:
     INC HL
     INC E
     JR NZ,.enemy_slots
-    LD HL,$1414                 ; normal black foreground / blue water
+    ENDIF
+    IFDEF WITH_PALETTE
+    LD HL,$1010                 ; water colour0 follows the backdrop register
+    ELSE
+    LD HL,$1414
+    ENDIF
     DUP 4,enemy_pair
     LD (HUD_ENEMY_COLORS+enemy_pair*2),HL
     EDUP
@@ -167,6 +206,10 @@ hud_init:
     LD DE,$1B24
     LD B,1
     CALL vram_copy_short
+    IFDEF WITH_PALETTE
+    XOR A
+    LD (PAL_INIT),A
+    ENDIF
     RET
 
 hud_unpack:
@@ -229,6 +272,7 @@ hud_load_patterns:
     DJNZ hud_load_patterns
     RET
 
+    IFNDEF WITH_PALETTE
 hud_prepare_palette:
     LD A,($C085)
     LD L,A
@@ -289,12 +333,20 @@ hud_prepare_palette:
     LD A,(HL)
     LD (HUD_ROLES+12),A
     JP hud_build_colors
+    ENDIF
 
 hud_prepare:
     XOR A
+    IFDEF WITH_PALETTE
+    LD (PAL_PALETTE_CHANGED),A
+    ENDIF
     LD (HUD_COLORS_NEEDED),A
     LD (HUD_SCORE_CHANGED),A
+    IFDEF WITH_PALETTE
+    CALL palette_prepare
+    ELSE
     CALL hud_prepare_palette
+    ENDIF
     CALL hud_prepare_water
     CALL hud_player_bases
     LD HL,HUD_PREVIOUS_SCORE
@@ -312,6 +364,23 @@ hud_prepare:
     LD (HUD_PREVIOUS_SCORE),HL
     LD A,($C0BA)
     LD (HUD_PREVIOUS_SCORE+2),A
+    OR H
+    OR L
+    JR NZ,.score_nonzero
+    LD HL,hud_blank_pair
+    LD (HUD_SCORE_SOURCE_PTRS),HL
+    LD (HUD_SCORE_SOURCE_PTRS+2),HL
+    LD (HUD_PTRS),HL
+    LD (HUD_PTRS+2),HL
+    LD HL,(HUD_SINGLE_BASE)
+    LD (HUD_SCORE_SOURCE_PTRS+4),HL
+    LD (HUD_PTRS+4),HL
+    LD A,1
+    LD (HUD_COLORS_NEEDED),A
+    XOR A
+    LD (HUD_SIGNIFICANT),A
+    JP .score_ready
+.score_nonzero:
     XOR A
     LD (HUD_SIGNIFICANT),A
     DUP 3,digit_pair
@@ -515,6 +584,30 @@ hud_prepare:
     LD A,(HUD_NAME_PAGE)
     XOR 4
     LD (HUD_NAME_PAGE),A
+    IFDEF WITH_PALETTE
+    LD A,(PAL_BLACKOUT)
+    OR A
+    JR NZ,.no_color_queue
+    LD A,(HUD_ALL_CURRENT)
+    OR A
+    JR NZ,.no_color_queue
+    CALL palette_begin_queue
+    CALL palette_forecast_apply
+    OR A
+    CALL Z,palette_default_prepare
+    OR A
+    CALL Z,hud_commit_fields
+.no_color_queue:
+    LD A,($C0A2)
+    CP 127
+    CALL NC,palette_prefetch
+    LD A,($C0A2)
+    CP 127
+    CALL NC,palette_player_prefetch
+    LD A,($C0A2)
+    CP 127
+    CALL NC,palette_forecast_tick
+    ENDIF
     RET
 
 hud_player_bases:
@@ -523,6 +616,27 @@ hud_player_bases:
     CP (HL)
     RET Z
     LD (HL),A
+    IFDEF WITH_PALETTE
+    ; A player swap can invalidate the whole score/life atlas even when the
+    ; palette itself stayed fixed after input canceled attract mode.
+    LD A,($C0A2)
+    CP 127
+    JR NC,.ordinary_swap
+    LD A,($C0A3)
+    OR A
+    JR Z,.ordinary_swap
+    LD A,($C0BB)
+    LD HL,$C0E9
+    OR (HL)
+    JR NZ,.ordinary_swap
+    LD A,(PAL_PALETTE_CHANGED)
+    OR A
+    JR NZ,.ordinary_swap
+    LD A,2
+    LD (PAL_PALETTE_CHANGED),A
+.ordinary_swap:
+    LD A,(HUD_PLAYER)
+    ENDIF
     LD HL,hud_pairs
     LD DE,hud_single
     LD BC,hud_lives
@@ -639,11 +753,24 @@ hud_count9:
     RET
 
 hud_show:
+    IFDEF WITH_PALETTE
+    LD A,(PAL_BLACKOUT)
+    OR A
+    RET NZ
+    LD A,(PAL_DISPLAY_OFF)
+    OR A
+    JR NZ,.show
+    ENDIF
     LD A,(HUD_FIRST_FRAME)
     OR A
     RET Z
+.show:
     XOR A
     LD (HUD_FIRST_FRAME),A
+    IFDEF WITH_PALETTE
+    LD (PAL_DISPLAY_OFF),A
+    CALL palette_upload_slow
+    ENDIF
     LD A,($F3E0)
     OR $40
     LD ($F3E0),A
@@ -654,38 +781,43 @@ hud_show:
 
 ; Only the inactive name table changes during the active picture.
 hud_upload_names:
+    LD A,(HUD_NAME_PAGE)
+    ADD A,$18
+    LD D,A
     DUP 3,hud_segment_index
     LD HL,(HUD_PTRS+2*hud_segment_index)
-    LD DE,$180C+3*hud_segment_index
+    LD E,$0C+3*hud_segment_index
     LD B,3
-    CALL hud_name_copy
+    CALL vram_copy_short
     EDUP
     LD HL,(HUD_PTRS+6)
-    LD DE,$182C
+    LD E,$2C
     LD B,9
-    CALL hud_name_copy
+    CALL vram_copy_short
+    INC D
+    INC D
     LD HL,(HUD_PTRS+8)
-    LD DE,$1A8C
+    LD E,$8C
     LD B,9
-    CALL hud_name_copy
+    CALL vram_copy_short
     LD HL,(HUD_PTRS+8)
     LD BC,9
     ADD HL,BC
-    LD DE,$1AAC
+    LD E,$AC
     LD B,9
-    CALL hud_name_copy
+    CALL vram_copy_short
     LD HL,(HUD_PTRS+10)
-    LD DE,$1ACC
+    LD E,$CC
     LD B,9
-    CALL hud_name_copy
+    CALL vram_copy_short
     LD HL,(HUD_PTRS+12)
-    LD DE,$1A69
+    LD E,$69
     LD B,13
-    CALL hud_name_copy
+    CALL vram_copy_short
     LD HL,(HUD_PTRS+14)
-    LD DE,$1A63
+    LD E,$63
     LD B,6
-    JP hud_name_copy
+    JP vram_copy_short
 hud_name_copy:
     LD A,(HUD_NAME_PAGE)
     ADD A,D
@@ -693,9 +825,38 @@ hud_name_copy:
     JP vram_copy_short
 
 hud_commit:
+    IFDEF WITH_PALETTE
+    LD A,(HUD_NAME_PAGE)
+    RRCA
+    RRCA
+    ADD A,6
+    OUT ($99),A
+    LD ($F3E1),A
+    LD A,$82
+    OUT ($99),A
+    LD A,(PAL_BLACKOUT)
+    OR A
+    JR Z,.visible
+    CALL hud_commit_water
+    LD A,($F3E0)
+    AND $BF
+    LD ($F3E0),A
+    OUT ($99),A
+    LD A,$81
+    OUT ($99),A
+    LD A,1
+    LD (PAL_DISPLAY_OFF),A
+    JP palette_upload_fast
+.visible:
+    CALL palette_commit
+    CALL hud_commit_water
+    JP hud_commit_ripple
+    ELSE
     CALL hud_commit_fields
     JP hud_commit_ripple
+    ENDIF
 hud_commit_fields:
+    IFNDEF WITH_PALETTE
     LD A,(HUD_NAME_PAGE)
     RRCA
     RRCA
@@ -705,6 +866,7 @@ hud_commit_fields:
     LD A,$82
     OUT ($99),A
     CALL hud_commit_water
+    ENDIF
     LD A,(HUD_ALL_CURRENT)
     OR A
     RET NZ
@@ -714,6 +876,11 @@ hud_commit_fields:
     LD IY,HUD_FIELD_CACHE
     XOR A
     LD (HUD_COLOR_BANK),A
+    IFDEF WITH_PALETTE
+    CALL palette_player_memo
+    OR A
+    JP NZ,.bottom_fields
+    ENDIF
     DUP 4,field
     LD HL,(HUD_PTRS+field*2)
     IF field==3
@@ -721,85 +888,88 @@ hud_commit_fields:
     ELSE
     LD B,3
     ENDIF
-    LD DE,(HUD_CLASS_SIGNATURES+2*HUD_SCORE_CLASS0)
+    hud_class_signature HUD_SCORE_CLASS0
     LD A,($C0B7)
     OR A
     JR Z,1F
-    LD DE,(HUD_CLASS_SIGNATURES+2*HUD_SCORE_CLASS1)
+    hud_class_signature HUD_SCORE_CLASS1
 1:
     CALL hud_field_colors
     EDUP
+.bottom_fields:
     LD A,$10
     LD (HUD_COLOR_BANK),A
     LD HL,(HUD_PTRS+8)
     LD B,18
-    LD DE,(HUD_CLASS_SIGNATURES+HUD_DIVER_CLASS*2)
+    hud_class_signature HUD_DIVER_CLASS
     CALL hud_field_colors
     LD HL,(HUD_PTRS+10)
     LD B,9
-    LD DE,(HUD_CLASS_SIGNATURES+HUD_LOGO_CLASS*2)
+    hud_class_signature HUD_LOGO_CLASS
     CALL hud_field_colors
     LD HL,(HUD_PTRS+12)
     LD B,13
+    IFDEF WITH_PALETTE
+    hud_global_signature
+    ELSE
     LD DE,(HUD_OXYGEN_SIGNATURE)
+    ENDIF
     CALL hud_field_colors
     LD HL,(HUD_PTRS+14)
     LD B,6
+    IFDEF WITH_PALETTE
+    hud_global_signature
+    ELSE
     LD DE,(HUD_OXYGEN_SIGNATURE)
+    ENDIF
     CALL hud_field_colors
     XOR A
     LD (HUD_COLOR_BANK),A
     LD HL,hud_background_top
     LD B,HUD_BACKGROUND_TOP_COUNT
-    LD DE,(HUD_KEY)
+    hud_global_signature
     CALL hud_field_colors
     LD A,$10
     LD (HUD_COLOR_BANK),A
     LD HL,hud_background_bottom
     LD B,HUD_BACKGROUND_BOTTOM_COUNT
-    LD DE,(HUD_KEY)
+    hud_global_signature
     CALL hud_field_colors
     RET
 
 ; Original surface rows45..54 rotate source82 before testing bit1. SCREEN2
 ; rows29/30 both project raw45; opaque background tiles253/254 have zero bits,
-; so only the low color nibble matters. Normal blue maps both hues identically.
+; so only the low color nibble matters. The two normal blues retain the ripple.
 hud_commit_ripple:
     LD A,(HUD_ROLES+2)
     LD E,A
     LD A,(HUD_ROLES+HUD_RIPPLE_ROLE)
     CP E
-    RET Z
-    LD D,A
+    XOR E
+    LD D,A                      ; carry mask selects exactly one of the two hues
     LD A,($C082)
     LD C,A
-    LD HL,$C4A0
+    RRC C                       ; first carry is source bit0, then bits7..0
+    LD A,$ED
+    OUT ($99),A
+    LD A,$67
+    OUT ($99),A                 ; contiguous27ED..27F7, across tiles253/254
     RLC C
-    CALL .color
-    LD (HL),A
+    SBC A,A
+    AND D
+    XOR E
+    OUT ($98),A
     INC HL
-    LD (HL),A
-    INC HL
-    LD B,9
-.row:
+    NOP
+    NOP
+    OUT ($98),A                 ; raw45 projects to both rows29 and30
+    DUP 9
     RLC C
-    CALL .color
-    LD (HL),A
-    INC HL
-    DJNZ .row
-    LD HL,$C4A0
-    LD DE,$27ED                 ; tile253 row5, three projected water rows
-    LD B,3
-    CALL vram_copy_short
-    LD HL,$C4A3
-    LD DE,$27F0                 ; tile254, eight projected water rows
-    LD B,8
-    JP vram_copy_short
-.color:
-    LD A,E
-    BIT 1,C
-    RET Z
-    LD A,D
+    SBC A,A
+    AND D
+    XOR E
+    OUT ($98),A
+    EDUP
     RET
 
 hud_prepare_water:
@@ -827,19 +997,43 @@ hud_commit_water:
     RET Z
     XOR A
     LD (HUD_WATER_DIRTY),A
+    IFDEF WITH_PALETTE
+    LD A,(HUD_WATER_CURRENT)
+    AND 15
+    LD ($F3E7),A
+    OUT ($99),A
+    LD A,$87
+    OUT ($99),A
+    RET
+    ELSE
+    LD A,(HUD_WATER_CURRENT)
+    LD E,A
     DUP 3,water_bank
-    LD HL,HUD_WATER_ATTR
-    LD DE,$2000+$800*water_bank
-    LD B,8
-    CALL vram_copy_short
+    XOR A
+    OUT ($99),A
+    LD A,$60+$08*water_bank
+    OUT ($99),A
+    LD A,E
+    DUP 8
+    OUT ($98),A
+    INC HL
+    NOP
+    NOP
+    EDUP
     EDUP
     RET
+    ENDIF
 
 ; Attributes are transferred only into the inactive enemy cache. AC already
 ; contains the source-ordered old-phase hue; do not recompute from new D9/BD.
 hud_prepare_enemy_colors:
     DUP 4,enemy_lane
     LD A,($C0AC+enemy_lane)
+    IFDEF WITH_PALETTE
+    CALL palette_enemy_lookup
+    LD (PAL_LANE_READY+enemy_lane),A
+    AND 127
+    ELSE
     LD L,A
     LD H,$CC
     LD B,(HL)
@@ -866,6 +1060,7 @@ hud_prepare_enemy_colors:
     LD C,A
     XOR A
 3:
+    ENDIF
     LD (HUD_ENEMY_SLOTS+enemy_lane),A
     LD B,A
     LD A,(cache_page)
@@ -879,11 +1074,15 @@ hud_prepare_enemy_colors:
     ADD HL,DE
     LD A,(HL)
     LD (HUD_ENEMY_TOP_IDS+enemy_lane),A
-    LD DE,48
+    LD DE,ENEMY_SLOT_IDS_BYTES
     ADD HL,DE
     LD A,(HL)
     LD (HUD_ENEMY_BOTTOM_IDS+enemy_lane),A
+    IFDEF WITH_PALETTE
+    LD A,(PAL_LANE_READY+enemy_lane)
+    ELSE
     LD A,(HUD_ENEMY_SLOTS+enemy_lane)
+    ENDIF
     OR A
     JR NZ,1F
     LD A,(cache_page)
@@ -985,6 +1184,10 @@ hud_field_colors:
     LD (IY+2),E
     LD (IY+3),D
 .tile:
+    IFDEF WITH_PALETTE
+    CALL palette_compile_field
+    JR .done
+    ELSE
     PUSH BC
     PUSH HL
     LD A,(HL)
@@ -994,6 +1197,7 @@ hud_field_colors:
     INC HL
     POP BC
     DJNZ .tile
+    ENDIF
 .done:
     LD DE,4
     ADD IY,DE
@@ -1001,6 +1205,9 @@ hud_field_colors:
 
 ; C=tile ID; only actual mapped colors invalidate the resident color cache.
 hud_tile_colors:
+    IFDEF WITH_PALETTE
+    JP palette_tile_color
+    ELSE
     LD L,C
     LD H,0
     LD DE,hud_top_class_ids
@@ -1068,6 +1275,7 @@ hud_tile_colors:
     POP HL
     LD B,8
     JP vram_copy_short
+    ENDIF
 
 hud_border_pattern:
     DB 0,$80,$80,$80,$80

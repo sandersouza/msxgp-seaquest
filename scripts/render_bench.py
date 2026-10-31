@@ -137,10 +137,12 @@ def main():
     parser.add_argument('--packed', action='store_true',help='link only original data tables used by the native code')
     parser.add_argument('--hud', action='store_true',help='original HUD and double-buffered name tables')
     parser.add_argument('--audio', action='store_true',help='ordered source audio stores translated to PSG, includes HUD')
+    parser.add_argument('--palette', action='store_true',help='128KiB prepared palette experiment, includes audio')
     parser.add_argument('--banked', action='store_true',help='64KiB ASCII16 with fully expanded enemy patterns')
     parser.add_argument('--input-synthetic', action='store_true',help='assemble the input adapter without original inputs (CI)')
     parser.add_argument('--build-only', action='store_true',help='assemble the probe without running openMSX')
     args = parser.parse_args()
+    args.audio = args.audio or args.palette
     args.hud = args.hud or args.audio
     args.banked = args.banked or args.hud
     args.stream = args.stream or args.banked
@@ -162,15 +164,18 @@ def main():
     if args.graphics:
         from original_graphics import generate as graphics_generate
         assets,_,_ = graphics_generate()
+        if args.palette:
+            from original_graphics import build_sprite_bank
+            build_sprite_bank()
     if args.collisions:
         from collision_reference import generate as collision_generate
         collision_generate()
-    if args.hud:
-        from hud_tables import generate as hud_generate
-        hud_generate()
     if args.banked:
         from enemy_patterns import generate as enemy_generate
-        enemy_generate()
+        enemy_generate(args.palette)
+    if args.hud:
+        from hud_tables import generate as hud_generate
+        hud_generate(args.palette)
     if args.audio:
         from audio_reference import generate as audio_generate
         audio_generate()
@@ -343,12 +348,15 @@ def main():
                     *(['-DWITH_PACKED_DATA'] if args.packed else []),
                     *(['-DWITH_HUD'] if args.hud else []),
                     *(['-DWITH_AUDIO'] if args.audio else []),
+                    *(['-DWITH_PALETTE'] if args.palette else []),
                     *(['-DWITH_BANKED'] if args.banked else []),
                     *(['-DCOLLISION_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_COLLISION_CORRUPT')=='1' else []),
                     *(['-DOXYGEN_CORRUPT'] if args.collisions and os.environ.get('SEAQUEST_OXYGEN_CORRUPT')=='1' else []),
                     *(['-DINPUT_CORRUPT_PORT2'] if args.input and os.environ.get('SEAQUEST_INPUT_CORRUPT_PORT2')=='1' else []),
                     *(['-DCONTROL_DEMO'] if args.controls else []),
                     str(ROOT/'src/render_bench.asm')], cwd=ROOT, check=True)
+    if args.palette and (OUT/'bench.rom').stat().st_size!=131072:
+        raise ValueError('palette cartridge must contain exactly eight16KiB banks')
     symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)', (OUT/'bench.sym').read_text(), re.M)}
     if args.audio and not args.controls:
         for suffix in ('rom','sym'):
@@ -377,7 +385,7 @@ def main():
                                           (bytes(input_controls[i]) if args.input else b'')+ram
                                           for i,(ram,(entry,a,x,y,c)) in enumerate(zip(cases,entries))))
     (OUT/'case-index.json').write_text(json.dumps(case_names)+'\n')
-    (OUT/'start.tcl').write_text(f'set input_mode {int(args.input)}\nset hud_mode {int(args.hud)}\n'+
+    (OUT/'start.tcl').write_text(f'set input_mode {int(args.input)}\nset hud_mode {int(args.hud)}\nset palette_mode {int(args.palette)}\n'+
         f'set prime_entry {symbols.get("core_F00E",0)}\nset prime_start {symbols["audio_prime_start"] if args.audio else symbols["rpc_start"]}\n'+
         f'set inject_pixel {int(os.environ.get("SEAQUEST_RENDER_INJECT_PIXEL","-1"))}\nset rpc_start {symbols["rpc_start"]}\nset rpc_done {symbols["rpc_done"]}\nset commit_pc {symbols["render_commit"]}\nsource scripts/render_bench.tcl\n')
     (OUT/'complete.txt').unlink(missing_ok=True)
@@ -395,7 +403,8 @@ def main():
     baseline = (OUT/'baseline.bin').read_bytes() if args.hud else None
     pages = (OUT/'name-pages.bin').read_bytes() if args.hud else None
     registers = (OUT/'registers.bin').read_bytes() if args.hud else None
-    if args.hud and (len(baseline)!=len(dumps) or len(pages)!=3*len(cases) or len(registers)!=8*len(cases)):
+    phase_registers = (OUT/'phase-registers.bin').read_bytes() if args.hud else None
+    if args.hud and (len(baseline)!=len(dumps) or len(pages)!=3*len(cases) or len(registers)!=8*len(cases) or len(phase_registers)!=4*len(cases)):
         raise ValueError('truncated HUD phase/VDP evidence')
     if args.hud:
         from presentation_check import PresentationOracle
@@ -404,13 +413,17 @@ def main():
         raise ValueError('truncated emulator evidence')
     for index,ram in enumerate(cases):
         if args.hud:
+            if phase_registers[index*4:index*4+2]!=phase_registers[index*4+2:index*4+4]:
+                raise ValueError(f'R1/R7 changed before VBlank in case {index}')
             old_page,prepared_page,final_page = pages[index*3:index*3+3]
             if old_page!=prepared_page or old_page not in (6,7) or final_page!=(old_page^1):
                 raise ValueError(f'HUD name-table phase mismatch in case {index}')
             if visible_signature(prepared[index*16384:(index+1)*16384],old_page*1024,9)!=visible_signature(baseline[index*16384:(index+1)*16384],old_page*1024,9):
                 raise ValueError(f'visible HUD/scene VRAM changed before VBlank in case {index}')
             regs = registers[index*8:index*8+8]
-            if regs[1]&32 or not regs[1]&64 or regs[3]!=255:
+            state = states[index*1024:(index+1)*1024]
+            blackout = args.palette and not state[0x86] and not any(state[a] for a in (0xe9,0xf6,0xac,0xad,0xae,0xaf))
+            if regs[1]&32 or bool(regs[1]&64)==blackout or regs[3]!=255:
                 raise ValueError(f'HUD VDP/display/IRQ contract mismatch in case {index}')
         elif index and visible_signature(prepared[index*16384:(index+1)*16384]) != visible_signature(dumps[(index-1)*16384:index*16384]):
             raise ValueError(f'visible VRAM changed before VBlank commit in case {index}')
@@ -425,7 +438,7 @@ def main():
             check_sprites(ram,dumps[index*16384:(index+1)*16384])
         expected = expected_pixels(ram,rom)
         if args.hud:
-            try: presentation.check(ram,block,final_page*1024)
+            try: presentation.check(ram,block,final_page*1024,regs[7]&15,bool(regs[1]&64))
             except ValueError as error: raise ValueError(f'presentation case {index} {case_names[index]}: {error}') from error
             for y in range(192):
                 if not any(top<=y<top+15 for top in (48,72,96,120)):
@@ -469,10 +482,14 @@ def main():
                       hud_data_bytes=len((ROOT/'outputs/presentation/hud.bin').read_bytes()))
     if args.banked:
         report['fixed_bank_padding_bytes'] = 0x8000-symbols['fixed_bank_end']
+    if args.palette:
+        report.pop('rom_padding_bytes',None)
+        report['source_bank_padding_bytes'] = 0x9b00-symbols['data_bank_end']
     if args.audio:
         report.update(audio='ordered source AUDC/AUDF/AUDV hooks; event/PSG acceptance is the separate audio contract',
                       status='original HUD/scene/PSG integration; full-game, source clock/PAL and physical hardware unverified')
-    if report['io']['min_data_spacing'] < 29: raise ValueError('unsafe VRAM transfer spacing')
+    if report['io'].get('min_active_spacing',report['io']['min_data_spacing']) < 29 or report['io']['min_data_spacing'] < (12 if args.palette else 29):
+        raise ValueError('unsafe VRAM transfer spacing')
     worst = cycles.index(max(cycles))
     (OUT/'worst-case.bin').write_bytes(cases[worst])
     input_setup = ''

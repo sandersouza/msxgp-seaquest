@@ -1,131 +1,131 @@
 {
   "passed": true,
-  "continuous_ticks": 6420,
+  "continuous_ticks": 6422,
   "ram_reloads_after_boot": 0,
-  "original_tia_acquisition_ticks": 6420,
-  "max_busy_cycles": 53405,
+  "original_tia_acquisition_ticks": 6422,
+  "max_busy_cycles": 49007,
   "skipped_vdp_frames": 0,
-  "rom_sha256": "3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5",
+  "rom_sha256": "f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3",
   "latency": [
     {
       "time": 12.0,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 18.6163,
-      "sat_commit_ms": 30.8129
+      "state_ms": 18.1523,
+      "sat_commit_ms": 30.8844
     },
     {
       "time": 12.2137,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 5.3239,
-      "sat_commit_ms": 17.3718
+      "state_ms": 4.7157,
+      "sat_commit_ms": 17.4366
     },
     {
       "time": 12.4274,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 8.4149,
-      "sat_commit_ms": 20.6192
+      "state_ms": 7.9724,
+      "sat_commit_ms": 20.6888
     },
     {
       "time": 12.6411,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 11.676,
-      "sat_commit_ms": 23.8647
+      "state_ms": 11.2215,
+      "sat_commit_ms": 23.9345
     },
     {
       "time": 12.854800000000001,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 14.9144,
-      "sat_commit_ms": 27.111
+      "state_ms": 14.4496,
+      "sat_commit_ms": 27.1738
     },
     {
       "time": 13.0685,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 18.1538,
-      "sat_commit_ms": 30.3581
+      "state_ms": 17.6953,
+      "sat_commit_ms": 30.424
     },
     {
       "time": 13.2822,
       "source": "keyboard",
       "direction": 1,
-      "state_ms": 4.8647,
-      "sat_commit_ms": 16.9126
+      "state_ms": 4.2532,
+      "sat_commit_ms": 16.9774
     },
     {
       "time": 13.4959,
       "source": "keyboard",
       "direction": -1,
-      "state_ms": 7.9571,
-      "sat_commit_ms": 20.1631
+      "state_ms": 7.5078,
+      "sat_commit_ms": 20.2304
     },
     {
       "time": 13.7096,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 11.1022,
-      "sat_commit_ms": 23.406
+      "state_ms": 10.6717,
+      "sat_commit_ms": 23.4719
     },
     {
       "time": 13.9233,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 14.2784,
-      "sat_commit_ms": 26.6526
+      "state_ms": 13.8356,
+      "sat_commit_ms": 26.7185
     },
     {
       "time": 14.137,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 17.509,
-      "sat_commit_ms": 29.8989
+      "state_ms": 17.0757,
+      "sat_commit_ms": 29.962
     },
     {
       "time": 14.3507,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 4.2233,
-      "sat_commit_ms": 16.4567
+      "state_ms": 3.6392,
+      "sat_commit_ms": 16.5221
     },
     {
       "time": 14.5644,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 7.3165,
-      "sat_commit_ms": 19.7064
+      "state_ms": 6.8969,
+      "sat_commit_ms": 19.7675
     },
     {
       "time": 14.7781,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 10.5773,
-      "sat_commit_ms": 22.9471
+      "state_ms": 10.1541,
+      "sat_commit_ms": 23.0169
     },
     {
       "time": 14.9918,
       "source": "joystick",
       "direction": 1,
-      "state_ms": 13.827,
-      "sat_commit_ms": 26.1967
+      "state_ms": 13.3861,
+      "sat_commit_ms": 26.2601
     },
     {
       "time": 15.2055,
       "source": "joystick",
       "direction": -1,
-      "state_ms": 17.2529,
-      "sat_commit_ms": 29.4427
+      "state_ms": 16.776,
+      "sat_commit_ms": 29.5058
     }
   ],
-  "max_state_ms": 18.6163,
-  "max_sat_commit_ms": 30.8129,
+  "max_state_ms": 18.1523,
+  "max_sat_commit_ms": 30.8844,
   "shot_births": [
     {
       "kind": "state",
-      "time": 6.512595315885119,
+      "time": 6.512119836459662,
       "vdp_frame": 390,
       "x": 76,
       "y": 49,
@@ -134,7 +134,7 @@
     },
     {
       "kind": "state",
-      "time": 6.77940436563865,
+      "time": 6.778932517959684,
       "vdp_frame": 406,
       "x": 76,
       "y": 49,
@@ -143,7 +143,7 @@
     },
     {
       "kind": "state",
-      "time": 7.046434951928248,
+      "time": 7.045992716951456,
       "vdp_frame": 422,
       "x": 76,
       "y": 49,
@@ -152,7 +152,7 @@
     },
     {
       "kind": "state",
-      "time": 7.480313559404896,
+      "time": 7.479796733942442,
       "vdp_frame": 448,
       "x": 76,
       "y": 49,
@@ -161,7 +161,7 @@
     },
     {
       "kind": "state",
-      "time": 7.913890731922632,
+      "time": 7.913633436651865,
       "vdp_frame": 474,
       "x": 71,
       "y": 49,
@@ -170,7 +170,7 @@
     },
     {
       "kind": "state",
-      "time": 8.36446419866212,
+      "time": 8.364052135117731,
       "vdp_frame": 501,
       "x": 98,
       "y": 49,
@@ -200,7 +200,7 @@
     ]
   },
   "audio": {
-    "cases": 6420,
+    "cases": 6422,
     "ordered_stores": 15807,
     "source_sites": [
       "F7E4",
@@ -238,8 +238,8 @@
     "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
     "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
     "limitation": "all cold source updates recorded; waveform phase and analog timbre remain approximate",
-    "rom_sha256": "3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5"
+    "rom_sha256": "f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3"
   },
-  "startup_prepare_cycles": 48071,
+  "startup_prepare_cycles": 37509,
   "startup_policy": "first cache preparation runs with display disabled; every subsequent visible frame is timed"
 }

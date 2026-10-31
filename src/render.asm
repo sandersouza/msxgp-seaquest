@@ -103,9 +103,14 @@ vram_copy:
     JP NZ,.tail
     RET
 
-; Fixed transfers below256 bytes: B count, HL source, DE destination.
+; Fixed transfers: B count, HL source, DE destination. Palette mode callers
+; use1..64 bytes; its display-disabled fast tail has exactly64 OUTI slots.
 ; Same29-cycle data spacing; no general16-bit count/block setup is needed.
 vram_copy_short:
+    IFDEF WITH_PALETTE
+    JP PAL_UPLOAD_DISPATCH
+    ENDIF
+vram_copy_short_slow:
     LD A,E
     OUT ($99),A
     LD A,D
@@ -717,15 +722,23 @@ lane_name_rows:
     DW NAMEBUF+15*32,NAMEBUF+12*32,NAMEBUF+9*32,NAMEBUF+6*32
 
 upload_name_strips:
+    IFDEF WITH_HUD
+    LD A,(HUD_NAME_PAGE)
+    ADD A,$18
+    LD D,A
+    ENDIF
     DUP 4, lane
     LD HL,NAMEBUF+(6+lane*3)*32
-    LD DE,$1800+(6+lane*3)*32
-    LD B,64
     IFDEF WITH_HUD
-    CALL hud_name_copy
-    ELSE
-    CALL vram_copy_short
+    IF lane==1
+    INC D
     ENDIF
+    LD E,LOW ($1800+(6+lane*3)*32)
+    ELSE
+    LD DE,$1800+(6+lane*3)*32
+    ENDIF
+    LD B,64
+    CALL vram_copy_short
     EDUP
     RET
 
@@ -767,7 +780,11 @@ render_commit:
     ELSE
     LD B,32
     ENDIF
+    IFDEF WITH_PALETTE
+    CALL palette_commit_sat
+    ELSE
     CALL vram_copy_short
+    ENDIF
     ; Allow the TMS9918's final queued byte to reach VRAM before returning.
     NOP
     NOP

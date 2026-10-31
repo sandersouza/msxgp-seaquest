@@ -2,6 +2,8 @@
 """Extract verified local TIA art; never write original-derived data to Git paths."""
 import hashlib
 import json
+import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -135,23 +137,27 @@ def sprite_bank(assets):
     lookup = {}
     names = [name for name in assets if name.startswith(
         ('player-','explosion-','ball-','patrol-','torpedo'))]
-    # First enumerate interior images so they form a contiguous resident bank.
-    for name in names:
-        rows = assets[name]['rows']
-        for x in (64,65):
-            scaled = scale_rows(rows,x)
-            for chunk in range(2 if name.startswith(('player-','explosion-')) else 1):
-                origin = 8+x*3//2+16*chunk
-                crop = [[px for px in row if origin <= px < origin+16] for row in scaled]
-                if name.startswith('patrol-'): crop = [[] for _ in range(8)]+crop
-                value = sprite_bytes(crop,origin)
-                if value not in bank: bank.append(value)
-    # The eight unused VRAM slots are best spent on missile edge variants:
-    # these can coincide with all four clipped lane objects and the patrol.
-    for x in range(153,160):
-        rows = scale_rows(assets['torpedo']['rows'],x)
-        value = sprite_bytes(rows,8+x*3//2)
-        if value not in bank: bank.append(value)
+    def interior(name, x):
+        rows = scale_rows(assets[name]['rows'],x)
+        for chunk in range(2 if name.startswith(('player-','explosion-','surface-')) else 1):
+            origin = 8+x*3//2+16*chunk
+            crop = [[px for px in row if origin <= px < origin+16] for row in rows]
+            if name.startswith('patrol-'): crop = [[] for _ in range(8)]+crop
+            yield sprite_bytes(crop,origin)
+
+    # Keep frequent surface/start images resident. Reset/Select can reveal them
+    # on the same update as a colour boundary, where uploads have no spare time.
+    # The first explosion frame is colder; its clipped form already uses scratch.
+    priorities = [(name,x) for name in names if not name.startswith('explosion-') for x in (64,65)]
+    priorities += [('torpedo',x) for x in range(153,160) if 'torpedo' in assets]
+    priorities += [(f'surface-player-{frame}-0-13',64) for frame in range(3)
+                   if f'surface-player-{frame}-0-13' in assets]
+    priorities += [(name,x) for name in names if name.startswith('explosion-')
+                   and not name.startswith('explosion-10-') for x in (64,65)]
+    priorities += [(name,x) for name in names if name.startswith('explosion-10-') for x in (64,65)]
+    for name,x in priorities:
+        for value in interior(name,x):
+            if value not in bank and len(bank)<47: bank.append(value)
     resident = len(bank)
     for name, asset in assets.items():
         if not name.startswith(('player-','explosion-','ball-','patrol-','early-patrol-','torpedo','surface-')):
@@ -178,7 +184,7 @@ def sprite_bank(assets):
 
 
 def write_assembly(bank,lookup,resident):
-    if resident+16 > 64: raise ValueError('resident bank plus two scratch banks exceeds VRAM')
+    if resident+16 > 63: raise ValueError('sprite banks overlap the reserved oxygen border pattern')
     if len(bank)//32 > 256: raise ValueError('ROM catalog exceeds byte lookup indices')
     def entry(name,x,chunk=0): return lookup[f'{name}@{x}']['patterns'][chunk]
     def table(label, values):
@@ -193,6 +199,7 @@ def write_assembly(bank,lookup,resident):
                                    for name in players for y in range(13,24) for chunk in range(2)])
     text += 'surface_pointers:\n    DW '+','.join('surface_images+'+str(n*22) for n in range(16))+'\n'
     for prefix,count in (('ball',16),('patrol',3),('torpedo',1)):
+        if prefix=='ball': text += '    ALIGN 256\n'
         text += table(prefix+'_images',[entry(f'{prefix}-{n}' if count>1 else prefix,
                                                64+i if i<2 else min(159,151+i))
                                        for n in range(count) for i in range(16)])
@@ -201,7 +208,24 @@ def write_assembly(bank,lookup,resident):
     from graphics_palette import tms_color
     text += '    ALIGN 256\n'
     text += table('tia_to_tms',[tms_color(n) for n in range(256)])
-    (OUT/'sprites.inc').write_text(text)
+    (OUT/'sprites.inc').write_text('    IFDEF WITH_PALETTE\n    INCLUDE "sprite-fast-labels.inc"\n    ELSE\n'+text+'    ENDIF\n')
+    fast = text.replace('tia_to_tms:','original_tia_to_tms:')
+    rom = read_original()
+    fast += table('sprite_player_colors',rom[0xcf3:0xcf5])
+    fast += table('sprite_death_colors',rom[0xf17:0xf2f])
+    fast += table('sprite_diver_color',rom[0xcfa:0xcfb])
+    (OUT/'sprites-fast.inc').write_text(fast)
+    (OUT/'tia-to-tms.bin').write_bytes(bytes(tms_color(n) for n in range(256)))
+
+
+def build_sprite_bank():
+    wrapper = OUT/'sprite-bank.asm'
+    wrapper.write_text('    ORG $8000\n    INCLUDE "sprites-fast.inc"\n    ASSERT $ <= $A200\n    DS $A200-$,$FF\n')
+    subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'),'--nologo',
+                    '--raw='+str(OUT/'sprite-bank5-head.bin'),'--sym='+str(OUT/'sprite-bank5.sym'),str(wrapper)],check=True)
+    symbols = re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(OUT/'sprite-bank5.sym').read_text(),re.M)
+    (OUT/'sprite-fast-labels.inc').write_text(''.join(f'{name} EQU ${int(value,16):04X}\n' for name,value in symbols)+
+        '    ALIGN 256\ntia_to_tms:\n    INCBIN "tia-to-tms.bin"\n')
 
 
 def generate():

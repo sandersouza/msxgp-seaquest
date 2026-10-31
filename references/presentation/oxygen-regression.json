@@ -3,8 +3,8 @@
   "cases": 24605,
   "max_cycles": [
     178,
-    19048,
-    19588
+    17179,
+    17639
   ],
   "stack_min": 62320,
   "detail": "complete",
@@ -12,7 +12,7 @@
   "transition_cases": 6125,
   "chain_ticks": 6192,
   "original_raster_alarm_cases": 768,
-  "rom_sha256": "897005edd51b95ebe7893493880b14ca7d39b4213d112796bcdd47f7c0ce7b20",
+  "rom_sha256": "41e0d2f1dd5fa2409920ac7af50aed6e247e21395f421b7f5d2942d6cb784402",
   "source_sha256": "fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43",
   "machine": "C-BIOS_MSX1",
   "ram_kib": 64,

@@ -15,12 +15,14 @@ remain the work of #14 and #15.
 
 ## Hardware and presentation
 
-The measured implementation uses a64KiB ASCII16 cartridge, unexpanded64KiB RAM,
+The implementation uses a128KiB ASCII16 cartridge, unexpanded64KiB RAM,
 16KiB VRAM, standard Z80, TMS9918A SCREEN2 and the standard PSG. The initial32KiB
-ROM target overflowed1,536bytes before audio even after unused source code was
-removed. Expanded enemy bitmaps in two ROM banks recover the required CPU time.
-Code remains in fixed bank0; every temporary enemy-bank transfer restores the
-source/art data bank before returning. No runtime6502 interpreter is present.
+ROM target overflowed before audio; a64KiB intermediate version then took over
+123,000cycles during real attract colour transitions. The128KiB layout stores
+exact prepared palettes and bounded native colour collectors. Enemy bitmaps
+retain their two expanded ROM banks. Fixed bank0 owns mapper-changing helpers;
+source code/data run in bank1, and every temporary mapping restores bank1 before
+returning. No runtime6502 interpreter is present.
 
 Original glyphs shift one MSX pixel right to align six projected source glyphs
 with nine tiles. Score/lives start atY0/8, all colored sky rows are retained with
@@ -30,18 +32,45 @@ the TIA HMOVE strip. TIA hue/luminance maps to fixed TMS indices; analog RGB is
 not claimed identical. Seed-dependent water rows are projected independently.
 
 Two name tables at1800/1C00 alternate. Names/patterns prepare into inactive
-storage; VBlank flips R2 and commits changed colors/SAT. Six normal enemy colors
-are resident, with a mutable fallback for other attract backgrounds. Player1's
-font is resident; player2 has resident outer tiles/life icons and two banks of
-three middle-glyph slots. A changed score can upload24bytes while the prior font
-bank remains visible. The sweep explicitly forces all three uploads.
+storage; VBlank flips R2 and commits changed colours/SAT. Seven enemy slots use
+six fully warmed foreground colours plus one private fallback. Predictable
+attract palettes and hidden glyph colours prepare over preceding updates;
+actual canonical state and field pointers validate a prepared result before use.
+A default class vector has permanent cache token1, while other exact vectors
+receive fresh generations, including canceled prefetches. Token rebasing clears
+all physical cache tags before reuse. Forecasting changes presentation only.
 
-The established192 enemy-pattern bytes and352 display bytes per frame remain;
-one extra4-byte SAT entry restores the oxygen border when three colors share a
-TMS row. Nine SAT entries never exceed four active sprites per scanline. Its
-last32-byte pattern occupies3FE0..3FFF. Generated HUD data/cache useD000..EF0F;
-the streamed renderer's unusedCC00 staging page holds the source-color slot
-lookup. F000..F2FF and stack guards remain checked.
+Water-coloured pattern nibbles use TMS colour0, with the actual water hue in R7.
+This removes the need to recolour every enemy background at a water transition.
+Opaque black retains index1. The external MSX border consequently follows the
+water colour; active256×192 pixels retain the projected source image. Source86
+(divers and hostile shots) and92(surface ripple) retain contrast with90(water).
+Only a completely black original scene can disable R1 for preparation; its next
+visible image is fully prepared before R1 returns, with no extra black frame.
+
+Player1's font is resident; player2 has resident outer tiles/life icons and two
+banks of three middle-glyph slots. A changed score can upload24bytes while its
+prior font bank stays visible. The sweep forces all three uploads. Frequent
+surface-player images are resident; less frequent and clipped images use two
+inactive scratch banks.47 resident patterns plus16scratch reserve hardware
+pattern63 at3FE0..3FFF for the oxygen-border overlay. Nine SAT entries never
+exceed four active sprites on a scanline.
+
+The established192enemy-pattern bytes and352display/name bytes per frame remain.
+Hidden sprite patterns and redundant colour uploads may be skipped; every actor
+and original simulation update remains. Generated immutable HUD data occupies
+D000..EBFF, colour cachesEC00/ED00, and double RGB buffersEE00/EF00. F000..F2FF,
+stack guards, source hardware locations and the RPC area remain protected.
+
+Active-picture VRAM data writes retain at least29Z80cycles between accesses.
+Only the paced VBlank commit uses12cycle uniform OUT or18cycle OUTI writes;
+fast general copies run only while R1 is physically disabled and accept1..64bytes.
+The slow copy dispatch is restored before display enable. TI's original
+[Data Manual, section2.1.5, page13](https://peacockmedia.software/tms/TMS9918datasheet.pdf)
+specifies2µs accesses during its4.3ms vertical-refresh window; the measured
+commits fit that window. The [openMSX original-slot implementation](https://raw.githubusercontent.com/openMSX/openMSX/master/src/video/VDPAccessSlots.cc)
+provides the corresponding TMS9918 access-slot model. This is standard-speed
+MSX1 operation; turbo CPUs need their own timing policy.
 
 ## Sound event policy
 
@@ -80,9 +109,10 @@ The adapter's event delay is measured separately from the source frame epoch.
 
 ## Verification and reproducibility
 
-`make presentation-check` runs39,328 integrated source-state/pixel cases,
-240paced frames, the focused font/palette/water sweep and the ordered PSG
-contract. `make presentation-natural` builds the cold cartridge and runs a
+`make presentation-check` first records the cold device replay, then runs39,328 integrated source-state/pixel cases,
+240paced frames, the focused font/palette/water sweep,183continuous attract
+chains and the ordered PSG contract. A second attract run forces native cache
+generation rebasing. `make presentation-natural` builds the cold cartridge and runs a
 device-only replay with no game-RAM reloads. The replay compares every update
 against original CPU instructions and original TIA contacts. Alerts, firing,
 diver sounds, death, refill and full-bonus chains are also checked from seeded
@@ -90,7 +120,8 @@ source scenarios; naturally collecting six divers is not claimed.
 
 The display oracle uses original ROM/ALE pixels and canonical source state,
 not generated target HUD caches. Every independently seeded renderer case
-warms both display caches using two F00E display-only preparations, then restores
+warms both display caches using F00E display-only preparations (two normally,
+48 for isolated attract-boundary fixtures), then restores
 the exact input RAM before measured F5B8. Artificial cold inputs with86=0 have
 no preceding valid picture: only their presentation preparation uses boot0/FF.
 Oxygen fixtures65/255 still compare native canonical bytes exactly, while the

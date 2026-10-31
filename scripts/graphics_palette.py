@@ -15,7 +15,12 @@ def tms_color(tia):
     if tia == 0: return 1
     if tia == 8: return 14
     if tia == 12: return 14
-    return HUES[tia>>4][int((tia&15)>=10)]
+    hue = tia >> 4
+    # Preserve the source's blue-on-blue contrasts: COLUP1=$86 must remain
+    # visible over water $90, and the rotating surface uses $90/$92. The TMS
+    # has two blues, so these hues need earlier luminance boundaries.
+    threshold = 6 if hue == 8 else 2 if hue == 9 else 10
+    return HUES[hue][int((tia&15)>=threshold)]
 
 
 def sprite_colors(ram,rom):

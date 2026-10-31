@@ -1,61 +1,107 @@
-# Issue13 verification — delivery checks in progress
+# Issue13 verification
+
+Local automated acceptance is complete for the frozen128KiBASCII16 candidate.
+Independent read-only review found no remaining material issue after corrections.
+Remote CI/integration is tracked in [PR29](https://github.com/sandersouza/msxgp-seaquest/pull/29).
+This is presentation/native-contract acceptance, not a full-game release or
+physical/PAL validation; #14 and #15 retain those boundaries.
 
 Environment: openMSX21.0/C-BIOS_MSX1, NTSC standard3579545Hz Z80,
-64KiB RAM/16KiB VRAM,64KiB ASCII16 cartridge. Python3.14.7,
-sjasmplusv1.24.0/d379eeac9ad3857fb48fd3a3929175d0a56038ce.
-Reference NTSC4K SHA256:
+64KiB RAM/16KiB VRAM. Python3.14.7, sjasmplus1.24.0 revision
+`d379eeac9ad3857fb48fd3a3929175d0a56038ce`.
+Atari2600 NTSC4K reference SHA256:
 `fbc29f4678f69ac27fe46da298c8c22f98cba2a3e5491e6b308fd9bf68d2ee43`.
-Physical machines/PAL/source-cadence acceptance remain open in #14/#15.
 
-The final broad renderer rerun, immutable review and remote CI/integration are
-pending. The results below are reproduced checks, not issue closure.
-
-| Check | Evidence |
+| Check | Reproduced result |
 |---|---|
-| Original HUD model versus TIA |321 states/1,284 fields, including every logo counter |
-| Focused native HUD/font/palette/ripple |1,000 source-pixel cases;24-byte triple-glyph update verified |
-| Ordered source/PSG contract |7,982 ticks/34,692 stores/45 source sites; controls0/4/8/12/15;2,400 continuous chain ticks |
-| Cold device-only original CPU/TIA replay |6,420 updates, zero game-RAM reloads, zero missed visible frames; max53,405busy cycles |
-| Cold ordered audio |15,807 stores, every captured source update from cold startup |
-| Native clear/RNG/core regression |2,963 cases, including all256 initial zero-clear X values |
-| Actual input/cadence regression |5,660 cases, both players/ports and16/26-tick held-fire |
-| Collision regression |40,748 cases/20,374 original TIA contacts |
-| Oxygen regression |24,605 cases/6,192 chained ticks/768 source raster alarm cases |
-| Score/progression regression |55,243 cases/8,800 chained ticks/25,072 source score-register/flag checks |
-| Omitted display dependency audit |264 source executions; onlyB0..B6/F8/F9 read before overwrite |
-| Public synthetic CI locally |46 tests, one optional py65 check skipped in systemPython; all synthetic assemblies pass |
-| Host reference environment |46 tests pass, including synthetic6502 ordered-store/frame-boundary trace |
+| Full native/input/collision/oxygen/progression/pixels |39,328cases; max59,110/59,736cycles,626free |
+| Paced dense normal case |240frames, zero skips; max57,190busy/1,732commitcycles |
+| Focused HUD/font/palette/ripple/all8sprites |1,129cases,24-byte triple-glyph upload forced; R1/R7 and visible VRAM unchanged before commit |
+| Real continuous attract boundaries/exits |183×112=20,496source updates;2,745RGB/all8spriteframes; zero skips/visible commits |
+| Forced cache generation rebase |183×112=20,496updates;180actual rebases;2,745RGB/spriteframes; zero skips |
+| Prepared token240 across activation/next epoch |183×384=70,272updates;139rebases;9,723READY1/token240 prefetch entries;5,490RGB/spriteframes; zero skips |
+| All continuous attract modes |max59,583/59,736busycycles,153free; max10,324commitcycles |
+| Ordered source/PSG |7,982ticks/34,692stores/45source sites;2,400persistent chain ticks |
+| Cold device-only original CPU/TIA/HUD/PSG |6,422updates;15,807sound stores; noRAMreload/skip; max49,007busycycles |
+| Native clear/RNG/core |2,963cases, including all256initial zero-clear X values |
+| Actual keyboard/joystick/held fire |5,660cases, bothplayers/ports and16/26-tick firing |
+| Collision |40,748cases/20,374original TIA contacts |
+| Oxygen/rescue |24,605cases/6,192chained ticks/768source raster alarm cases |
+| Score/progression |55,243cases/8,800chained ticks/25,072score register/flag checks |
+| Omitted display dependency audit |264source executions; onlyB0..B6/F8/F9 read before overwrite |
+| Host checks |48pass in reference environment; public synthetic CI runs48 with one optional py65 skip |
+| Public synthetic CI locally |all original-free ROM/input/collision/audio assemblies pass |
 
-The focused target is
-`9782ddd79e58f26cb688d81d7d0132e8723f9f5025af1c0cfa9942227fa44b73`;
-the cold controls target is
-`3cf7b27000519b3f78cfa84195d8eb131a3dc3a8b2ee7c9b71b218b4e5ddf7b5`.
-They differ only by the controls bootstrap/build variant. Local cartridge/raw
-artifacts stay in ignored outputs/presentation and outputs/render.
+Timed cartridge SHA256:
+`0942a040aa4bc4cb72df7db39445c2f96f237719bf8e63d1ed962ca13eca0910`.
+Cold controls/playtest cartridge SHA256:
+`f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3`.
+Both are131,072bytesASCII16 and differ by bootstrap/build variant. No original
+ROM, generated art/table or playable cartridge is published. Named local artifacts
+remain ignored; concise JSON summaries beside this document identify each run.
+The renderer summary drops the obsolete64KiB rom_padding field and derives the
+source-bank gap from the matching saved symbols:512bytes before9B00 helpers.
+Fixedbank0 has117padding bytes. Stack minimumF370 and memory/VRAM guards pass.
 
-Sound negative control: setting PSG8 to15 after the first hook was rejected at
-tick0:FFC3 (`actual...3f0f0000`, expected`...3f000000`). The complete clean contract
-was rerun successfully. Hooks preserve AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral
-direction bits and PSG15 after every store. Source instruction-start cycles are
-trace metadata; source frame epochs and event order are checked exactly. The
-PSG timbre/phase/shared-noise differences are explicit in [the contract](../../docs/hud-audio.md).
+## Continuous transition evidence
 
-Cold replay observed16 deaths,14 death-driven switches,13 attract swaps, two
-game overs, one restart and all four difficulty settings. Maximum event-to-state
-18.6163ms; completed SAT commit30.8129ms. Those exclude host input/scanout/physical
-latency. Initial cache preparation48,071cycles runs with display disabled;
-subsequent visible frames are timed. Natural six-diver collection/full bonuses
-are not claimed: those events use continuous seeded source chains.
+The former64KiB version's true attract boundary reached123,526total/57,781commit
+cycles despite passing normal steady-palette checks. The final backend prepares
+exact palettes/hidden fonts/colour spans over prior updates; every source update
+and all192enemy-pattern/352display-name bytes remain. Its timing proof includes
+all129A2counter boundaries, B/W, multiple A3/player windows, and keyboard/Reset/
+Select at oldphaseFE/FF/00. Attract priming only supplies the initial display;
+each112/384-update chain then runs without RAM reloads from one real cold-replay
+game-over seed. Rebase tests only advance the serial and explicitly exercise a
+READY1palette containing token240 before the next epoch. No target cache supplies
+the RGB/native oracle. Isolated synchronous projection fixtures are not the
+paced-transition timing workload; their maximum65,105cycles is reported in the
+focused JSON rather than mislabeled as a paced-frame pass.
 
-Reproduce with documented local original inputs:
+Active-picture VRAM data accesses retain at least29cycles; display-disabled
+copies use18cycles. VBlank uses12cycle uniformOUT/18cycleOUTI and its maximum
+commit remains inside the documented4.3ms no-wait refresh window. See primary
+sources and the exact adaptation in [HUD/audio contract](../../docs/hud-audio.md).
+The external MSX border follows R7water. Opaque black stays1; source86divers/
+hostile shots and92surface ripple retain visible contrast against90water.
+
+Independent read-only review also compared16,384original-CPU cases for each new
+F644/F875/F8DE/F992 native fold, including ordered stores and final A/X/Y/carry.
+It caught/fixed the patrol/oxygen pattern63 collision, wrong font-memo player
+selection and READY1pending-token rebase hazard. Every incoming entry into a
+folded body is guarded. These review arithmetic checks supplement the executed
+Z80/native regressions; they do not replace them.
+
+## Audio and cold replay limits
+
+Sound negative control from the first implementation changed PSG8 after a hook
+and was rejected immediately; clean ordered contracts are reproduced again on
+the final hash. Hooks preserve registers/stack/IFF, PSG7 peripheral directions
+and PSG15 on every store. Source frame epochs and event order match; analog
+amplitude, oscillator phase, TIA polynomial/noise and timbre remain approximate.
+
+Cold replay observed16deaths,14death-driven switches,13attract swaps,2gameovers,
+1restart and all4difficulty settings. Maximum event-to-state18.1523ms and completed
+SAT30.8844ms exclude host/physical input and visible scanout. Initial37,509cycle
+cache preparation runs with R1disabled; subsequent visible frames are timed.
+Natural six-diver collection/full-game completion are not claimed: full bonuses
+and other late transitions use continuous seeded source chains. PAL/source-cadence
+policy and physical-machine release acceptance remain #14/#15.
+
+## Reproduce
+
+With the documented local original inputs and pinned tools:
 
 ```sh
 make presentation-check
-make presentation-natural
 make native-contract input-contract collision-contract oxygen-contract progression-contract
+.venv/bin/python -B -m unittest discover -s tests
 bash scripts/ci.sh
 ```
 
-Run targets serially because builders share ignored outputs. Public CI never
-acquires or uploads original ROMs/art. See JSON files here for concise records;
-RAM/event/VRAM dumps, replay snapshots and extracted assets remain local.
+Run serially: builders share ignored outputs. `presentation-check` first builds
+and records the cold controls replay, then runs the39,328/240paced suite, focused
+sweep, all three continuous attract modes and ordered audio. Save named matching
+ROM/symbol pairs before portable CI overwrites renderer build outputs.
+`make presentation-run` opens the controls cartridge; arrows move, Space fires,
+F1Reset/start and F2Select. The owner playtest copies are preserved separately.

@@ -85,5 +85,5 @@
   "preserved": "AF/BC/DE/HL/IX/IY/SP/IFF, PSG7 peripheral bits, PSG15 on every store",
   "oracle": "independent py65 original instructions and explicit mathematical PSG policy",
   "limitation": "seeded source ticks; oscillator phase and analog timbre are not identical",
-  "rom_sha256": "9782ddd79e58f26cb688d81d7d0132e8723f9f5025af1c0cfa9942227fa44b73"
+  "rom_sha256": "0942a040aa4bc4cb72df7db39445c2f96f237719bf8e63d1ed962ca13eca0910"
 }

@@ -8,7 +8,7 @@ from graphics_palette import tms_color
 from hud_reference import masks
 
 
-def decode_colors(vram, name_base):
+def decode_colors(vram, name_base, backdrop=0):
     memory = np.frombuffer(vram, dtype=np.uint8)
     names = memory[name_base:name_base+768].reshape(24,32).astype(np.int32)
     ys = np.arange(192)[:,None]
@@ -16,7 +16,9 @@ def decode_colors(vram, name_base):
     pattern = pattern.astype(np.int32)
     bits = ((memory[pattern][:,:,None] >> np.arange(7,-1,-1)) & 1).reshape(192,256)
     colors = memory[8192+pattern]
-    return np.where(bits, np.repeat(colors>>4,8,axis=1), np.repeat(colors&15,8,axis=1)).astype(np.uint8)
+    result = np.where(bits, np.repeat(colors>>4,8,axis=1), np.repeat(colors&15,8,axis=1)).astype(np.uint8)
+    if backdrop: result[result==0] = backdrop&15
+    return result
 
 
 class PresentationOracle:
@@ -76,8 +78,9 @@ class PresentationOracle:
             result[152:157,8+3*x//2:8+3*(x+1)//2] = color[gauge[:,x]][:,None]
         return result
 
-    def check(self, ram, vram, name_base):
-        actual = decode_colors(vram,name_base)
+    def check(self, ram, vram, name_base, backdrop=0, display_enabled=True):
+        actual = (decode_colors(vram,name_base,backdrop) if display_enabled else
+                  np.full((192,256),backdrop&15,dtype=np.uint8))
         # The ninth sprite restores the one-pixel oxygen edge, independently
         # of the eight source actors checked by the existing sprite oracle.
         y,x,pattern,color = vram[0x1b20:0x1b24]

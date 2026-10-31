@@ -14,9 +14,9 @@ MSX1 with **64 KiB RAM and 16 KiB VRAM**, standard-speed Z80, TMS9918-family VDP
 - [x] Scope and acceptance criteria below are understood.
 
 ## Definition of Done
-- [ ] HUD matches canonical state and original layout as hardware permits. Audio event onset, duration and priority match traces; document timbre differences and verify alerts, rescue, firing, death and bonus.
-- [ ] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
-- [ ] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
+- [x] HUD matches canonical state and original layout as hardware permits. Audio event onset, duration and priority match traces; document timbre differences and verify alerts, rescue, firing, death and bonus.
+- [x] Relevant checks pass and reproducible evidence is linked (ROM hash, tool versions, machine, settings, scenario and verdict where applicable).
+- [x] Documentation and delivery links are updated; unverified emulator/hardware claims remain explicit.
 
 ## Tracking
 - Roadmap ID: SQ-13
@@ -32,23 +32,41 @@ Original ROMs are local research inputs; do not publish them accidentally. This 
 
 Published issue: https://github.com/sandersouza/msxgp-seaquest/issues/13
 
-## Progress — implementation ongoing
+## Delivery candidate — local acceptance complete
 
-Dependencies #8 and #12 are closed. Work is on `codex/feat/13-original-hud-psg`.
-The #12 baseline was reproduced at39,328 cases/240paced frames and59,311 cycles.
-Direct source-row streaming, data-only linking and shared group-column setup
-preserve pixels and192 enemy/352 visible transfer bytes. The64KiB ASCII16
-baseline passes the same suite at53,443/59,736 cycles,29-cycle port spacing and
-stackF370. No enemies, visibility or simulation frequency were reduced.
+[PR29](https://github.com/sandersouza/msxgp-seaquest/pull/29) integrates original
+HUD/font/score/lives/divers/oxygen/logo, start/attract flow and source-ordered PSG
+playback on unexpanded MSX1/64KiB RAM/16KiB VRAM. The measured128KiBASCII16 backend
+preserves original actors/simulation and192enemy-pattern/352display-name bytes
+per frame. Exact palette/colour queues, hidden font warming and source-preserving
+native folds keep actual transitions within the frame budget.
 
-HUD work requires more than the original32KiB target: the first prototype
-overflowed by1,536 bytes even after recovering3KiB from unused source code.
-The measured successor uses64KiB ASCII16 on the same unexpanded MSX1/64KiB RAM/
-16KiB VRAM target. Independent read-only review checked all608 pre-expanded
-image vectors,19 source-window mappings, packed source tables and bank restoration.
+The owner's invisible diver/hostile-shot and static-water findings are fixed:
+source86/92 retain contrast with90water. R7 supplies water through colour0; the
+external MSX border follows water. Opaque black remains1. Standard PSG timbre,
+shared noise and oscillator-phase differences remain documented.
 
-The original HUD model passes1,284 Atari TIA pixel comparisons. An isolated
-native prototype also matches source HUD/background colors, including the
-oxygen edge restored through the last free sprite pattern. Full timing/color
-integration, audio playback/event-order evidence, cold controls replay, final CI
-and review remain open. This issue is not delivered or closed.
+Reproduced on timed SHA256
+`0942a040aa4bc4cb72df7db39445c2f96f237719bf8e63d1ed962ca13eca0910`:
+
+- 39,328native/source/pixel cases at59,110/59,736cycles;240paced dense frames pass.
+- 1,129focused HUD/font/palette/ripple/all8sprite checks, including24-byte triple
+ glyph upload and precommit R1/R7/visible-VRAM protection.
+- 111,264source updates across three183-chain attract modes, including all129
+ counter boundaries, input/Reset/Select exits, B/W, cache rebases and a prepared
+ token240 across activation into the next epoch.10,980RGB/spriteframes, no skips
+ or visible commits; max59,583busy/10,324commitcycles.
+- 7,982audio ticks/34,692ordered stores/45sites, including2,400persistent chain ticks.
+- 6,422cold device-only CPU/TIA updates/15,807sound stores, noRAMreload/skip,
+ max49,007busycycles on controls SHA256
+ `f6b8e010db183e31f76533763fd195c452dc7933aff9c0ff51bb0b2a51b169c3`.
+- Native2,963/input5,660/collision40,748/oxygen24,605/progression55,243 regressions,
+ 48host checks and local original-free CI pass.
+
+Independent read-only review found/fixed source/cache/mapping risks and reports
+no remaining material correctness finding. Final immutable-head review, remote
+CI and integration remain PR gates; this issue stays open until integrated.
+Detailed evidence/reproduction: references/presentation/verification.md and
+ docs/hud-audio.md. #14 owns cadence/50Hz; #15 owns full-game/hardware acceptance.
+The owner's original playtest artifacts remain local; original ROMs/art/tables
+and playable cartridges are not published.

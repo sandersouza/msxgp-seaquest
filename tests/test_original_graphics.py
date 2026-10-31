@@ -8,6 +8,12 @@ from graphics_palette import tms_color
 
 
 class OriginalGraphicsTests(unittest.TestCase):
+    def test_normal_water_preserves_actor_and_surface_contrast(self):
+        # Original COLUP1=$86 draws both divers and hostile torpedoes. The
+        # surface alternates $90/$92; collapsing either pair hides gameplay.
+        self.assertNotEqual(tms_color(0x86), tms_color(0x90))
+        self.assertNotEqual(tms_color(0x92), tms_color(0x90))
+
     def test_patrol_carry_includes_low_reserve_and_death_overrides(self):
         clear_reserves = {0:{0,1},1:set(range(7)),9:set(range(7)),10:set(),14:set(),15:set(),23:set()}
         state = bytearray(256)
@@ -59,11 +65,20 @@ class OriginalGraphicsTests(unittest.TestCase):
     def test_catalog_distinguishes_resident_and_edge_images(self):
         assets = {'torpedo':dict(rows=[list(range(8))])}
         bank,lookup,resident = sprite_bank(assets)
-        self.assertLessEqual((resident+16)*32,2048)
+        self.assertLessEqual((resident+16)*32,2016)
         for x in range(160):
             index = lookup[f'torpedo@{x}']['patterns'][0]
             self.assertEqual(bank[index*32:index*32+32],
                              sprite_bytes(scale_rows(assets['torpedo']['rows'],x),8+x*3//2))
+
+    def test_sprite_catalog_reserves_oxygen_border_pattern(self):
+        # Enough distinct player images to fill VRAM; the final pattern belongs
+        # to the oxygen overlay even when every scratch sprite is visible.
+        assets = {f'player-{n}':dict(rows=[[bit for bit in range(8) if n & (1<<bit)]])
+                  for n in range(1,100)}
+        _,_,resident = sprite_bank(assets)
+        self.assertEqual(resident,47)
+        self.assertEqual(resident+16,63)
 
     def test_opaque_palette_never_uses_transparency(self):
         self.assertEqual(tms_color(0),1)

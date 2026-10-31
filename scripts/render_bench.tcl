@@ -13,8 +13,10 @@ if {$hud_mode} {
     set baseline [open $::bench_dir/baseline.bin wb]
     set pages [open $::bench_dir/name-pages.bin wb]
     set registers [open $::bench_dir/registers.bin wb]
+    set phase_registers [open $::bench_dir/phase-registers.bin wb]
 }
 set min_spacing 999999
+set min_active_spacing 999999
 set last_data -1
 set data_writes 0
 set count 0
@@ -39,9 +41,9 @@ proc next_case {} {
         close $::timings
         close $::states
         close $::prepared
-        if {$::hud_mode} {close $::baseline; close $::pages; close $::registers}
+        if {$::hud_mode} {close $::baseline; close $::pages; close $::registers; close $::phase_registers}
         set f [open $::bench_dir/io.json w]
-        puts $f "\{\"min_data_spacing\":$::min_spacing,\"data_writes\":$::data_writes\}"
+        puts $f "\{\"min_data_spacing\":$::min_spacing,\"min_active_spacing\":$::min_active_spacing,\"data_writes\":$::data_writes\}"
         close $f
         set f [open $::bench_dir/complete.txt w]
         puts $f $::count
@@ -57,10 +59,22 @@ proc next_case {} {
     set ::case_ram $ram
     set ::case_header $header
     set ::prime_remaining [expr {$::hud_mode?2:0}]
+    if {[info exists ::palette_mode] && $::palette_mode} {
+        binary scan [string index $ram 129] cu old_phase
+        binary scan [string index $ram 162] cu idle_counter
+        if {$old_phase==255 && $idle_counter>=127} {set ::prime_remaining 48}
+    }
     dispatch_case
 }
 proc dispatch_case {} {
-    debug write_block memory 0xC000 $::case_ram
+    if {[info exists ::palette_mode] && $::palette_mode} {
+        # Native6502 uses251 canonicalbytes plus hardware280/282/284/296.
+        # C100/C200/C300 contain platform-owned forecast buffers, not gameRAM.
+        debug write_block memory 0xC000 [string range $::case_ram 0 250]
+        debug write_block memory 0xC280 [string range $::case_ram 640 645]
+    } else {
+        debug write_block memory 0xC000 $::case_ram
+    }
     set header $::case_header
     binary scan $header c* vv
     debug write memory 0xC6F0 0
@@ -97,6 +111,7 @@ proc compare_case {} {
         incr ::prime_remaining -1
         if {$::prime_remaining==0} {
             puts -nonewline $::baseline [debug read_block VRAM 0 16384]
+            puts -nonewline $::phase_registers [binary format cc [vdpreg 1] [vdpreg 7]]
             puts -nonewline $::pages [binary format c [vdpreg 2]]
         }
         dispatch_case
@@ -123,6 +138,11 @@ after time 5 {
         if {$::last_data >= 0} {
             set gap [expr {round(($now-$::last_data)*3579545)}]
             if {$gap < $::min_spacing} {set ::min_spacing $gap}
+            set y [machine_info VDP_msx_y_pos]
+            if {$y>=0 && $y<192 && ([vdpreg 1]&64)} {
+                if {$gap<$::min_active_spacing} {set ::min_active_spacing $gap}
+                if {$gap<29} {fail "unsafe active VRAM gap=$gap y=$y"}
+            }
         }
         set ::last_data $now
         if {!$::hud_mode || $::prime_remaining==0} {incr ::data_writes}
@@ -130,7 +150,10 @@ after time 5 {
     debug set_bp $::commit_pc {} {
         if {!$::hud_mode || $::prime_remaining==0} {
             puts -nonewline $::prepared [debug read_block VRAM 0 16384]
-            if {$::hud_mode} {puts -nonewline $::pages [binary format c [vdpreg 2]]}
+            if {$::hud_mode} {
+                puts -nonewline $::pages [binary format c [vdpreg 2]]
+                puts -nonewline $::phase_registers [binary format cc [vdpreg 1] [vdpreg 7]]
+            }
         }
     }
     debug set_bp $::rpc_done {} {debug break; after break compare_case}

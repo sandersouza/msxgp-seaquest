@@ -2,7 +2,7 @@
   "passed": true,
   "cases": 40748,
   "acquisition_cycles": 10097,
-  "tick_cycles": 23693,
+  "tick_cycles": 21831,
   "acquisition_worst": 14960,
   "tick_worst": 20113,
   "stack_min": 62320,
@@ -43,7 +43,7 @@
   "wave_values": 256,
   "seed_values": 256,
   "legal_player_y_values": 96,
-  "rom_sha256": "897005edd51b95ebe7893493880b14ca7d39b4213d112796bcdd47f7c0ce7b20",
+  "rom_sha256": "41e0d2f1dd5fa2409920ac7af50aed6e247e21395f421b7f5d2942d6cb784402",
   "python": "3.14.7",
   "method": "unmodified ALE/Stella raster latches; independent occupancy; Z80 acquisition and original py65 ordered resolution",
   "physical_hardware": false

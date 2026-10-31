@@ -43,7 +43,15 @@ init:
     LD BC,256
     ENDIF
     LD DE,$3800
+    IFDEF WITH_PALETTE
+    LD A,5
+    LD ($7000),A
+    ENDIF
     CALL vram_copy
+    IFDEF WITH_PALETTE
+    LD A,1
+    LD ($7000),A
+    ENDIF
     IFNDEF WITH_GRAPHICS
     LD HL,sat_initial
     LD DE,SATBUF
@@ -89,6 +97,10 @@ idle:
 audio_prime_start:
     DI
     LD SP,$F380
+    IFDEF WITH_PALETTE
+    XOR A
+    LD (PAL_FAST_VBLANK),A
+    ENDIF
     CALL audio_init
     CALL audio_sync
     JP frame_start
@@ -116,6 +128,10 @@ input_rpc_done:
     ENDIF
 rpc_start:
     LD SP,$F380
+    IFDEF WITH_PALETTE
+    XOR A
+    LD (PAL_FAST_VBLANK),A
+    ENDIF
 frame_start:
     IFDEF WITH_NATIVE
     IFDEF WITH_COLLISIONS
@@ -143,7 +159,15 @@ core_done:
     CALL prepare_shapes
     CALL prepare_sprites
     IFDEF WITH_GRAPHICS
+    IFDEF WITH_PALETTE
+    LD A,5
+    LD ($7000),A
+    ENDIF
     CALL prepare_original_sprites
+    IFDEF WITH_PALETTE
+    LD A,1
+    LD ($7000),A
+    ENDIF
     ENDIF
     CALL render_frame
 rpc_done:
@@ -151,7 +175,15 @@ rpc_done:
 paced_start:
     CALL wait_vblank
 paced_commit:
+    IFDEF WITH_PALETTE
+    LD A,1
+    LD (PAL_FAST_VBLANK),A
+    ENDIF
     CALL render_commit
+    IFDEF WITH_PALETTE
+    XOR A
+    LD (PAL_FAST_VBLANK),A
+    ENDIF
 paced_frame_start:
     IFDEF WITH_NATIVE
     IFDEF WITH_COLLISIONS
@@ -175,7 +207,15 @@ paced_core_done:
     CALL prepare_shapes
     CALL prepare_sprites
     IFDEF WITH_GRAPHICS
+    IFDEF WITH_PALETTE
+    LD A,5
+    LD ($7000),A
+    ENDIF
     CALL prepare_original_sprites
+    IFDEF WITH_PALETTE
+    LD A,1
+    LD ($7000),A
+    ENDIF
     ENDIF
     CALL render_prepare
 paced_prepared:
@@ -305,7 +345,11 @@ prepare_sprites:
     scale_x
     LD (SATBUF+9),A
     DUP 4, lane
+    IFDEF WITH_GRAPHICS
+    LD A,119-24*lane
+    ELSE
     LD A,120-24*lane
+    ENDIF
     LD (SATBUF+12+4*lane),A
     LD A,($C0C7+lane)
     scale_x
@@ -332,6 +376,9 @@ prepare_sprites:
     ENDIF
     IFDEF WITH_HUD
     INCLUDE "hud.asm"
+    ENDIF
+    IFDEF WITH_PALETTE
+    INCLUDE "palette_fast.asm"
     ENDIF
 benchmark_shape:
     IFNDEF WITH_NATIVE
@@ -404,12 +451,41 @@ sat_initial:
     EDUP
     ENDIF
     IFDEF WITH_BANKED
+    IFNDEF WITH_PALETTE
     INCLUDE "../outputs/native/core.inc"
+    ELSE
+    INCLUDE "../outputs/presentation/palette-tables.inc"
+    ENDIF
     ALIGN 256
+    IFNDEF WITH_PALETTE
 enemy_windows:
     INCBIN "../outputs/presentation/enemy-windows.bin"
+    ENDIF
 enemy_pointers:
     INCBIN "../outputs/presentation/enemy-pointers.bin"
+    IFDEF WITH_PALETTE
+; ALL_CURRENT is only established by the default-colour boot atlas. Before
+; hidden font warming drops that stronger invariant, retain exact visible
+; field memos. A later moving logo need not rescan every already-correct field.
+palette_stamp_default_memos:
+    DUP 8,field
+    LD HL,(HUD_PTRS+field*2)
+    LD (HUD_FIELD_CACHE+field*4),HL
+    EDUP
+    LD HL,hud_background_top
+    LD (HUD_FIELD_CACHE+32),HL
+    LD HL,hud_background_bottom
+    LD (HUD_FIELD_CACHE+36),HL
+    LD DE,1
+    DUP 6,field
+    LD (HUD_FIELD_CACHE+field*4+2),DE
+    EDUP
+    LD DE,PALETTE_DEFAULT_INDEX
+    DUP 4,field
+    LD (HUD_FIELD_CACHE+(field+6)*4+2),DE
+    EDUP
+    RET
+    ENDIF
 fixed_bank_end:
     ASSERT $ <= $8000
     DS $8000-$,$FF
@@ -417,8 +493,13 @@ fixed_bank_end:
     INCLUDE "../outputs/graphics/sprites.inc"
     IFDEF WITH_HUD
     INCLUDE "../outputs/presentation/hud.inc"
+    IFNDEF WITH_PALETTE
     INCLUDE "../outputs/presentation/hud-palette.inc"
+    ENDIF
     INCLUDE "../outputs/presentation/enemy-colors.inc"
+    ENDIF
+    IFDEF WITH_PALETTE
+    INCLUDE "../outputs/native/core.inc"
     ENDIF
     ALIGN 256
 original_rom EQU $-$C00
@@ -426,15 +507,44 @@ original_rom EQU $-$C00
     IFDEF WITH_AUDIO
     INCLUDE "../outputs/presentation/audio-tables.inc"
     ENDIF
+    IFDEF WITH_PALETTE
+    ALIGN 256
+    INCLUDE "../outputs/presentation/enemy-window-pointers.inc"
+    ENDIF
 data_bank_end:
     ASSERT $ <= $C000
+    IFDEF WITH_PALETTE
+    ASSERT $ <= $9B00
+    DS $9B00-$,$FF
+    INCLUDE "../outputs/presentation/palette-writers.inc"
+    INCLUDE "palette_enemy.asm"
+    INCLUDE "../outputs/presentation/palette-generations.inc"
+palette_default:
+    INCBIN "../outputs/presentation/palette-default.bin"
+    INCLUDE "../outputs/presentation/palette-default-bases.inc"
+    ASSERT $ <= $C000
+    DS $C000-$,$FF
+    ELSE
     IF $ < $C000
     DS $C000-$,$FF
+    ENDIF
     ENDIF
     ORG $8000
     INCBIN "../outputs/presentation/enemy-patterns.bin",0,$4000
     ORG $8000
+    IFDEF WITH_PALETTE
+    INCBIN "../outputs/presentation/palette-bank3.bin"
+    ORG $8000
+    INCBIN "../outputs/presentation/palette-bank4.bin"
+    ORG $8000
+    INCBIN "../outputs/presentation/palette-bank5.bin"
+    ORG $8000
+    INCBIN "../outputs/presentation/palette-bank6.bin"
+    ORG $8000
+    INCBIN "../outputs/presentation/palette-bank7.bin"
+    ELSE
     INCBIN "../outputs/presentation/enemy-patterns.bin",$4000,$4000
+    ENDIF
     ELSE
     IFDEF WITH_NATIVE
     IFDEF WITH_HUD

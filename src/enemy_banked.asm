@@ -15,6 +15,18 @@ upload_banked_lane:
     LD E,A
     LD A,(source_ptr)
     LD L,A
+    IFDEF WITH_PALETTE
+    LD H,HIGH enemy_windows_low
+    LD A,(HL)
+    INC H
+    LD H,(HL)
+    LD L,A
+    LD A,E
+    ADD A,A
+    ADD A,E
+    LD E,A
+    ADD HL,DE
+    ELSE
     LD H,HIGH enemy_windows
     LD L,(HL)
     LD H,0
@@ -28,6 +40,7 @@ upload_banked_lane:
     ADD HL,DE
     LD DE,enemy_pointers
     ADD HL,DE
+    ENDIF
     LD E,(HL)
     INC HL
     LD D,(HL)

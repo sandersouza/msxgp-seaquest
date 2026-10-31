@@ -3,7 +3,7 @@
   "cases": 5660,
   "max_sample_cycles": 1879,
   "detail": "complete",
-  "rom_sha256": "9f06069c6d1a8d45e3e0466e9ea7f99e914c3421e1dbd7b0f59e2d0cc4d1de13",
+  "rom_sha256": "c2b6ce5fab6acb029a7319d9fa6e1285afd66600f577e256ed2be953b3842f9c",
   "rom_bytes": 32768,
   "machine": "C-BIOS_MSX1",
   "cpu_hz": 3579545,
