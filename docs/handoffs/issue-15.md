@@ -1,5 +1,24 @@
 # Issue #15 handoff — full-game regression and hardware acceptance preparation
 
+## Delivery record
+
+Issue #15 delivery: [PR #32](https://github.com/sandersouza/msxgp-seaquest/pull/32).
+Runtime remains the exact #14 cartridge. See
+[acceptance evidence](../../references/acceptance/verification.md),
+[independent review](../../references/acceptance/review.md) and
+[hardware instructions](../hardware-acceptance.md).
+The local-only ZIP is `outputs/acceptance/seaquest-issue15-41ec3b92e7a5.zip`,
+SHA256 `c1ad0b986638e3b1ad7b59538dd4c1fcb3c9adeb7971f0e8ef4c80c3ec72d68a`.
+It contains the exact candidate, symbols, reports, instructions and 18 replays;
+59 members match its manifest. Complete-game/rescue matrix and all controller-free
+replays pass 105,359 source updates. Independent final read-only review reports
+no blockers. Manual emulator gameplay/listening, natural full-six rescue and
+physical-machine acceptance remain unobserved; do not promote those to passed.
+No original-derived artifacts were published. Owner visible openMSX sessions and
+the protected cartridge paths below were not operated or overwritten.
+
+The original start-of-issue handoff follows for historical reproducibility.
+
 Start after [PR #31](https://github.com/sandersouza/msxgp-seaquest/pull/31) is
 merged and issue #14 is Closed/Done. Resolve the actual merge revision from
 GitHub; do not assume the runtime source hash below is the merge commit.

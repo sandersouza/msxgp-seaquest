@@ -4,6 +4,7 @@ PYTHON ?= .venv/bin/python
 .PHONY: progression-contract render-progression-bench progression-natural
 .PHONY: presentation presentation-run presentation-check presentation-natural
 .PHONY: video-build video-check
+.PHONY: acceptance-check
 environment:
 	@bash scripts/setup.sh
 environment-check:
@@ -75,6 +76,8 @@ presentation-natural: presentation
 	@$(PYTHON) -B scripts/input_natural.py --audio --progression
 video-build:
 	@$(PYTHON) -B scripts/video_check.py --build-only
+acceptance-check:
+	@$(PYTHON) -B scripts/full_game_check.py
 video-check:
 	@$(MAKE) presentation-check
 	@$(MAKE) video-build

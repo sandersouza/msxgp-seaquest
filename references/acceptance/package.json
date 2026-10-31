@@ -1,0 +1,7 @@
+{
+  "path": "outputs/acceptance/seaquest-issue15-41ec3b92e7a5.zip",
+  "sha256": "c1ad0b986638e3b1ad7b59538dd4c1fcb3c9adeb7971f0e8ef4c80c3ec72d68a",
+  "rom_sha256": "41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8",
+  "bytes": 1682629,
+  "verdict": "pass"
+}
