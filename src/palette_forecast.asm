@@ -241,6 +241,11 @@ palette_forecast_tick:
     LD HL,F_BACKGROUND_BOTTOM
 .background_field:
     CALL forecast_global_field
+    IFDEF WITH_FLAT
+    LD A,(F_STAGE)
+    CP 9
+    CALL Z,forecast_initial_background
+    ENDIF
 .stage_done:
     LD A,(F_REMAIN)
     OR A
