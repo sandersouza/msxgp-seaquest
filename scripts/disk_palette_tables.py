@@ -146,16 +146,16 @@ def colour_programs(classes,fields,labels,default,future_base):
              '    LD A,($C0BB)','    CP 3','    RET NZ',
              '    LD A,($C0E6)','    CP 64','    RET NZ',
              '    LD A,(F_COUNT)','    CP 63','    RET NC',
-             '    LD HL,.classes',f'    LD E,{bottom_tiles[0]}',f'    LD B,{len(bottom_tiles)}',
-             '.mark:','    LD A,(HL)','    INC HL','    PUSH HL','    LD L,A',
+             f'    LD HL,${labels["hud_bottom_class_ids"]+bottom_tiles[0]:04X}',
+             f'    LD E,{bottom_tiles[0]}',f'    LD B,{len(bottom_tiles)}',
+             '.mark:','    LD A,(HL)','    INC HL','    PUSH HL','    ADD A,$D0','    LD L,A',
              '    LD H,$CF','    LD A,(HL)','    LD L,E','    LD H,$C3','    LD (HL),A',
              f'    LD H,${labels["hud_bottom_cache"]>>8:02X}','    XOR A','    LD (HL),A',
              '    INC E','    POP HL','    DJNZ .mark',
              '    LD (F_REMAIN),A','    LD HL,(F_QPTR)',
               '    LD DE,F_FUSED_BOTTOM_WRITER','    LD (HL),E','    INC HL',
               '    LD (HL),D','    INC HL','    LD (F_QPTR),HL',
-              '    LD HL,F_COUNT','    INC (HL)','    RET','.classes:',
-              '    DB '+','.join(str(0xd0+bottom_classes[tile]) for tile in bottom_tiles)]
+              '    LD HL,F_COUNT','    INC (HL)','    RET']
     (OUT/'palette-fused-background.inc').write_text('\n'.join(fused)+'\n')
     gen = ['palette_restore_default_roles:']
     # Roles remain real TMS indices; only the class rows substitute water0.
