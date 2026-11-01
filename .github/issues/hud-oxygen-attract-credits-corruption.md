@@ -39,15 +39,44 @@ Owner observed corruption at the bottom of the screen outside gameplay while HUD
 - [x] Owner specified all three changes and authorized implementation in another issue/chat.
 - [x] Main/default native build and prior qualification receipts are available locally.
 - [x] Owner testing before PR/merge/release is an explicit gate.
-- [ ] Corruption is reproduced and its affected phases/root cause are measured (investigation work).
+- [x] Corruption is reproduced and its affected phases/root cause are measured; see `docs/issue-40-candidate.md`.
 
 ## Definition of Done
 
-- [ ] Filled oxygen is the submarine's yellow; depleted/empty appearance and mechanics remain unchanged.
-- [ ] `retrowork 2026` alternates with the existing lower Activision presentation only outside gameplay.
-- [ ] Reported cycling-HUD corruption is reproduced, explained and fixed across full palette/credit cycles.
-- [ ] Final Normal ROM stays <=32 KiB; ROM and COM work on the original 64 KiB MSX1 target with measured PAL/NTSC timing and guard/state/presentation regressions passing.
-- [ ] Candidate artifacts and before/after evidence are delivered for owner testing, with automated/manual/physical evidence kept separate.
+- [x] Filled oxygen is the submarine's yellow; depleted/empty appearance and mechanics remain unchanged.
+- [x] `retrowork 2026` alternates with the existing lower Activision presentation only outside gameplay.
+- [x] Reported cycling-HUD corruption is reproduced, explained and fixed across full palette/credit cycles.
+- [x] Final Normal ROM stays <=32 KiB; ROM and COM work on the original 64 KiB MSX1 target with measured PAL/NTSC timing and guard/state/presentation regressions passing.
+- [x] Candidate artifacts and before/after evidence are delivered for owner testing, with automated/manual/physical evidence kept separate.
 - [ ] Owner explicitly approves the tested candidate before any PR, merge or release.
 - [ ] Independent review, PR checks and integration pass after that approval.
 - [ ] New release is published after approval, retaining base release text and adding these fixes; GitHub/local handoff/status agree.
+
+
+## Local implementation and candidate evidence
+
+Implementation source: `a44811c68345d32041d0114c048276e169958430` on local branch
+`codex/fix/40-hud-attract`. ROM 32,768 bytes SHA256
+`5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a`; COM 25,599 bytes SHA256
+`a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91`.
+
+The candidate passed 78 automated PAL/NTSC checks (2,643,400 frames),
+including 36 complete game-over/restart/rescue routes, plus 36 independent
+original-CPU replays. Worst busy time: NTSC 59,133/59,736 cycles,
+PAL 67,006/71,364. No skipped VDP frames or visible commits;
+active writes retain 29-cycle spacing. 91 host tests and synthetic CI pass;
+the shared banked renderer retains its passing 39,328-case diagnostic identity.
+
+The measured baseline exceeded the NTSC budget and performed 18-cycle writes
+at active line0 on ROM and COM. The repair covers the initial idle screen,
+both font half-periods, lower-background transfer scheduling and the redundant
+HUD queue on a player swap after palette activation. `retrowork 2026` retains
+Activision and copyright 1983; only the filled oxygen hue is changed.
+
+The ROM/COM, guide, SHA256 sums and actual before/after captures are delivered
+locally in the dedicated issue chat. Compact metadata and reproduction are in
+`references/compact-delivery/issue-40-candidate.json` and
+`docs/issue-40-candidate.md`. Original inputs, BIOS/DOS and replay images remain
+private. Owner visual/audio/playtesting and physical MSX acceptance are pending.
+**Keep this issue open/In progress. Owner approval remains required before
+independent review, any PR/draft, merge, tag or publication. No release was made.**

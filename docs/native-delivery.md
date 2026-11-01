@@ -128,7 +128,7 @@ current checkout's HEAD.
 For a cartridge, use the exact built binary and its matching runtime symbols:
 
 ```sh
-make input-natural
+make progression-natural
 .venv/bin/python -B scripts/render_bench.py --palette --progression
 make disk-build
 .venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1 --scenario dense
@@ -138,7 +138,8 @@ make disk-build
 .venv/bin/python -B scripts/native_replay_check.py outputs/native-acceptance/plain32
 ```
 
-The first two commands generate the private continuous-input seed and the
+The first two commands generate the private continuous-input seed through
+game-over/restart and the
 39,328-case source/pixel benchmark with its cycle-ranked dense fixtures. They
 must precede seeded/dense qualification on a fresh checkout; the native build
 does not invent or substitute those measurements.

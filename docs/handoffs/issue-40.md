@@ -5,15 +5,15 @@ Dedicated chat: `ISSUE #40` in Seaquest project `745758fe-48e5-471b-950b-4a2cee9
 
 ## Owner request and authorization gate
 
-Implement in this new issue/chat: filled oxygen bar yellow like the player's submarine, with depleted/empty rendering unchanged; add exact `retrowork 2026` to the lower Activision logo/text cycle outside active gameplay; reproduce and repair lower HUD corruption during non-gameplay color cycling. No cause has been assumed or measured yet.
+Implement in this new issue/chat: filled oxygen bar yellow like the player's submarine, with depleted/empty rendering unchanged; add exact `retrowork 2026` to the lower Activision logo/text cycle outside active gameplay; reproduce and repair lower HUD corruption during non-gameplay color cycling. The original handoff did not assume a cause. Measured failures and the implementation are now documented in `docs/issue-40-candidate.md`.
 
 **Deliver the local ROM/COM candidate for owner testing, then wait for explicit owner approval. Do not create any PR (even draft), merge, tag or publish until that approval.** After approval, perform independent review/PR/merge and publish a new release retaining the base release text and appending these fixes. This explicit user gate overrides earlier autonomous release practices. Keep the issue open while approval/delivery is pending.
 
 ## Exclusive checkout transfer
 
 - Repository: `/Users/sandersouza/Developer/msx-gamePorts/seaquest`.
-- Current branch: `main`, commit `e315927ff846e9b019c1a68467523e35119decd8` (merged PR #39).
-- Existing tracked checkout was clean. Pending files from issue setup: `.github/issues/hud-oxygen-attract-credits-corruption.md` and this handoff, both untracked. Preserve/commit them on a new scoped branch such as `codex/fix/40-hud-attract`.
+- Handoff base: `main`, commit `e315927ff846e9b019c1a68467523e35119decd8` (merged PR #39). Current issue branch: `codex/fix/40-hud-attract`; frozen implementation commit `a44811c68345d32041d0114c048276e169958430`.
+- The initial issue/handoff files were preserved and committed at `0087519`. The implementation is committed locally; owner approval is still pending.
 - The old ISSUE #35 chat stops modifying the checkout immediately after dispatching this handoff. The new ISSUE #40 chat has exclusive implementation ownership. Do not run concurrent issue implementations here.
 - GitHub project #7 item `PVTI_lAHOAJR8nM4Bn8x0zhFNhjI`: In progress, P2, M, estimate 8 hours (provisional). No milestone. Labels bug/enhancement/priority:p2. Full local issue copy is authoritative for requirements.
 
@@ -47,4 +47,34 @@ Likely source entry points: scripts/hud_tables.py (hud_logo/oxygen tile vectors 
 
 ## Next actions
 
-Take exclusive checkout ownership, create the scoped branch, commit setup docs, reproduce/capture baseline attract corruption, implement the three changes, validate and prepare candidate ROM/COM plus concise before/after previews and exact reproducible commands. Deliver to the owner in ISSUE #40 and wait for the required approval before creating a PR or publishing anything. Do not ask for initial architecture/permission already authorized by this handoff.
+Wait for the owner to test and explicitly approve the exact candidate below. Do not change the frozen runtime, create a PR/draft, merge, tag or publish while approval is pending. After approval, continue this issue with independent review and integration/release checks; preserve the existing release narrative and append the fixes. Keep the issue open until those delivery conditions are met.
+
+
+## Local candidate delivered for owner testing
+
+- Frozen runtime source: `a44811c68345d32041d0114c048276e169958430` on `codex/fix/40-hud-attract`.
+  Later documentation commits do not alter the source fingerprint.
+- ROM 32,768 bytes, SHA256 `5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a`.
+- COM 25,599 bytes, SHA256 `a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91`.
+- Owner archive: `outputs/issue40/seaquest-issue40-5907ee7f.zip`; guide `outputs/issue40/candidate/LEIA-ME.md`.
+  These binaries and captures stay local/ignored pending approval.
+- Final evidence: 78 checks, 36 complete routes plus 36 independent replays,
+  2,643,400 frames; NTSC worst 59,133/59,736,
+  PAL 67,006/71,364 cycles, no skipped VDP frames/visible commits.
+  91 host tests and synthetic CI pass. Shared banked diagnostic remains the
+  exact 39,328-case benchmark binary `8bd402d131e233f0dbcc857cdfd4c3ad0807de6423d3cee17774f6cc8ec6154f`.
+- Authoritative compact receipt: `references/compact-delivery/issue-40-candidate.json`.
+  Full receipt: `outputs/issue40/candidate/qualification.json`.
+- Actual fixes and reproducible commands: `docs/issue-40-candidate.md`.
+  The measured baseline missed VBlank and performed 18-cycle active writes.
+  The repair forecasts initial palettes, warms both font half-periods, fuses
+  lower-background transfers and avoids a full HUD queue after an already
+  prepared atlas swap. Oxygen/credit changes remain presentation-only.
+- Owner human emulator viewing/listening/playtesting and physical MSX evidence
+  remain pending. This does not change the existing release 1.0.0 or its prose.
+- **No PR/draft, push, merge, tag or publication has been made. Keep issue #40
+  open/In progress and wait for explicit approval of these exact binaries.**
+  After approval: independent review, PR/checks/integration, then the requested
+  release retaining `docs/releases/1.0.0.md`'s base narrative and appending fixes.
+  Any runtime change must be requalified and its binary identity rechecked
+  against the owner's tested candidate. Do not start another issue in this chat.
