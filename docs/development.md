@@ -11,10 +11,10 @@ Install Xcode Command Line Tools and Homebrew first. Then:
 make environment-dry-run
 make environment
 make environment-check
-make build
+make diagnostic-build
 make test
 make smoke
-make run
+make diagnostic-run
 ```
 
 Setup supports macOS ARM and Intel. ARM was exercised here; Intel is prepared
@@ -41,8 +41,11 @@ describes the preparation steps without applying changes.
 
 | Command | Result |
 |---|---|
-| `make build` | `outputs/seaquest-diagnostic.rom` and hash manifest |
-| `make run` | build and open the diagnostic on C-BIOS_MSX1 |
+| `make build` / `make` | complete game: `outputs/disk/SEAQUEST32.ROM`, 32 KiB Normal |
+| `make run` | build and open the game on C-BIOS_MSX1; `MACHINE=C-BIOS_MSX1_EU` for PAL |
+| `make build FORMAT=com` | native MSX-DOS 1 executable: `outputs/disk/SEAQUEST.COM` |
+| `make run FORMAT=com MACHINE=my_msx1_disk DOS_DISK=/path/to/dos1.dsk` | boot a temporary DOS1 disk copy with the current COM; requires your BIOS/system disk |
+| `make diagnostic-build` / `make diagnostic-run` | build / open the separate synthetic hardware diagnostic |
 | `make smoke` | bounded headless C-BIOS_MSX1 boot, `outputs/smoke-result.json` |
 | `make test` | synthetic unit tests, no original ROM inputs needed |
 | `make reference-check` | verify all local originals against the immutable manifest |
@@ -60,6 +63,9 @@ describes the preparation steps without applying changes.
 | `make presentation-natural` | cold device-only replay, original CPU/TIA and every sound store |
 
 Use `PYTHON=/path/to/python` with make to override the local venv interpreter.
+Game builds require the documented local original inputs and reference
+dependencies; see [native build and launch instructions](native-delivery.md).
+The synthetic diagnostic, host tests and CI do not require those inputs.
 `references/tools-lock.json` pins reference research tools; sjasmplus is pinned to
 v1.24.0 commit `d379eeac9ad3857fb48fd3a3929175d0a56038ce`, built with `USE_LUA=0`.
 Generated outputs are ignored. Keep source files under `src/`, tests under `tests/`

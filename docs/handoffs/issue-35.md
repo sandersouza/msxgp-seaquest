@@ -2,6 +2,28 @@
 
 Issue: https://github.com/sandersouza/msxgp-seaquest/issues/35
 
+## Owner-requested build/download follow-up — 2026-11-01
+
+The owner requested the complete ordinary 32 KiB cartridge as the default for
+`make`, `make build`, `make run`, README downloads and WebMSX. `FORMAT=com` selects
+the native executable for both build and run. COM launch uses `MACHINE` with a
+disk-capable 64 KiB MSX1 and `DOS_DISK` with the owner's bootable DOS1 image;
+the launcher imports the current COM and startup command into a temporary copy.
+The separate synthetic diagnostic has explicit `diagnostic-build` and
+`diagnostic-run` targets, and remains the subject of `make smoke` and public CI.
+The original release assets/tag are retained; the default ROM is `SEAQUEST32.ROM`
+with Normal mapping, while only the historical 128 KiB `seaquest.rom` is ASCII16.
+The build/launcher change does not alter game or loader assembly.
+
+Validation: 90 host tests and original-free CI pass; actual `make run` paths
+boot ROM and DOS COM (2,422/1,014 paced-loop observations). The test source
+disk remains SHA256 `5fb34d8c1664a60e4cc81c1a4f1a8585428dc2420f00bce9f74d85b0e38b928e`.
+Rebuilt native ROM/COM exactly match the published `bf4bcb22...` / `b3e80510...`
+identities below. The updated WebMSX Normal URL displayed the running game.
+Independent review found a setup prerequisite mismatch; the initial setup now
+uses explicit diagnostic targets and links the separate native-build recipe.
+No additional physical/human acceptance is claimed.
+
 ## Completed native delivery
 
 The dedicated issue implementation now has both requested native formats.
