@@ -1,11 +1,15 @@
 .DEFAULT_GOAL := build
 PYTHON ?= .venv/bin/python
+FORMAT ?= rom
+MACHINE ?= C-BIOS_MSX1
+DOS_DISK ?=
 .PHONY: environment environment-check environment-dry-run build run smoke test reference-check reference-trace-check native-contract render-bench render-native-bench graphics graphics-reference-check render-graphics-bench render-input-bench controls controls-run input-contract input-natural disassemble
 .PHONY: progression-contract render-progression-bench progression-natural
 .PHONY: presentation presentation-run presentation-check presentation-natural
 .PHONY: video-build video-check
 .PHONY: acceptance-check
 .PHONY: disk-build plain32-build
+.PHONY: diagnostic-build diagnostic-run
 disk-build plain32-build:
 	@$(PYTHON) -B scripts/build_disk.py
 environment:
@@ -15,10 +19,14 @@ environment-check:
 environment-dry-run:
 	@bash scripts/setup.sh --dry-run
 build:
-	@$(PYTHON) -B scripts/rom.py build
+	@$(PYTHON) -B scripts/play.py build --format "$(FORMAT)"
 run: build
+	@$(PYTHON) -B scripts/play.py run --format "$(FORMAT)" --machine "$(MACHINE)" --disk "$(DOS_DISK)"
+diagnostic-build:
+	@$(PYTHON) -B scripts/rom.py build
+diagnostic-run: diagnostic-build
 	@$(PYTHON) -B scripts/rom.py run
-smoke: build
+smoke: diagnostic-build
 	@$(PYTHON) -B scripts/smoke.py
 test:
 	@$(PYTHON) -B -m unittest discover -s tests -v

@@ -35,8 +35,9 @@ Use normal emulator speed. The loader expands the game into the same original
 support an ordinary 32 KiB image. Physical cartridge programming and hardware
 qualification remain separate from the emulator tests.
 
+The default build and WebMSX link use `SEAQUEST32.ROM` with Normal mapping.
 The original `seaquest.rom` download remains the accepted 128 KiB ASCII16
-version, with its original hash and WebMSX link. The new alternatives have
+version, with its original hash. The native formats have
 different filenames and their own source/manifest/checksum identities; they do
 not replace or retag the old artifact.
 
@@ -49,12 +50,28 @@ original inputs locally and run these commands in order:
 make environment-check
 .venv/bin/python -m pip install -r requirements-reference.txt
 make reference-check
-make disk-build
+make build
+make build FORMAT=com
 shasum -a 256 outputs/disk/SEAQUEST.COM outputs/disk/SEAQUEST32.ROM
 cat outputs/disk/manifest.json
 ```
 
-`make plain32-build` is an alias for the same shared build. Both targets emit
+`make run` builds and opens the Normal ROM in `C-BIOS_MSX1`;
+`make run MACHINE=C-BIOS_MSX1_EU` selects PAL. For disk execution:
+
+```sh
+make run FORMAT=com MACHINE=my_msx1_disk DOS_DISK=/path/to/dos1.dsk
+```
+
+Replace the machine placeholder with your installed 64 KiB MSX1 configuration
+with a disk interface and BIOS. C-BIOS cannot boot MSX-DOS. Supply your own
+bootable DOS1 disk image. The launcher copies it to a temporary directory,
+imports the freshly built `SEAQUEST.COM` and `AUTOEXEC.BAT` using openMSX, then
+boots that copy. The original disk is untouched, and the temporary copy is
+removed after openMSX exits. Reset the machine to leave the game.
+
+`make disk-build` and `make plain32-build` remain aliases for the shared build.
+All native builds emit
 `outputs/disk/flat.bin`, runtime symbols, loader symbols and a manifest. All
 reference-derived data and binaries remain ignored. The first disk build
 fetches the public BSD-licensed ZX0 compressor at pinned commit

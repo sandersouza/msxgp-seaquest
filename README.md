@@ -16,40 +16,43 @@ of what comes next!
 
 ![Seaquest running on the MSX1 renderer](docs/gameplay.png)
 
-[▶ Play Seaquest 1.0.0 directly in WebMSX](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2Fseaquest.rom&ROM_FORMAT=ASCII16)
+[▶ Play Seaquest 1.0.0 directly in WebMSX — 32 KiB](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
 
 MSX1 port of Activision's Atari 2600 Seaquest, focused on preserving the original
 gameplay, rules and simulation timing on standard MSX hardware.
 
 The game requires **64 KiB RAM and 16 KiB VRAM**, a standard-speed Z80,
 TMS9918-family VDP and PSG. No RAM expansion, turbo, disk drive or additional
-sound hardware is required. The cartridge is **128 KiB, ASCII16**; cartridge
-capacity is separate from the machine's RAM requirement.
+sound hardware is required. The default cartridge is **32 KiB, Normal**, mapped
+at `4000..BFFF` without bank switching. It expands into the original 64 KiB RAM
+at startup.
 
 ## Download and play
 
-Download **[seaquest.rom — version 1.0.0](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/seaquest.rom)**
+Download **[SEAQUEST32.ROM — version 1.0.0, 32 KiB](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST32.ROM)**
 from the [release page](https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.0).
-Use cartridge type **ASCII16** when loading it in an emulator or compatible flash
-cartridge. The release also includes `seaquest-1.0.0.json` and `SHA256SUMS` to
-identify and verify the exact ROM.
+Use cartridge type **Normal** when loading it in an emulator or compatible flash
+cartridge. `seaquest-1.0.0-native-manifest.json` and
+`seaquest-1.0.0-native-SHA256SUMS` identify and verify the native downloads.
 
-Additional native MSX1 formats are available as **[SEAQUEST.COM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST.COM)**
-for **MSX-DOS 1**, and **[SEAQUEST32.ROM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST32.ROM)**
-for an ordinary **32 KiB cartridge**. Both use the original 64 KiB RAM and
+The disk executable **[SEAQUEST.COM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST.COM)**
+is available for **MSX-DOS 1**. Both formats use the original 64 KiB RAM and
 16 KiB VRAM. The disk program requires your normal disk interface/system disk;
 type `SEAQUEST` at the DOS prompt and use the machine reset to exit.
 The [native ZIP package](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/seaquest-1.0.0-native-msx1.zip)
 includes both formats, instructions, their manifest/checksums and the ZX0 notice.
 See [native loading, build and validation instructions](docs/native-delivery.md).
 
+The original **[seaquest.rom — 128 KiB, ASCII16](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/seaquest.rom)**
+remains available with its original `seaquest-1.0.0.json` and `SHA256SUMS`.
+
 ### WebMSX
 
-[Play 1.0.0 in WebMSX — MSX1, ASCII16](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2Fseaquest.rom&ROM_FORMAT=ASCII16)
+[Play 1.0.0 in WebMSX — MSX1, 32 KiB Normal](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
 
 Click the emulator to give it keyboard focus and enable audio when requested.
 For manual loading, open [WebMSX](https://webmsx.org), select MSX1 and insert
-`seaquest.rom` with **ASCII16** format. URL parameters follow the
+`SEAQUEST32.ROM` with **Normal** format. URL parameters follow the
 [official WebMSX documentation](https://github.com/ppeccin/WebMSX/blob/master/doc/README.md#media-loading).
 The port's timing measurements use openMSX; WebMSX is an additional play option.
 
@@ -58,7 +61,7 @@ The port's timing measurements use openMSX; WebMSX is an additional play option.
 From the folder containing the downloaded cartridge:
 
 ```sh
-openmsx -machine C-BIOS_MSX1 -cart seaquest.rom -romtype ASCII16
+openmsx -machine C-BIOS_MSX1 -cart SEAQUEST32.ROM -romtype Normal
 ```
 
 For PAL, use `-machine C-BIOS_MSX1_EU`. Keep the emulator at normal speed.
@@ -97,21 +100,22 @@ to restore B/B. Held Select repeats with the original timing.
 graphics, HUD, oxygen and rescue loop, score progression, PSG effects,
 one/two-player sessions, game over, attract and restart.
 
-The released ROM is the exact 131,072-byte acceptance candidate, SHA-256:
+The default 32,768-byte Normal ROM has SHA-256:
 
 ```text
-41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8
+bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e
 ```
 
-Automated openMSX qualification covers **18 complete-game/rescue routes** on
-NTSC and PAL, both player selections and all four difficulty combinations.
-Independent device replays reproduce every captured canonical state. Controlled
-comparisons additionally cover full-six rescue bonuses, score boundaries, dense
-scenes, VRAM writes, stack/RAM guards and frame pacing.
+Automated openMSX qualification of the native ROM and COM covers **36 complete-game/rescue
+routes**, 18 per format, on NTSC and PAL, both player selections and all four
+difficulty combinations. All 36 independent device replays reproduce every
+canonical update. The 59-check native matrix also covers dense scenes, generation
+boundaries, actual loading, immutable RAM, VRAM writes, stack guards and frame pacing.
+See the [native qualification receipt](references/compact-delivery/native.json).
 
 See the [release notes](docs/releases/1.0.0.md),
-[complete-game evidence](references/acceptance/verification.md) and
-[video timing evidence](references/video/verification.md) for scopes and limitations.
+[original ASCII16 complete-game evidence](references/acceptance/verification.md) and
+[original ASCII16 video timing evidence](references/video/verification.md) for scopes and limitations.
 Automated play does not establish completed human playtesting or subjective sound
 acceptance. **Physical-machine and flash-cartridge qualification, and the
 20-minute physical soak, remain pending.** The
@@ -131,14 +135,24 @@ make environment               # prepare macOS tools and the virtual environment
 make environment-check
 .venv/bin/python -m pip install -r requirements-reference.txt
 make reference-check
-make video-build               # build the playable PAL/NTSC cartridge
-openmsx -machine C-BIOS_MSX1 -cart outputs/video/seaquest-video.rom -romtype ASCII16
+make build                     # complete 32 KiB Normal cartridge
+make run                       # build and launch it on a 64 KiB MSX1
+make run MACHINE=C-BIOS_MSX1_EU # PAL
+make build FORMAT=com          # MSX-DOS 1 executable
+make run FORMAT=com MACHINE=my_msx1_disk DOS_DISK=/path/to/dos1.dsk
 ```
 
-`make video-build` exports the playable ROM and matching symbols under
-`outputs/video/`. **Plain `make`, `make build` and `make run` retain the separate
-32 KiB hardware diagnostic**; they do not select the release game.
-`make presentation-run` builds and opens the playable integration directly.
+Plain `make`, `make build` and `make run` select
+`outputs/disk/SEAQUEST32.ROM` (**Normal**, 32,768 bytes). `FORMAT=com` selects
+`outputs/disk/SEAQUEST.COM`. The shared build emits both formats and their symbols
+and manifest under `outputs/disk/`. COM launch requires your bootable DOS1 disk
+and a disk-capable 64 KiB MSX1 configuration with your own BIOS; C-BIOS cannot boot
+DOS. It imports the current COM and an automatic startup command into a temporary
+copy of your disk, which is removed when openMSX exits. Reset the MSX to leave the game.
+
+`make diagnostic-build` / `make diagnostic-run` select the separate synthetic
+hardware diagnostic. `make smoke` checks that diagnostic. `make video-build` and
+`make presentation-run` retain the original ASCII16 development integration.
 
 | Command | Result |
 | --- | --- |

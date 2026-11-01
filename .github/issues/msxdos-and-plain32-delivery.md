@@ -57,6 +57,23 @@ published to 1.0.0 and downloaded byte-verified. The original three assets and
 tag object/commit are unchanged. `references/compact-delivery/publication.json`
 records that delivery. Manual/physical qualification remains explicitly pending.
 
+## Owner-requested default build follow-up — 2026-11-01
+
+Use the complete 32 KiB Normal ROM as the default for `make`, `make build`,
+`make run`, README downloads and WebMSX. `FORMAT=com` selects the executable.
+For COM launch, `MACHINE` and `DOS_DISK` select the owner's disk-capable 64 KiB
+MSX1 and bootable DOS1 disk; the launcher imports the current COM and AUTOEXEC
+into a temporary copy and leaves the system disk intact. Keep the synthetic
+diagnostic under explicit `diagnostic-build` / `diagnostic-run` targets and
+`make smoke`. Preserve existing release binaries, identities and tag.
+
+The default and COM Make launch paths booted the actual native programs in
+openMSX, with 2,422 and 1,014 paced-loop observations respectively. Both rebuilt
+binaries remain byte-identical to the qualified published assets. All 90 host
+tests and original-free synthetic CI pass. The Normal 32 KiB WebMSX link was
+opened and the running game was visible. Independent review's setup-documentation
+finding was corrected. These checks do not extend physical/human acceptance.
+
 ## Historical feasibility checkpoint — 2026-10-31, superseded above
 
 The unchanged playable rebuild reproduces the accepted 1.0.0 hash. The existing
