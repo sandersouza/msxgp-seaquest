@@ -276,9 +276,6 @@ palette_default_prepare:
     LD A,(PAL_PALETTE_CHANGED)
     OR A
     JP Z,.no
-    LD A,(HUD_PREVIOUS_LOGO)
-    CP 9                        ; authored credit uses the exact field collector
-    JP Z,.no
     LD A,($C0E6)
     LD HL,$C0BE
     OR (HL)
@@ -292,14 +289,14 @@ palette_default_prepare:
     OR A
     JP NZ,.no
     LD A,(HUD_PREVIOUS_LOGO)
-    ADD A,18
+    ADD A,20
     JR .base
 .attract:
     LD A,($C0B7)
     OR A
     LD A,(HUD_PREVIOUS_LOGO)
     JR Z,.base
-    ADD A,9
+    ADD A,10
 .base:
     ADD A,A
     LD L,A
@@ -313,11 +310,9 @@ palette_default_prepare:
     LD A,(HL)
     INC HL
     LD (PAL_QUEUE_COUNT),A
-    ADD A,A
-    LD C,A
-    LD B,0
     LD DE,PAL_QUEUE
-    LDIR
+    CALL palette_base_copy_segment
+    CALL palette_base_copy_segment
     LD (PAL_QUEUE_PTR),DE
     LD HL,palette_base_memo
     LD DE,HUD_FIELD_CACHE+12
@@ -401,6 +396,22 @@ palette_default_prepare:
     RET
 .no:
     XOR A
+    RET
+
+; Header: byte count, little-endian source. Common HUD and logo fragments are
+; interned independently, retaining an exact precompiled queue for every logo.
+palette_base_copy_segment:
+    LD C,(HL)
+    INC HL
+    LD B,0
+    LD A,(HL)
+    INC HL
+    PUSH HL
+    LD H,(HL)
+    LD L,A
+    LDIR
+    POP HL
+    INC HL
     RET
 
 ; A original AC byte. Return A slot*8|128 if ready,0 fallback; C exactRGBA.

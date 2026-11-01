@@ -54,7 +54,7 @@ def colour_programs(classes,fields,labels,default,future_base):
         if span not in spans: spans[span] = len(spans)
         dynamic_spans[tile] = spans[span]
     bases = []
-    for player,life,logo in [(p,0,l) for p in range(2) for l in range(9)]+[(0,3,l) for l in range(9)]:
+    for player,life,logo in [(p,0,l) for p in range(2) for l in range(10)]+[(0,3,l) for l in range(10)]:
         life_name = 'hud_lives1' if player else 'hud_lives'
         vectors = [(fields[life_name][life*9:life*9+9],0),
                    (fields['hud_blank_pair'],0),(fields['hud_divers'][:18],2),
@@ -150,9 +150,20 @@ def colour_programs(classes,fields,labels,default,future_base):
     (OUT/'palette-generations.inc').write_text('\n'.join(gen)+'\n')
     base_code = ['palette_default_bases:',
                  '    DW '+','.join(f'palette_default_base_{n}' for n in range(len(bases)))]
+    common,logos = {},{}
+    logo_class = classes.index(tuple([(10,6)]*8))
     for index,(keys,pointers) in enumerate(bases):
-        base_code += [f'palette_default_base_{index}:',f'    DB {len(keys)}',
-                      '    DW '+','.join(str(writer_symbols[f'colour_writer_{spans[span]}']) for span in keys)]
+        rest = tuple(span for span in keys if span[2]!=logo_class)
+        logo = tuple(span for span in keys if span[2]==logo_class)
+        ci,li = common.setdefault(rest,len(common)),logos.setdefault(logo,len(logos))
+        base_code += [f'palette_default_base_{index}:',f'    DB {len(keys)},{2*len(rest)}',
+                      f'    DW palette_base_common_{ci}',f'    DB {2*len(logo)}',
+                      f'    DW palette_base_logo_{li}']
+    for prefix,groups in (('common',common),('logo',logos)):
+        for keys,index in groups.items():
+            if not keys: raise ValueError('empty palette queue fragment')
+            base_code += [f'palette_base_{prefix}_{index}:',
+                          '    DW '+','.join(str(writer_symbols[f'colour_writer_{spans[span]}']) for span in keys)]
     base_code += ['palette_base_memo:']
     for field,pointer in enumerate(bases[0][1]):
         sig = '0' if field<3 else 'PALETTE_DEFAULT_INDEX'
