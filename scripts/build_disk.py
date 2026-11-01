@@ -12,6 +12,7 @@ import random
 import subprocess
 import sys
 import shutil
+from source_identity import fingerprint,verify as verify_source
 
 root=Path(__file__).resolve().parents[1]
 out=root/'src/disk'
@@ -234,6 +235,9 @@ native_writers_start:
     (dest/'flat.asm').write_text(source)
 
 def main():
+    identity=fingerprint(root)
+    dirty=subprocess.check_output(['git','status','--porcelain','--','src','scripts','Makefile','references/tools-lock.json'],cwd=root,text=True).strip()
+    revision=None if dirty else subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
     # The shared asset generators use outputs/presentation and outputs/native.
     # Match render_bench's lock ordering and retain locks through packaging.
     locks=[]
@@ -279,7 +283,7 @@ def main():
     verify_writer_map(symbols,resolved)
     verify_layout(symbols)
     (dest/'layout.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(json.dumps(report),flush=True)
+    print(json.dumps({k:v for k,v in report.items() if k!='source_identity'}),flush=True)
     if report['static_overflow_bytes'] or report['cold_overflow_bytes']:
         raise SystemExit(1)
     raw=(dest/'flat.raw').read_bytes()
@@ -295,10 +299,10 @@ def main():
     memory[0xd000:0xec00]=hud
     (dest/'flat.bin').write_bytes(memory)
     (dest/'resident.bin').write_bytes((root/'outputs/graphics/sprite-patterns.bin').read_bytes()[:1504])
-    package_com()
+    package_com(identity,revision)
 
 
-def package_com():
+def package_com(identity,revision):
     """Compress only after the final flat symbol map has converged."""
     from environment import prepare_checkout
     tool=root/'.tools/zx0'
@@ -327,9 +331,11 @@ def package_com():
     data=(dest/'SEAQUEST.COM').read_bytes()
     report=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest(),payload_sum16=checksum,
                 runtime_sha256=hashlib.sha256(memory).hexdigest(),zx0_delta=deltas,
+                source_identity=identity,source_revision=revision,
                 runtime='unexpanded MSX1 64 KiB RAM / 16 KiB VRAM; DOS1 full-RAM takeover; reset to exit')
+    verify_source(root,identity)
     (dest/'manifest.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(json.dumps(report),flush=True)
+    print(json.dumps({k:v for k,v in report.items() if k!='source_identity'}),flush=True)
     package_rom(report)
 
 
@@ -341,6 +347,7 @@ def package_rom(com_report):
     if len(data)!=32768:
         raise ValueError('plain cartridge is not exactly 32768 bytes')
     shutil.copyfile(dest/'flat.sym',dest/'SEAQUEST32.sym')
+    verify_source(root,com_report['source_identity'])
     com_report['plain_rom']=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest(),mapper='Normal, fixed 4000..BFFF')
     (dest/'manifest.json').write_text(json.dumps(com_report,indent=2)+'\n')
 

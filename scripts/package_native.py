@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import zipfile
+from source_identity import verify as verify_source
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -19,18 +20,24 @@ def main():
     args=parser.parse_args()
     if subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip():
         raise ValueError('commit the reviewed source and evidence before release packaging')
-    source=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     build=ROOT/'outputs/disk'
+    built=json.loads((build/'manifest.json').read_text())
+    if not built.get('source_revision'):
+        raise ValueError('release build must record a clean source revision; rebuild from committed sources')
+    verify_source(ROOT,built['source_identity'])
+    source=built['source_revision']
     evidence=json.loads(args.evidence.read_text())
     if evidence.get('verdict')!='pass':
         raise ValueError('native qualification is not complete')
+    if evidence.get('build_source_sha256')!=built['source_identity']['sha256']:
+        raise ValueError('qualification is not linked to this build source identity')
     files={name:(build/name).read_bytes() for name in ('SEAQUEST.COM','SEAQUEST32.ROM')}
     identities={name:dict(bytes=len(data),sha256=digest(data)) for name,data in files.items()}
     if identities!=evidence['artifacts']:
         raise ValueError('qualified identities differ from the files being packaged')
     if identities['SEAQUEST32.ROM']['bytes']!=32768:
         raise ValueError('plain cartridge exceeds its fixed 32 KiB contract')
-    manifest=dict(release='1.0.0',source_revision=source,artifacts=identities,
+    manifest=dict(release='1.0.0',source_revision=source,source_sha256=built['source_identity']['sha256'],artifacts=identities,
                   ram_kib=64,vram_kib=16,cpu='standard Z80',
                   disk_environment='MSX-DOS 1; no cartridge; machine reset to exit',
                   plain_mapper='Normal, fixed 4000..BFFF; no bank switching',

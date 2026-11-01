@@ -96,6 +96,15 @@ cache is 8 KiB. Visible enemy patterns are transferred during the paced VBlank
 commit. Current HUD fields share the same exact descriptors as forecast fields.
 The final link verifies every generated numeric writer address against the
 assembled symbols and rejects any remaining mapper access in its include tree.
+The four-step token translator keeps its reserved generation constant until
+the pending palette is complete; qualification checks that invariant on every
+translation chunk, including forced generation240 boundaries.
+
+The build records a fingerprint of source/build-tool files before and after
+assembly. Release packaging requires a clean recorded source revision, an
+unchanged fingerprint and qualification receipts for the exact rebuilt bytes.
+It uses that recorded revision, rather than attributing an old binary to the
+current checkout's HEAD.
 
 ## Reproducing qualification
 
