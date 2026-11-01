@@ -21,7 +21,7 @@ Use the current checkout as requested; no concurrent implementation.
 5. [x] For viable candidates, implement native disk and plain32 loaders and
    reproducible packages. Verify real loading, RAM/slot/stack guards, original
    state/pixels/PSG, full-density timing and PAL/NTSC full-game/rescue routes.
-6. [ ] Obtain independent review, run local and remote checks and integrate a
+6. [x] Obtain independent review, run local and remote checks and integrate a
    scoped PR. Publish new assets only after their own gates pass; preserve tag,
    original assets and README image/WebMSX order. Otherwise keep #35 open,
    publish no candidate binaries, and synchronize measured blockers/handoff.
@@ -33,7 +33,9 @@ and compression estimates being mistaken for a usable runtime.
 Current implementation: PR #37. The flat runtime and both real loading paths
 now fit and pass their complete automated qualification; see
 `docs/native-delivery.md` and `references/compact-delivery/native.json`.
-Integration/publication is the remaining step. The earlier ledger below records
+PR #37 is merged and the five new native assets are published and read-back
+verified in release1.0.0; see `references/compact-delivery/publication.json`.
+No implementation/delivery step remains. The earlier ledger below records
 the initial rejected design, not the final native implementation.
 
 ## Decisions and evidence ledger

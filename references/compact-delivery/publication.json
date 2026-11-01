@@ -1,0 +1,34 @@
+{
+  "verdict": "pass",
+  "release_url": "https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.0",
+  "release_id": 430104921,
+  "source_revision": "0f11ed47d16cd8bda9531cd992db9afec8106f3c",
+  "artifacts": {
+    "seaquest-1.0.0-native-manifest.json": "9a5d364b542539635e84b106f4cdc2ff0a241e5da07ec08eaa68831afa0a4fe2",
+    "SEAQUEST32.ROM": "bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e",
+    "seaquest-1.0.0-native-SHA256SUMS": "458cd080fb4a9914e3436689b50b8121f4e983e13210b60e0587cec5ae633ca2",
+    "SEAQUEST.COM": "b3e8051088a911943501b8bf1f1615afe45e1308fa2d944b80c8dbbc0004e79d",
+    "seaquest-1.0.0-native-msx1.zip": "ea2eab771076231ab563a0b3e594e48e56a09cf75372c82d942debf8bc998344"
+  },
+  "original_assets_unchanged": {
+    "seaquest-1.0.0.json": [
+      696120223,
+      762,
+      "sha256:9b81099e98b48054f9e4c1907929c5f153723b254435185da024dad3d1efda1c"
+    ],
+    "seaquest.rom": [
+      696120224,
+      131072,
+      "sha256:41ec3b92e7a570f3661bbd186c8761ca5a39fe654d5b0a3eb8b6a18b727e9be8"
+    ],
+    "SHA256SUMS": [
+      696120226,
+      165,
+      "sha256:74030c93ce9fa9acfd8bdadb7a374f5a29527cf0a32577eb05e7d84a0625f780"
+    ]
+  },
+  "tag_object_unchanged": "aa93f67d4755067fceda42560f71c4da9d442050",
+  "tag_commit_unchanged": "6b741859464f32d20d1007c9b53bd9f474643f92",
+  "implementation_pr": "https://github.com/sandersouza/msxgp-seaquest/pull/37",
+  "implementation_merge": "a0add75f0d1707cda839828b60478580cd4eb3a3"
+}
