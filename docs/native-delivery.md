@@ -111,12 +111,20 @@ current checkout's HEAD.
 For a cartridge, use the exact built binary and its matching runtime symbols:
 
 ```sh
-.venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1 --scenario dense --quick
+make input-natural
+.venv/bin/python -B scripts/render_bench.py --palette --progression
+make disk-build
+.venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1 --scenario dense
 .venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1 --generation wrap
 .venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1_EU --generation wrap
 .venv/bin/python -B scripts/full_game_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --output-root outputs/native-acceptance/plain32
 .venv/bin/python -B scripts/native_replay_check.py outputs/native-acceptance/plain32
 ```
+
+The first two commands generate the private continuous-input seed and the
+39,328-case source/pixel benchmark with its cycle-ranked dense fixtures. They
+must precede seeded/dense qualification on a fresh checkout; the native build
+does not invent or substitute those measurements.
 
 For disk qualification, prepare a **private** bootable DOS1 image containing
 the exact `SEAQUEST.COM` plus `AUTOEXEC.BAT` containing `SEAQUEST`. Supply a
@@ -146,3 +154,30 @@ firmware, DOS files, private images and OMR snapshots are not release assets.
 Automated original-state/pixel/PSG equivalence and emulator timing are distinct
 from subjective listening, human playtesting and physical-machine evidence.
 Those manual/physical observations remain pending, as for the original release.
+
+## Qualified candidate
+
+The [compact receipts](../references/compact-delivery/native.json) cover the
+exact 25,361-byte COM and 32,768-byte plain cartridge, their source identity and
+the shared flat runtime. Across both formats, 59 instrumented checks verified
+1,476,113 display frames, 1,625,249 original source updates and 192,860 sampled
+pixel frames. These include all 36 complete-game/rescue routes, normal/wrapped/
+READY generation boundaries, 32 dense seeds per region and every PAL accumulator.
+All 36 independent device replays additionally compare 251 canonical bytes on
+each of their 210,718 source updates, plus final pixels and PSG registers.
+
+| Measured busy work | Maximum | Display budget |
+| --- | --- | --- |
+| NTSC | 59,698 cycles | 59,736 cycles |
+| PAL | 67,264 cycles | 71,364 cycles |
+
+The narrowest observed NTSC margin is 38 cycles. Any runtime, font or ROM change
+requires fresh dense/boundary timing qualification. These results have no skipped
+VDP frames, visible commits or unsafe active-display transfers; they do not
+substitute for physical-machine acceptance.
+
+Negative controls reject a damaged COM payload and insufficient DOS program
+space before takeover, and catch a deliberately injected transient write to
+immutable RAM even when the following instruction would restore it. The
+original 128 KiB release rebuild still reproduces `41ec3b92...`; its tag and
+original assets are preserved independently of these new source revisions.

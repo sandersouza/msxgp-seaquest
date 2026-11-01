@@ -75,8 +75,9 @@ after time 1000 {{puts stderr independent-replay-watchdog; exit 1}}
             raise ValueError('replay media differs from the frozen recording')
         data=capture.read_bytes()
         native=(folder/'native.bin').read_bytes()
-        expected=b''.join(native[i+2052:i+2303] for i in range(0,len(native),2303))
-        if states.read_bytes()!=expected or len(expected)!=count*251:
+        expected_states=b''.join(native[i+2052:i+2303] for i in range(0,len(native),2303))
+        actual_states=states.read_bytes()
+        if actual_states!=expected_states or len(actual_states)!=count*251:
             raise ValueError(f'independent replay source-update mismatch: {folder.name}')
         if data[:251]!=native[-251:]:
             raise ValueError(f'independent canonical replay mismatch: {folder.name}')
@@ -90,13 +91,13 @@ after time 1000 {{puts stderr independent-replay-watchdog; exit 1}}
         check_original_sprites(state,image,assets,rom,True)
         audio=(folder/'audio-events.bin').read_bytes()
         if audio:
-            expected=struct.unpack('<IH6sB11sI',audio[-28:])[4]
-            if data[-11:]!=expected:
+            expected_psg=struct.unpack('<IH6sB11sI',audio[-28:])[4]
+            if data[-11:]!=expected_psg:
                 raise ValueError(f'independent PSG replay mismatch: {folder.name}')
         receipts.append(dict(path=str(folder.relative_to(args.root.resolve())),
                              replay_sha256=hashlib.sha256(replay.read_bytes()).hexdigest(),
                              capture_sha256=hashlib.sha256(data).hexdigest(),ticks=count,
-                             states_sha256=hashlib.sha256(expected).hexdigest(),
+                             states_sha256=hashlib.sha256(actual_states).hexdigest(),states_bytes=len(actual_states),
                              canonical=True,pixels=True,psg=True))
         print(f'PASS {folder.parent.name}/{folder.name}',flush=True)
     if len(receipts)!=18:
