@@ -135,9 +135,15 @@ def colour_programs(classes,fields,labels,default,future_base):
                 '    LD A,1','    JR Z,$+3','    LD A,C',f'    LD (PAL_NEXT_IDS+{cls}),A']
     gen += ['    RET','palette_rebase_current_tokens:',
             '    LD A,(PAL_STATIC_DEFAULT)','    OR A','    JP NZ,palette_generations_default']
+    # Retain the fixed-time unroll. Both arrays stay within their own page;
+    # register-indirect accesses save code and cycles without a loop counter.
+    gen += ['    LD HL,PAL_CURRENT_STATIC','    LD DE,HUD_CLASS_SIGNATURES','    LD C,1',
+            '    ASSERT (PAL_CURRENT_STATIC & 255)+31 <= 256',
+            '    ASSERT (HUD_CLASS_SIGNATURES & 255)+31 <= 256']
     for cls in range(31):
-        gen += [f'    LD A,(PAL_CURRENT_STATIC+{cls})',f'    CP {default[248+cls]}',
-                '    LD A,1','    JR Z,$+3','    INC A',f'    LD (HUD_CLASS_SIGNATURES+{cls}),A']
+        gen += ['    LD A,(HL)',f'    CP {default[248+cls]}',
+                '    LD A,C','    JR Z,$+3','    INC A','    LD (DE),A']
+        if cls<30:gen += ['    INC L','    INC E']
     gen += ['    RET','palette_base_clear_cache:','    XOR A','    LD HL,0']
     for bank in (0,2):
         tiles = sorted({tile for keys,_ in bases for first,count,cls,which,_ in keys if which==bank
