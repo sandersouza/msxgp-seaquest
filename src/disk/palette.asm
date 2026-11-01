@@ -31,14 +31,9 @@ PAL_NEXT_ROLES EQU $C6B0
 PAL_NEXT_IDS EQU $CFD0
 PAL_QUEUE EQU $C510
 
-palette_forecast_tick:
-    JP palette_forecast_tick_banked
-palette_forecast_apply:
-    LD A,($C2E1)
-    CP 10
-    LD A,0
-    RET NZ
-    JP palette_forecast_apply_banked
+; The flat helpers are directly addressable; apply already checks F_STAGE.
+palette_forecast_tick EQU palette_forecast_tick_banked
+palette_forecast_apply EQU palette_forecast_apply_banked
 
 palette_init:
     LD A,$C3

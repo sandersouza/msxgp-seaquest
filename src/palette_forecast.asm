@@ -244,7 +244,7 @@ palette_forecast_tick:
     IFDEF WITH_FLAT
     LD A,(F_STAGE)
     CP 9
-    CALL Z,forecast_initial_background
+    CALL Z,forecast_bottom_background
     ENDIF
 .stage_done:
     LD A,(F_REMAIN)

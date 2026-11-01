@@ -276,6 +276,21 @@ palette_default_prepare:
     LD A,(PAL_PALETTE_CHANGED)
     OR A
     JP Z,.no
+    IFDEF WITH_FLAT
+    ; An atlas-only swap can follow a large palette commit. When its hidden
+    ; font is already ready, use the normal memoized field path rather than
+    ; queueing the entire fixed HUD again. Bottom-field changes still collect.
+    CP 2
+    JR NZ,.fixed_fields
+    LD IY,HUD_FIELD_CACHE
+    CALL palette_player_memo
+    OR A
+    JR Z,.fixed_fields
+    CALL hud_commit_fields.bottom_fields
+    LD A,1
+    RET
+.fixed_fields:
+    ENDIF
     IFNDEF WITH_FLAT
     LD A,($C0E6)
     LD HL,$C0BE

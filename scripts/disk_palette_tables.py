@@ -100,8 +100,8 @@ def colour_programs(classes,fields,labels,default,future_base):
             writers += ['    LD A,(HL)',f'    LD B,{count}','    JP (IX)']
         else:
             writers += [f'    LD D,{count}',f'    LD E,{cls*8}','    JP (IY)']
-    # The initial idle screen can recolour every lower-background class at
-    # once. Fuse its contiguous transfers instead of repeating each VDP setup.
+    # A palette commit can recolour every lower-background class at once.
+    # Fuse its contiguous transfers instead of repeating each VDP setup.
     bottom_tiles = list(fields['hud_background_bottom'])
     if bottom_tiles!=list(range(bottom_tiles[0],bottom_tiles[0]+len(bottom_tiles))):
         raise ValueError('revisit fused initial-background tile layout')
@@ -138,13 +138,7 @@ def colour_programs(classes,fields,labels,default,future_base):
     writer_symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',
                                                       (OUT/'palette-writers.sym').read_text(),re.M)}
     (OUT/'palette-writers.inc').write_text('\n'.join(writers[1:])+'\n')
-    fused = ['forecast_initial_background:',
-             '    LD A,(F_A3)','    OR A','    RET NZ',
-             '    LD A,($C0B7)','    LD HL,$C0B8','    OR (HL)','    INC HL',
-             '    OR (HL)','    INC HL','    OR (HL)',
-             '    LD HL,$C0BE','    OR (HL)','    LD HL,$C0E9','    OR (HL)','    RET NZ',
-             '    LD A,($C0BB)','    CP 3','    RET NZ',
-             '    LD A,($C0E6)','    CP 64','    RET NZ',
+    fused = ['forecast_bottom_background:',
              '    LD A,(F_COUNT)','    CP 63','    RET NC',
              f'    LD HL,${labels["hud_bottom_class_ids"]+bottom_tiles[0]:04X}',
              f'    LD E,{bottom_tiles[0]}',f'    LD B,{len(bottom_tiles)}',
