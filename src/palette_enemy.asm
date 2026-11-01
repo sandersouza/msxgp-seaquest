@@ -276,9 +276,14 @@ palette_default_prepare:
     LD A,(PAL_PALETTE_CHANGED)
     OR A
     JP Z,.no
+    IFNDEF WITH_FLAT
     LD A,($C0E6)
     LD HL,$C0BE
     OR (HL)
+    ELSE
+    LD A,($C0BE)
+    OR A
+    ENDIF
     JP NZ,.no
     LD A,($C0BB)
     OR A
@@ -346,6 +351,21 @@ palette_default_prepare:
     LD (hud_top_cache+HUD_BLANK_TILE),A
     LD A,1
     LD (PAL_BASE_RESET_PENDING),A
+    IFDEF WITH_FLAT
+    ; A console transition can start refilling oxygen on the palette-change
+    ; tick. Keep the fixed fields precompiled and collect only its real gauge.
+    LD A,255
+    LD (HUD_FIELD_CACHE+27),A
+    LD IY,HUD_FIELD_CACHE+24
+    LD A,$10
+    LD (HUD_COLOR_BANK),A
+    LD HL,(HUD_PTRS+12)
+    LD B,13
+    hud_global_signature
+    CALL hud_field_colors
+    XOR A
+    LD (HUD_COLOR_BANK),A
+    ENDIF
     LD A,($C0B8)
     LD HL,$C0B9
     OR (HL)

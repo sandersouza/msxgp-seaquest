@@ -61,7 +61,7 @@ def colour_programs(classes,fields,labels,default,future_base):
         life_name = 'hud_lives1' if player else 'hud_lives'
         vectors = [(fields[life_name][life*9:life*9+9],0),
                    (fields['hud_blank_pair'],0),(fields['hud_divers'][:18],2),
-                   (fields['hud_logo'][logo*9:logo*9+9],2),(fields['hud_oxygen'][:13],2),
+                   (fields['hud_logo'][logo*9:logo*9+9],2),
                    (fields['hud_oxygen_label'],2),(fields['hud_background_top'],0),
                    (fields['hud_background_bottom'],2)]
         zero = list(fields['hud_single1'][:3] if player else fields['hud_single'][:3])

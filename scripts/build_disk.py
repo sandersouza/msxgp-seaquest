@@ -269,7 +269,7 @@ def main():
         with (dest/'build.log').open('w') as log:
             subprocess.run([str(root/'.tools/sjasmplus/sjasmplus'),'--nologo',
                             '--raw='+str(dest/'flat.raw'),'--sym='+str(dest/'flat.sym'),
-                            *('-D'+s for s in ('WITH_NATIVE','WITH_GRAPHICS','WITH_INPUT','WITH_COLLISIONS','WITH_STREAM','WITH_PACKED_DATA','WITH_HUD','WITH_AUDIO','WITH_PALETTE','WITH_BANKED')),
+                            *('-D'+s for s in ('WITH_FLAT','WITH_NATIVE','WITH_GRAPHICS','WITH_INPUT','WITH_COLLISIONS','WITH_STREAM','WITH_PACKED_DATA','WITH_HUD','WITH_AUDIO','WITH_PALETTE','WITH_BANKED')),
                             str(dest/'flat.asm')],cwd=root,stdout=log,stderr=subprocess.STDOUT,check=True)
         symbols={n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(dest/'flat.sym').read_text(),re.M)}
         if symbols['native_writers_start']==writerbase: break
