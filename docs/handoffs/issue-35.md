@@ -2,7 +2,7 @@
 
 Issue: https://github.com/sandersouza/msxgp-seaquest/issues/35
 
-## Current native qualification checkpoint
+## Completed native delivery
 
 The dedicated issue implementation now has both requested native formats.
 PR #37 contains the runtime/loaders; verified build source is `0f11ed4`.
@@ -28,11 +28,17 @@ PR #37 contains the runtime/loaders; verified build source is `0f11ed4`.
   are incorporated. Human listening/playtesting and physical acceptance remain
   pending; no such observations are inferred from automation.
 
-Read `docs/native-delivery.md` and `references/compact-delivery/native.json`.
-Next steps are integrating PR #37, packaging from its recorded clean build
-source, uploading only the distinct new assets to1.0.0, downloading/verifying
-them, then synchronizing issue/project/final handoff. Keep #35 open until that
-external delivery is complete. The sections below are historical context.
+PR #37 merged as `a0add75`. Release1.0.0 now contains `SEAQUEST.COM`,
+`SEAQUEST32.ROM`, `seaquest-1.0.0-native-msx1.zip`, the distinct native manifest
+and native checksum file. All five were downloaded and byte/hash-verified;
+the three original assets and tag object/commit are unchanged. Actual native
+build source is `0f11ed47d16cd8bda9531cd992db9afec8106f3c`, recorded in the
+source-bound package. No implementation or publication work remains.
+
+Read `docs/native-delivery.md`, `references/compact-delivery/native.json` and
+`references/compact-delivery/publication.json`. Future issue implementation
+belongs in its own dedicated chat. Manual/physical observations remain pending
+under their separate acceptance scope. The sections below are historical context.
 
 The owner requests adding two playable alternatives to latest release 1.0.0:
 a native MSX disk/MSX-DOS program and a complete plain cartridge <=32,768 bytes.

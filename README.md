@@ -39,6 +39,8 @@ for **MSX-DOS 1**, and **[SEAQUEST32.ROM](https://github.com/sandersouza/msxgp-s
 for an ordinary **32 KiB cartridge**. Both use the original 64 KiB RAM and
 16 KiB VRAM. The disk program requires your normal disk interface/system disk;
 type `SEAQUEST` at the DOS prompt and use the machine reset to exit.
+The [native ZIP package](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/seaquest-1.0.0-native-msx1.zip)
+includes both formats, instructions, their manifest/checksums and the ZX0 notice.
 See [native loading, build and validation instructions](docs/native-delivery.md).
 
 ### WebMSX

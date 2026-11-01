@@ -40,9 +40,9 @@ Simply changing ASCII16 to Konami does not shrink cartridge capacity. Current ba
 - [x] Plain cartridge is <=32,768 bytes and runs without ASCII16/Konami mapper emulation on the standard 64 KiB target.
 - [x] Full gameplay, graphics, audio and original mechanics are retained; measured frame timing and memory guards pass on final artifacts.
 - [x] PAL/NTSC complete-game/restart and rescue validation is recorded for each delivered variant; manual/physical qualification stays explicitly scoped.
-- [ ] Independent review and relevant local/remote checks pass; scoped PR is merged.
-- [ ] Latest release contains verified downloads, distinct manifests/checksums and correct instructions, linked to actual source revisions.
-- [ ] Local issue copy, GitHub status and handoff agree. If a delivery condition is infeasible, document the measured blocker and keep the issue open instead of publishing a degraded build.
+- [x] Independent review and relevant local/remote checks pass; scoped PR is merged.
+- [x] Latest release contains verified downloads, distinct manifests/checksums and correct instructions, linked to actual source revisions.
+- [x] Local issue copy, GitHub status and handoff agree. If a delivery condition is infeasible, document the measured blocker and keep the issue open instead of publishing a degraded build.
 
 ## Native qualification checkpoint
 
@@ -52,7 +52,10 @@ bytes. Both preserve 64 KiB RAM/16 KiB VRAM and standard-speed hardware.
 `docs/native-delivery.md` provides loading/reproduction; the source-bound
 `references/compact-delivery/native.json` records 59 passing checks, 36 natural
 game/rescue routes and all 36 independent replays, comparing every canonical
-update. Integration and publication remain pending at this checkpoint.
+update. PR #37 is merged as `a0add75`; five distinct native assets have been
+published to 1.0.0 and downloaded byte-verified. The original three assets and
+tag object/commit are unchanged. `references/compact-delivery/publication.json`
+records that delivery. Manual/physical qualification remains explicitly pending.
 
 ## Historical feasibility checkpoint — 2026-10-31, superseded above
 
