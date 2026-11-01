@@ -2,6 +2,38 @@
 
 Issue: https://github.com/sandersouza/msxgp-seaquest/issues/35
 
+## Current native qualification checkpoint
+
+The dedicated issue implementation now has both requested native formats.
+PR #37 contains the runtime/loaders; verified build source is `0f11ed4`.
+
+- `SEAQUEST.COM`: 25,361 bytes, SHA256
+  `b3e8051088a911943501b8bf1f1615afe45e1308fa2d944b80c8dbbc0004e79d`.
+- `SEAQUEST32.ROM`: 32,768 bytes, SHA256
+  `bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e`.
+- Both load the exact shared flat runtime into original 64 KiB RAM; disk
+  qualification boots DOS1 without a cartridge, and plain qualification uses
+  Normal fixed cartridge mapping. Expanded RAM slots also pass.
+- Final receipts cover 59 checks, 1,476,113 display frames, 1,625,249 original
+  state updates, 192,860 sampled pixel frames, 36 natural full-game/rescue
+  routes and 36 independent begin-to-end device replays. Replay comparison
+  covers every251-byte canonical update, with correct full-stream hashes.
+- Worst busy work: NTSC59,698/59,736 cycles; PAL67,264/71,364. No skipped frames,
+  visible commits or unsafe active writes. CPU watchpoints also protect immutable
+  RAM, and staged token generations remain constant through construction.
+- Build/qualification/package source fingerprints prevent attributing an old
+  artifact to an unrelated HEAD. The original playable rebuild still matches
+  `41ec3b92...`; tag1.0.0 and its three original assets are untouched.
+- Host tests:86 pass. Remote/local synthetic CI pass. Independent review fixes
+  are incorporated. Human listening/playtesting and physical acceptance remain
+  pending; no such observations are inferred from automation.
+
+Read `docs/native-delivery.md` and `references/compact-delivery/native.json`.
+Next steps are integrating PR #37, packaging from its recorded clean build
+source, uploading only the distinct new assets to1.0.0, downloading/verifying
+them, then synchronizing issue/project/final handoff. Keep #35 open until that
+external delivery is complete. The sections below are historical context.
+
 The owner requests adding two playable alternatives to latest release 1.0.0:
 a native MSX disk/MSX-DOS program and a complete plain cartridge <=32,768 bytes.
 The owner explicitly clarified that `.exe` means execution on the MSX from

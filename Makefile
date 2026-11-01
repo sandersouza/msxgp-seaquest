@@ -5,6 +5,9 @@ PYTHON ?= .venv/bin/python
 .PHONY: presentation presentation-run presentation-check presentation-natural
 .PHONY: video-build video-check
 .PHONY: acceptance-check
+.PHONY: disk-build plain32-build
+disk-build plain32-build:
+	@$(PYTHON) -B scripts/build_disk.py
 environment:
 	@bash scripts/setup.sh
 environment-check:

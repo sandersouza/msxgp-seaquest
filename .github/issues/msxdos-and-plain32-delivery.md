@@ -36,15 +36,25 @@ Simply changing ASCII16 to Konami does not shrink cartridge capacity. Current ba
 
 ## Definition of Done
 
-- [ ] Disk program runs without a cartridge on an unexpanded 64 KiB MSX1 with disk/DOS support, with exact loading instructions.
-- [ ] Plain cartridge is <=32,768 bytes and runs without ASCII16/Konami mapper emulation on the standard 64 KiB target.
-- [ ] Full gameplay, graphics, audio and original mechanics are retained; measured frame timing and memory guards pass on final artifacts.
-- [ ] PAL/NTSC complete-game/restart and rescue validation is recorded for each delivered variant; manual/physical qualification stays explicitly scoped.
+- [x] Disk program runs without a cartridge on an unexpanded 64 KiB MSX1 with disk/DOS support, with exact loading instructions.
+- [x] Plain cartridge is <=32,768 bytes and runs without ASCII16/Konami mapper emulation on the standard 64 KiB target.
+- [x] Full gameplay, graphics, audio and original mechanics are retained; measured frame timing and memory guards pass on final artifacts.
+- [x] PAL/NTSC complete-game/restart and rescue validation is recorded for each delivered variant; manual/physical qualification stays explicitly scoped.
 - [ ] Independent review and relevant local/remote checks pass; scoped PR is merged.
 - [ ] Latest release contains verified downloads, distinct manifests/checksums and correct instructions, linked to actual source revisions.
 - [ ] Local issue copy, GitHub status and handoff agree. If a delivery condition is infeasible, document the measured blocker and keep the issue open instead of publishing a degraded build.
 
-## Feasibility checkpoint — 2026-10-31
+## Native qualification checkpoint
+
+PR #37 implements the shared flat-RAM runtime, checked DOS1 loading and an
+ordinary 32 KiB cartridge. The final COM is 25,361 bytes; the plain ROM is 32,768
+bytes. Both preserve 64 KiB RAM/16 KiB VRAM and standard-speed hardware.
+`docs/native-delivery.md` provides loading/reproduction; the source-bound
+`references/compact-delivery/native.json` records 59 passing checks, 36 natural
+game/rescue routes and all 36 independent replays, comparing every canonical
+update. Integration and publication remain pending at this checkpoint.
+
+## Historical feasibility checkpoint — 2026-10-31, superseded above
 
 The unchanged playable rebuild reproduces the accepted 1.0.0 hash. The existing
 renderer passes 39,328 original-state/pixel fixtures at a maximum 59,110 cycles.

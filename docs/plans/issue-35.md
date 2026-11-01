@@ -14,11 +14,11 @@ Use the current checkout as requested; no concurrent implementation.
    expansion cache instead of 29 KiB of prepared transfers. Retain full original
    graphics/HUD/audio and compare states/pixels and full-density frame costs.
    This spike still uses ASCII16 and is not a disk/plain32 delivery candidate.
-4. [ ] Choose a shared runtime only when both the 64 KiB DOS memory budget and
+4. [x] Choose a shared runtime only when both the 64 KiB DOS memory budget and
    plain32 storage/slot layout fit. If a tested approach misses the acceptance
    gate, retain the measured blocker and required redesign; never infer that
    the game itself is mathematically impossible on this hardware.
-5. [ ] For viable candidates, implement native disk and plain32 loaders and
+5. [x] For viable candidates, implement native disk and plain32 loaders and
    reproducible packages. Verify real loading, RAM/slot/stack guards, original
    state/pixels/PSG, full-density timing and PAL/NTSC full-game/rescue routes.
 6. [ ] Obtain independent review, run local and remote checks and integrate a
@@ -29,6 +29,12 @@ Use the current checkout as requested; no concurrent implementation.
 Review focus: DOS1 on a 64 KiB MSX1, expanded RAM slots, BIOS visibility while
 using low RAM, page/stack overlap, actual disk boot versus memory injection,
 and compression estimates being mistaken for a usable runtime.
+
+Current implementation: PR #37. The flat runtime and both real loading paths
+now fit and pass their complete automated qualification; see
+`docs/native-delivery.md` and `references/compact-delivery/native.json`.
+Integration/publication is the remaining step. The earlier ledger below records
+the initial rejected design, not the final native implementation.
 
 ## Decisions and evidence ledger
 

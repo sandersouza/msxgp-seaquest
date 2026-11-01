@@ -34,6 +34,13 @@ Use cartridge type **ASCII16** when loading it in an emulator or compatible flas
 cartridge. The release also includes `seaquest-1.0.0.json` and `SHA256SUMS` to
 identify and verify the exact ROM.
 
+Additional native MSX1 formats are available as **[SEAQUEST.COM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST.COM)**
+for **MSX-DOS 1**, and **[SEAQUEST32.ROM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST32.ROM)**
+for an ordinary **32 KiB cartridge**. Both use the original 64 KiB RAM and
+16 KiB VRAM. The disk program requires your normal disk interface/system disk;
+type `SEAQUEST` at the DOS prompt and use the machine reset to exit.
+See [native loading, build and validation instructions](docs/native-delivery.md).
+
 ### WebMSX
 
 [Play 1.0.0 in WebMSX — MSX1, ASCII16](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2Fseaquest.rom&ROM_FORMAT=ASCII16)
