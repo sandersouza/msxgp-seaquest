@@ -103,6 +103,8 @@ def colour_programs(classes,fields,labels,default,future_base):
     # The initial idle screen can recolour every lower-background class at
     # once. Fuse its contiguous transfers instead of repeating each VDP setup.
     bottom_tiles = list(fields['hud_background_bottom'])
+    if bottom_tiles!=list(range(bottom_tiles[0],bottom_tiles[0]+len(bottom_tiles))):
+        raise ValueError('revisit fused initial-background tile layout')
     bottom_classes = fields['hud_bottom_class_ids']
     bottom_program = next(key for key,index in programs.items()
                           if index==background['hud_background_bottom'])
@@ -144,23 +146,16 @@ def colour_programs(classes,fields,labels,default,future_base):
              '    LD A,($C0BB)','    CP 3','    RET NZ',
              '    LD A,($C0E6)','    CP 64','    RET NZ',
              '    LD A,(F_COUNT)','    CP 63','    RET NC',
-             '    LD H,$C3','    LD D,$CF']
-    for tile in bottom_tiles:
-        cls = bottom_classes[tile]
-        fused += [f'    LD E,${0xd0+cls:02X}','    LD A,(DE)',
-                  f'    LD L,{tile}','    CP (HL)','    JR NZ,.dirty']
-    fused += ['    XOR A','    LD (F_REMAIN),A','    RET','.dirty:']
-    for tile in bottom_tiles:
-        cls = bottom_classes[tile]
-        fused += [f'    LD E,${0xd0+cls:02X}','    LD A,(DE)',
-                  f'    LD L,{tile}','    LD (HL),A']
-    fused += ['    XOR A']
-    for tile in bottom_tiles:
-        fused += [f'    LD (${labels["hud_bottom_cache"]+tile:04X}),A']
-    fused += ['    LD (F_REMAIN),A','    LD HL,(F_QPTR)',
+             '    LD HL,.classes',f'    LD E,{bottom_tiles[0]}',f'    LD B,{len(bottom_tiles)}',
+             '.mark:','    LD A,(HL)','    INC HL','    PUSH HL','    LD L,A',
+             '    LD H,$CF','    LD A,(HL)','    LD L,E','    LD H,$C3','    LD (HL),A',
+             f'    LD H,${labels["hud_bottom_cache"]>>8:02X}','    XOR A','    LD (HL),A',
+             '    INC E','    POP HL','    DJNZ .mark',
+             '    LD (F_REMAIN),A','    LD HL,(F_QPTR)',
               '    LD DE,F_FUSED_BOTTOM_WRITER','    LD (HL),E','    INC HL',
               '    LD (HL),D','    INC HL','    LD (F_QPTR),HL',
-              '    LD HL,F_COUNT','    INC (HL)','    RET']
+              '    LD HL,F_COUNT','    INC (HL)','    RET','.classes:',
+              '    DB '+','.join(str(0xd0+bottom_classes[tile]) for tile in bottom_tiles)]
     (OUT/'palette-fused-background.inc').write_text('\n'.join(fused)+'\n')
     gen = ['palette_restore_default_roles:']
     # Roles remain real TMS indices; only the class rows substitute water0.
