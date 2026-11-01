@@ -20,8 +20,10 @@ open. Original ROMs, BIOS/DOS, emulator traces and binaries remain local/ignored
   clears all private enemy pattern slots; every subsequent producer leaves that
   row untouched. This removes 12 redundant writes from a four-lane commit.
 - Flat palette wrappers avoid redundant calls/register loads. The original fast
-  unrolled token-rebase stamping is retained; a compact-loop attempt exceeded
-  the NTSC budget when an input transition coincided with a generation renewal.
+  unrolled token-rebase stamping is retained with register-indirect accesses.
+  All player swaps mark an atlas-only change when the physical palette is
+  unchanged, including Select/reset restoring A3=0 and three lives. Previously
+  that edge took the slow generic field scan and exceeded the NTSC budget.
 
 ## Reproduced baseline failures
 
