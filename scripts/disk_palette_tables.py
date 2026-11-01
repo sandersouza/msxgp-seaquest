@@ -135,9 +135,11 @@ def colour_programs(classes,fields,labels,default,future_base):
                 '    LD A,1','    JR Z,$+3','    LD A,C',f'    LD (PAL_NEXT_IDS+{cls}),A']
     gen += ['    RET','palette_rebase_current_tokens:',
             '    LD A,(PAL_STATIC_DEFAULT)','    OR A','    JP NZ,palette_generations_default']
-    for cls in range(31):
-        gen += [f'    LD A,(PAL_CURRENT_STATIC+{cls})',f'    CP {default[248+cls]}',
-                '    LD A,1','    JR Z,$+3','    INC A',f'    LD (HUD_CLASS_SIGNATURES+{cls}),A']
+    gen += ['    LD HL,PAL_CURRENT_STATIC','    LD IX,PAL_DEFAULT_STATIC',
+            '    LD DE,HUD_CLASS_SIGNATURES','    LD B,31','.class:',
+            '    LD A,(HL)','    CP (IX+0)','    LD A,1','    JR Z,.store',
+            '    INC A','.store:','    LD (DE),A','    INC HL','    INC IX',
+            '    INC DE','    DJNZ .class']
     gen += ['    RET','palette_base_clear_cache:','    XOR A','    LD HL,0']
     for bank in (0,2):
         tiles = sorted({tile for keys,_ in bases for first,count,cls,which,_ in keys if which==bank

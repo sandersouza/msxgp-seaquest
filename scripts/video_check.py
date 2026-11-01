@@ -47,7 +47,7 @@ def main():
     parser.add_argument('--input-delay',type=float,default=0,help='shift cold device events to allow disk boot')
     parser.add_argument('--quick', action='store_true')
     parser.add_argument('--frames', type=int, default=525)
-    parser.add_argument('--scenario', choices=('attract','burst','dense','cold','fullgame'), default='attract')
+    parser.add_argument('--scenario', choices=('attract','idle','burst','dense','cold','fullgame'), default='attract')
     parser.add_argument('--mode', type=int, choices=(0,1), default=0)
     parser.add_argument('--difficulty', type=int, choices=(0,64,128,192), default=0)
     parser.add_argument('--controller', choices=('exhaust','rescue'), default='exhaust')
@@ -83,12 +83,23 @@ def main():
                          if (state:=cold[t*2303+2052:(t+1)*2303])[0xa3]
                          and not any(state[a] for a in (0xe9,0xbb,0xc2)))
         seed[:251] = cold[seed_tick*2303+2052:(seed_tick+1)*2303]
+        if args.scenario=='idle':
+            # The initial screen retains full oxygen/reserves and A3=0. It
+            # must not borrow the depleted game-over seed's cheaper HUD path.
+            from native_contract import reference
+            seed = bytearray(1024)
+            seed[0x82] = 1
+            seed[:251],_ = reference(rom,seed,0xfb54)
+            seed_tick = None
     configs = [(n,240,1,63,0,255,0) for n in ([199] if args.quick else range(127,256))]
     if not args.quick:
         configs += [(n,240,1,63,action,phase,0) for n in (127,199,215,255)
                     for phase in (254,255,0) for action in (1,2,3)]
         configs += [(n,240,1,55,0,255,0) for n in (127,128,191,199,215,255)]
         configs += [(199,a3,player,63,0,255,0) for a3 in (1,96,104,159,160,255) for player in (0,1)]
+    if args.scenario=='idle':
+        configs = [(n,0,0,switches,0,255,0) for switches in (63,55)
+                   for n in ([199] if args.quick else range(127,256))]
     if args.scenario=='burst':
         configs = [(199,240,1,63,3,255,accum) for accum in ([0] if args.quick else range(262))]
     seeds = []
@@ -131,6 +142,9 @@ def main():
     audio_hooks = audio_hooks.replace('$::count','$::tick')
     audio_hooks = audio_hooks.replace('{$::recording}', '{$::recording && $::active_tick}')
     harness = (ROOT/'scripts/video_check.tcl').read_text()
+    watchdog = max(2000,60+(args.frames+4)*max(1,len(seeds))*0.021+args.input_delay)
+    harness = harness.replace('after time 2000 {fail_video watchdog}',
+                              f'after time {watchdog:.3f} {{fail_video watchdog}}')
     if args.scenario=='fullgame':
         script += f'set game_mode {args.mode}\nset game_difficulty {args.difficulty}\nset game_controller {args.controller}\n'
         harness += '\nsource scripts/full_game.tcl\n'

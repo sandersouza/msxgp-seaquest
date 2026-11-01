@@ -29,7 +29,11 @@ palette_forecast_tick:
     RET C
     LD A,($C0A3)
     OR A
-    RET Z
+    JR NZ,.idle
+    LD A,($C0A2)
+    CP 127                      ; initial idle screen also changes palette
+    RET C
+.idle:
     LD A,($C0E9)
     OR A
     RET NZ
@@ -113,12 +117,15 @@ palette_forecast_tick:
     NEG
     LD B,A
     LD A,($C0A3)
+    OR A
+    JR Z,.future_ready          ; zero stays zero; only game-over skips zero
 .future_a3:
     DEC A
     JR NZ,.nonzero
     DEC A
 .nonzero:
     DJNZ .future_a3
+.future_ready:
     LD C,A
     LD A,(F_STAGE)
     OR A
@@ -135,6 +142,8 @@ palette_forecast_tick:
     LD BC,16
     LDIR
     LD A,(F_A3)
+    OR A
+    JR Z,.logo
     DUP 3
     SRL A
     EDUP
@@ -148,7 +157,7 @@ palette_forecast_tick:
     LD A,8
     JR .logo
 .seaquest:
-    XOR A
+    LD A,9
 .logo:
     LD L,A
     LD H,0
@@ -216,8 +225,8 @@ palette_forecast_tick:
     LD (DE),A
     INC HL
     DJNZ .force_logo
-    LD A,($CFD0+F_LOGO)
     POP HL
+    LD A,($CFD0+F_LOGO)
     CALL forecast_field
     JR .stage_done
 .background:

@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from hud_fonts import SCORE, OXYGEN, score_rows, displayed_score, oxygen_rows
+from hud_fonts import SCORE, OXYGEN, CREDIT, CREDIT_GLYPHS, credit_rows, score_rows, displayed_score, oxygen_rows
 
 
 class HudFontTests(unittest.TestCase):
@@ -39,6 +39,17 @@ class HudFontTests(unittest.TestCase):
         self.assertEqual(rows[-1],[])
         self.assertTrue(all(0<=x<48 for row in rows for x in row))
         self.assertEqual([x for x in rows[6] if x<8],[2,3,4,5])
+
+    def test_credit_is_exact_lowercase_and_fits_the_existing_logo_field(self):
+        self.assertEqual(CREDIT,'retrowork 2026')
+        rows=credit_rows()
+        self.assertEqual(len(rows),8)
+        self.assertEqual(rows[-1],[])
+        self.assertTrue(all(1<=x<71 for row in rows for x in row))
+        for column,letter in enumerate(CREDIT):
+            self.assertTrue(all(1+5*column+4 not in row for row in rows))
+            self.assertEqual(any(1+5*column<=x<5+5*column for row in rows for x in row),letter!=' ')
+        self.assertNotEqual(CREDIT_GLYPHS['r'],CREDIT_GLYPHS['t'])
 
 
 if __name__=='__main__': unittest.main()

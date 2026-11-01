@@ -19,6 +19,9 @@ PAL_FONT_LEFT EQU $C4BE
 PAL_FONT_BLANK EQU $C4BF
 PAL_FONT_WORK EQU $C6E3
 PAL_FONT_SOURCE EQU $C6E5
+PAL_FONT_TARGET EQU $C4C8
+PAL_FONT_IDS EQU $C4C9
+PAL_FONT_RGB EQU $C4CA
 
 palette_enemy_init:
     LD HL,0
@@ -62,11 +65,12 @@ palette_enemy_init:
     RET
 
 ; The opposite player's font is not displayed during this idle half-period.
-; Prewarm its attributes (not its patterns) so phase0's player swap does not
+; Prewarm its attributes (not its patterns) so either half-period player swap does not
 ; add work to the period containing the large preceding colour commit.
 palette_player_prefetch:
     LD A,($C081)
-    CP $C0
+    AND $7F
+    CP $40
     RET C
     LD A,($C0A3)
     OR A
@@ -74,10 +78,27 @@ palette_player_prefetch:
     LD A,($C0E9)
     OR A
     RET NZ
+    LD A,($C081)
+    BIT 7,A
+    JR NZ,.next_palette
+    LD L,LOW HUD_CLASS_SIGNATURES
+    LD A,(PAL_CURRENT_PAGE)
+    LD (PAL_FONT_RGB),A
+    LD A,(PAL_CUR_INDEX)
+    JR .target
+.next_palette:
     LD A,($C6D2)
     OR A
     RET Z
+    LD A,(PAL_NEXT_PAGE)
+    LD (PAL_FONT_RGB),A
+    LD L,LOW PAL_NEXT_IDS
     LD A,($C6D1)
+.target:
+    LD (PAL_FONT_TARGET),A
+    LD A,L
+    LD (PAL_FONT_IDS),A
+    LD A,(PAL_FONT_TARGET)
     LD HL,PAL_FONT_UID
     CP (HL)
     JR NZ,.start
@@ -95,7 +116,7 @@ palette_player_prefetch:
     CALL NZ,palette_stamp_default_memos
     LD A,(PAL_CUR_INDEX)
     LD (PAL_FONT_SOURCE),A
-    LD A,($C6D1)
+    LD A,(PAL_FONT_TARGET)
     LD (PAL_FONT_UID),A
     LD A,($C0B7)
     LD (PAL_FONT_PLAYER),A
@@ -140,6 +161,9 @@ palette_player_prefetch:
     CALL .blank_visible
     JR Z,.next
     LD A,HUD_BLANK_TILE
+    LD C,0
+    CALL .write
+    JR .next
 .ordinary:
     LD C,A
     LD A,(PAL_FONT_PLAYER)
@@ -154,6 +178,12 @@ palette_player_prefetch:
     JR NZ,.font
     RET
 .blank_visible:
+    LD A,($C081)
+    BIT 7,A                     ; current-palette blank keeps its background
+    JR NZ,.test_blank
+    OR 1
+    RET
+.test_blank:
     LD A,HUD_BLANK_TILE
     DUP 3,field
     LD HL,(HUD_PTRS+field*2)
@@ -172,7 +202,8 @@ palette_player_prefetch:
     LD (HUD_ALL_CURRENT),A
     LD D,HIGH hud_top_cache
     LD A,C
-    ADD A,LOW PAL_NEXT_IDS
+    LD HL,PAL_FONT_IDS
+    ADD A,(HL)
     LD L,A
     LD H,HIGH PAL_NEXT_IDS
     LD A,(HL)
@@ -192,7 +223,7 @@ palette_player_prefetch:
     ADD A,A
     ADD A,A
     LD L,A
-    LD A,(PAL_NEXT_PAGE)
+    LD A,(PAL_FONT_RGB)
     LD H,A
     LD B,8
     JP vram_copy_short
@@ -244,6 +275,9 @@ palette_player_memo:
 palette_default_prepare:
     LD A,(PAL_PALETTE_CHANGED)
     OR A
+    JP Z,.no
+    LD A,(HUD_PREVIOUS_LOGO)
+    CP 9                        ; authored credit uses the exact field collector
     JP Z,.no
     LD A,($C0E6)
     LD HL,$C0BE

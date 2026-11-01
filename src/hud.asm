@@ -492,6 +492,8 @@ hud_prepare:
     hud_store_pointer 8
 .divers_ready:
     LD A,($C0A3)
+    OR A
+    JR Z,.logo_index            ; active game retains its original Seaquest logo
     DUP 3
     SRL A
     EDUP
@@ -505,7 +507,7 @@ hud_prepare:
     LD A,8
     JR .logo_index
 .seaquest:
-    XOR A
+    LD A,9                     ; retrowork 2026 during the idle logo cycle
 .logo_index:
     LD HL,HUD_PREVIOUS_LOGO
     CP (HL)
