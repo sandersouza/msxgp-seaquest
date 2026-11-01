@@ -19,9 +19,9 @@ open. Original ROMs, BIOS/DOS, emulator traces and binaries remain local/ignored
 - Native enemy transfers omit the permanently zero last row. Cold initialization
   clears all private enemy pattern slots; every subsequent producer leaves that
   row untouched. This removes 12 redundant writes from a four-lane commit.
-- Flat palette wrappers avoid redundant calls/register loads. A bounded loop
-  replaces the unrolled rare token-rebase stamping to keep the native image
-  below C000 without moving any RAM ownership boundary.
+- Flat palette wrappers avoid redundant calls/register loads. The original fast
+  unrolled token-rebase stamping is retained; a compact-loop attempt exceeded
+  the NTSC budget when an input transition coincided with a generation renewal.
 
 ## Reproduced baseline failures
 
