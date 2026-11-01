@@ -39,7 +39,12 @@ def build():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--rom', type=Path, default=OUT/'seaquest-video.rom')
-    parser.add_argument('--machine', choices=('C-BIOS_MSX1','C-BIOS_MSX1_EU'),default='C-BIOS_MSX1_EU')
+    parser.add_argument('--machine',default='C-BIOS_MSX1_EU')
+    parser.add_argument('--delivery',choices=('ascii16','dos','plain32'),default='ascii16')
+    parser.add_argument('--disk',type=Path,help='private DOS1 boot disk containing the exact COM under test')
+    parser.add_argument('--runtime',type=Path,help='independent flat RAM image for loader verification')
+    parser.add_argument('--region',choices=('pal','ntsc'),help='explicit clock for custom MSX1 fixtures')
+    parser.add_argument('--input-delay',type=float,default=0,help='shift cold device events to allow disk boot')
     parser.add_argument('--quick', action='store_true')
     parser.add_argument('--frames', type=int, default=525)
     parser.add_argument('--scenario', choices=('attract','burst','dense','cold','fullgame'), default='attract')
@@ -61,7 +66,9 @@ def main():
     if (args.inject_clock_error or args.inject_canonical_error) and (cold_start or args.machine!='C-BIOS_MSX1_EU'):
         parser.error('negative controls require a seeded PAL scenario')
     s = symbols(args.rom.with_suffix('.sym'))
-    pal = args.machine.endswith('_EU')
+    pal = args.region=='pal' if args.region else args.machine.endswith('_EU')
+    from native_video import launch_arguments
+    launch = launch_arguments(args.delivery,args.rom,args.disk)
     suffix = ('-clock-negative' if args.inject_clock_error else '')+('-state-negative' if args.inject_canonical_error else '')
     route = f'-m{args.mode}-d{args.difficulty}-{args.controller}' if args.scenario=='fullgame' else ''
     target = args.output_root/args.machine/(args.scenario+route+'-'+args.generation+('-quick' if args.quick else '')+suffix)
@@ -134,8 +141,8 @@ def main():
         seed_script = target/'replay-seed.tcl'
         seed_script.write_text(f'set renderer none\nset throttle off\nset z80_freq_locked true\nset power true\nplug joyporta msxjoystick1\nplug joyportb msxjoystick2\nreverse start\nafter time 1 {{reverse savereplay {target}/seed.omr; exit}}\n')
         with (target/'seed.log').open('w') as log:
-            subprocess.run(['openmsx','-control','stdio','-machine',args.machine,'-cart',str(args.rom),
-                            '-romtype','ASCII16','-script',str(seed_script)],cwd=ROOT,
+            subprocess.run(['openmsx','-control','stdio','-machine',args.machine,*launch,
+                            '-script',str(seed_script)],cwd=ROOT,
                            env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},
                            stdout=log,stderr=subprocess.STDOUT,timeout=30,check=True)
         schedule = [(5.75,(0,0,64,0,0)),(6.35,(0,0,0,0,0)),(6.5,(0,0,1,0,0)),
@@ -149,18 +156,28 @@ def main():
             controls = (0,0,16 if left else 128,0,0) if source=='keyboard' else (0,0,0,4 if left else 8,0)
             schedule += [(time,controls),(time+.04,(0,0,0,0,0))]
             latency.append(dict(time=time,source=source,direction=-1 if left else 1))
+        schedule=[(time+args.input_delay,controls) for time,controls in schedule]
+        for item in latency:
+            item['time']+=args.input_delay
         events = [event for time,controls in sorted(schedule) for event in device_events(time,controls)]
-        replay(target/'seed.omr',events,30,target/'input.omr')
+        replay(target/'seed.omr',events,30+args.input_delay,target/'input.omr')
         harness = harness.replace('set power true','set power true\nreverse loadreplay -goto begin -viewonly '+str(target/'input.omr'))
+    if args.delivery!='ascii16':
+        from native_video import configure
+        harness=configure(harness,s,args.delivery,read_only=args.scenario=='cold')
     (target/'start.tcl').write_text(script+audio_hooks+harness)
     (target/'raw.json').unlink(missing_ok=True)
     with (target/'openmsx.log').open('w') as log:
         result = subprocess.run(['openmsx','-control','stdio','-machine',args.machine,
-                                '-cart',str(args.rom),'-romtype','ASCII16','-script',str(target/'start.tcl')],
+                                *launch,'-script',str(target/'start.tcl')],
                                cwd=ROOT,env={**os.environ,'SDL_VIDEODRIVER':'dummy','SDL_AUDIODRIVER':'dummy'},
                            stdout=log,stderr=subprocess.STDOUT,timeout=600)
     if result.returncode or not (target/'raw.json').exists():
         raise ValueError((target/'openmsx.log').read_text()[-2000:])
+    if args.delivery!='ascii16':
+        from native_video import verify_loaded
+        verify_loaded(target,args.runtime or args.rom.parent/'flat.bin',s)
+        launch_arguments(args.delivery,args.rom,args.disk)
     data = (target/'native.bin').read_bytes()
     assets = extract(rom)
     timing = [json.loads(line) for line in (target/'timing.jsonl').read_text().splitlines()]
@@ -270,6 +287,16 @@ def main():
                   stack_measurement='C-BIOS init_ram C9 reserve, including startup' if cold_start else 'A5 marker after BIOS initialization',
                   physical_hardware=False,host_event_and_scanout_latency_measured=False)
     report['observed_machine'] = json.loads((target/'machine.json').read_text())
+    if args.delivery!='ascii16':
+        report.update(json.loads((target/'native-integrity.json').read_text()))
+        report.update(mapper='DOS1 COM, actual disk boot, no cartridge' if args.delivery=='dos' else 'Normal fixed 32 KiB cartridge',
+                      immutable_segments_verified=True,resident_atlas_verified=True,
+                      stack_measurement='A5 after native takeover; startup included' if cold_start else 'A5 after native startup')
+        if args.scenario=='cold':
+            report['stack_measurement']='native loader reserve comparison during view-only OMR playback'
+        if args.delivery=='dos':
+            report.update(disk_com_identity_verified=True,
+                          private_disk_sha256=hashlib.sha256(args.disk.read_bytes()).hexdigest())
     if args.scenario=='fullgame':
         from full_game_reference import coverage
         report['full_game'] = coverage(data,timing,args.mode,args.difficulty,args.controller)
