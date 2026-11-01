@@ -497,17 +497,22 @@ hud_prepare:
     DUP 3
     SRL A
     EDUP
+    CP 24
+    JR NC,.credit
     CP 20
-    JR NC,.activision
+    JR NC,.copyright
     CP 12
-    JR C,.seaquest
+    JR C,.activision
     SUB 11                      ; source8..15 -> table1..8
     JR .logo_index
-.activision:
+.copyright:
     LD A,8
     JR .logo_index
-.seaquest:
-    LD A,9                     ; retrowork 2026 during the idle logo cycle
+.credit:
+    LD A,9                     ; third idle window; retain Activision and 1983
+    JR .logo_index
+.activision:
+    XOR A
 .logo_index:
     LD HL,HUD_PREVIOUS_LOGO
     CP (HL)

@@ -147,17 +147,22 @@ palette_forecast_tick:
     DUP 3
     SRL A
     EDUP
+    CP 24
+    JR NC,.credit
     CP 20
-    JR NC,.activision
+    JR NC,.copyright
     CP 12
-    JR C,.seaquest
+    JR C,.activision
     SUB 11
     JR .logo
-.activision:
+.copyright:
     LD A,8
     JR .logo
-.seaquest:
+.credit:
     LD A,9
+    JR .logo
+.activision:
+    XOR A
 .logo:
     LD L,A
     LD H,0

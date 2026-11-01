@@ -1,7 +1,7 @@
 """Original scene and authorized MSX lettering versus actual SCREEN2 colours.
 
-Canonical source state determines content/colours. Only the score and oxygen
-label masks use the explicit MSX font specification; no native HUD buffers feed
+Canonical source state determines content/colours. Score, oxygen label and the
+authored credit use explicit MSX font masks; no native HUD buffers feed
 the expected image.
 """
 from functools import lru_cache
@@ -75,7 +75,7 @@ class PresentationOracle:
             if name=='divers': height=16
             result[top:top+height,96:168] = tms_color(field['background'])
             foreground = tms_color(field['foreground'])
-            if name=='logo' and 0<ram[0xa3]<96:
+            if name=='logo' and ram[0xa3]>=192:
                 for y,row in enumerate(credit_rows()):
                     for x in row: result[top+y,96+x] = foreground
                 continue

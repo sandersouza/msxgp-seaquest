@@ -7,9 +7,10 @@ open. Original ROMs, BIOS/DOS, emulator traces and binaries remain local/ignored
 
 - Filled oxygen pixels use player one's submarine palette role. Bar geometry,
   empty pixels, border, low-oxygen blinking and source logic are unchanged.
-- The stable Seaquest window of the nonzero source logo counter displays the
-  authored native-grid `retrowork 2026`. Activision and its transition windows
-  remain in the cycle; active gameplay's zero counter retains Seaquest.
+- A third stable window displays the authored native-grid `retrowork 2026`.
+  Activision remains at counters0..95, its original transition at96..159,
+  copyright1983 at160..191 and the added credit at192..255. Active gameplay's
+  zero counter retains Activision. No canonical counter is changed.
 - Initial idle palettes are forecast even when the source logo counter is zero.
   Zero remains zero in the prediction, matching the original CPU.
 - Both half-period player changes prewarm the hidden font. The first half uses
@@ -50,7 +51,10 @@ The preliminary native ROM passed4,096 consecutive game-over frames and two
 58,704/59,736 cycles; maximum commit15,833 cycles. These are preliminary identities,
 not substitutes for the final frozen ROM/COM receipts.
 
-Full final qualification and candidate identities are pending. Human playtesting,
+The first local credit placement replaced the stable Activision window; visual
+inspection caught this before delivery. The revised three-window cycle keeps
+both existing presentations. Final qualification and candidate identities are
+pending. Human playtesting,
 subjective viewing/listening and physical MSX acceptance are not established by
 the automated checks.
 
