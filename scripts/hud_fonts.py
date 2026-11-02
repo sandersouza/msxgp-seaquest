@@ -45,3 +45,25 @@ def displayed_score(ram):
 def oxygen_rows():
     return [[8*column+1+x for column,glyph in enumerate(OXYGEN)
              for x,pixel in enumerate(glyph[y]) if pixel=='#'] for y in range(7)]+[[]]
+
+
+CREDIT = 'retrowork 2026'
+# Four-pixel glyphs leave a full pixel between letters in the 72-pixel field.
+CREDIT_GLYPHS = {
+    'r': ('....','....','#.##','##..','#...','#...','#...'),
+    'e': ('....','....','.##.','#..#','####','#...','.###'),
+    't': ('.#..','.#..','###.','.#..','.#..','.#.#','..#.'),
+    'o': ('....','....','.##.','#..#','#..#','#..#','.##.'),
+    'w': ('....','....','#..#','#..#','#..#','####','.##.'),
+    'k': ('#...','#...','#..#','#.#.','##..','#.#.','#..#'),
+    ' ': ('....',)*7,
+    '2': ('.##.','#..#','...#','..#.','.#..','#...','####'),
+    '0': ('.##.','#..#','#..#','#..#','#..#','#..#','.##.'),
+    '6': ('.##.','#...','#...','###.','#..#','#..#','.##.'),
+}
+
+
+def credit_rows():
+    return [[1+5*column+x for column,letter in enumerate(CREDIT)
+             for x,pixel in enumerate(CREDIT_GLYPHS[letter][y]) if pixel=='#']
+            for y in range(7)]+[[]]

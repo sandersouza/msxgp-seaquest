@@ -1,0 +1,122 @@
+{
+  "issue": 40,
+  "status": "owner approved; reviewed; integration in progress",
+  "source_revision": "a44811c68345d32041d0114c048276e169958430",
+  "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
+  "instrumented_checks": 78,
+  "display_frames": 2643400,
+  "source_updates": 2927052,
+  "pixel_frames": 341048,
+  "max_busy": {
+    "ntsc": 59133,
+    "pal": 67006
+  },
+  "budget": {
+    "ntsc": 59736,
+    "pal": 71364
+  },
+  "baseline_reproduction": {
+    "source_revision": "e315927ff846e9b019c1a68467523e35119decd8",
+    "rom_sha256": "bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e",
+    "com_sha256": "b3e8051088a911943501b8bf1f1615afe45e1308fa2d944b80c8dbbc0004e79d",
+    "strict_ntsc_initial_idle": {
+      "frame": 352,
+      "busy_cycles": 61259,
+      "budget": 59736,
+      "verdict": "fail"
+    },
+    "rom_and_com_diagnostic": {
+      "chain_frame": 864,
+      "active_line": 0,
+      "spacing_cycles": 18,
+      "required_spacing": 29,
+      "skipped_vdp_frames": 1,
+      "time_budget_disabled_for_diagnosis": true,
+      "verdict": "fail"
+    },
+    "scanout_visual_corruption_recorded": false
+  },
+  "manual_emulator_playtesting": "owner approved candidate; platform and duration not specified",
+  "physical_hardware": false,
+  "owner_approval": true,
+  "pr_created": false,
+  "merged": false,
+  "published": false,
+  "artifacts": {
+    "SEAQUEST32.ROM": {
+      "bytes": 32768,
+      "sha256": "5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a"
+    },
+    "SEAQUEST.COM": {
+      "bytes": 25599,
+      "sha256": "a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91"
+    }
+  },
+  "native_matrix_checks": 42,
+  "natural_routes": 36,
+  "independent_replays": 36,
+  "issue_state": "open",
+  "project_status": "In progress",
+  "host_tests": {
+    "passed": 91,
+    "skipped": 0
+  },
+  "synthetic_ci": {
+    "passed": true,
+    "skipped": 1
+  },
+  "legacy_renderer": {
+    "rom_sha256": "8bd402d131e233f0dbcc857cdfd4c3ad0807de6423d3cee17774f6cc8ec6154f",
+    "cases": 39328,
+    "max_cycles": 59056,
+    "cpu_margin_cycles": 680,
+    "pace": {
+      "frames": 240,
+      "min_period": 59709,
+      "max_period": 59738,
+      "max_commit_cycles": 1781,
+      "max_busy_cycles": 58728,
+      "stack_min": 62320,
+      "min_commit_y": 192,
+      "max_commit_end_y": 200
+    }
+  },
+  "archive": {
+    "local_path": "outputs/issue40/seaquest-issue40-5907ee7f.zip",
+    "bytes": 59506,
+    "sha256": "52a1ebd56537bdc4fbe6c09749cd029072e4c70de328dff0cced1eddaa41b93c"
+  },
+  "private_receipts": [
+    "outputs/issue40/qualified-plain32-video",
+    "outputs/issue40/qualified-dos-video",
+    "outputs/issue40/qualified-plain32-acceptance",
+    "outputs/issue40/qualified-dos-acceptance"
+  ],
+  "preview_provenance": {
+    "rom_sha256": "5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a",
+    "baseline_rom_sha256": "bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e",
+    "capture": "actual VRAM decoded to TMS palette; nearest-neighbour scaling; scanout/CRT not recorded",
+    "source_result": "outputs/issue40/qualified-plain32-video/C-BIOS_MSX1/attract-normal-quick/result.json",
+    "oxygen_sources": [
+      {
+        "result": "outputs/issue35/qualified-plain32-acceptance/C-BIOS_MSX1/fullgame-m0-d0-exhaust-normal/result.json",
+        "pixel_sample": 13,
+        "oxygen": 32
+      },
+      {
+        "result": "outputs/issue40/qualified-plain32-acceptance/C-BIOS_MSX1/fullgame-m0-d0-exhaust-normal/result.json",
+        "pixel_sample": 13,
+        "oxygen": 32
+      }
+    ],
+    "images": {
+      "oxygen-before-after.png": "044a53fc0695c69f830bbd06449cee88d12d5d3627e2cc8d0cb9941d9c8a4dfe",
+      "screen.png": "b11c2d03395b276858ddc6048bf8c0e212f392584c11c8fdfda3debb7e79ffcc",
+      "activision.png": "ae41c7e93772f9416d6ef619bcef3d6a63da065007ea3f144f83f2e13ee6034d",
+      "copyright.png": "fb4cf79efc680d3d993be201e77b019cf9ff6cf5205aa0c5916abd8400edc092",
+      "credit.png": "6b67f231dd236bfb22a38d976aa673187e62ae1daa569fedb73d04b71f10a37b"
+    }
+  },
+  "approval_record": "references/compact-delivery/issue-40-approval.json",
+  "independent_review": "references/compact-delivery/issue-40-review.json"
+}

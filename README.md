@@ -16,7 +16,7 @@ of what comes next!
 
 ![Seaquest running on the MSX1 renderer](docs/gameplay.png)
 
-[▶ Play Seaquest 1.0.0 directly in WebMSX — 32 KiB](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
+[▶ Play Seaquest 1.0.1 directly in WebMSX — 32 KiB](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.1%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
 
 MSX1 port of Activision's Atari 2600 Seaquest, focused on preserving the original
 gameplay, rules and simulation timing on standard MSX hardware.
@@ -29,17 +29,17 @@ at startup.
 
 ## Download and play
 
-Download **[SEAQUEST32.ROM — version 1.0.0, 32 KiB](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST32.ROM)**
-from the [release page](https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.0).
+Download **[SEAQUEST32.ROM — version 1.0.1, 32 KiB](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/SEAQUEST32.ROM)**
+from the [release page](https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.1).
 Use cartridge type **Normal** when loading it in an emulator or compatible flash
-cartridge. `seaquest-1.0.0-native-manifest.json` and
-`seaquest-1.0.0-native-SHA256SUMS` identify and verify the native downloads.
+cartridge. `seaquest-1.0.1-native-manifest.json` and
+`seaquest-1.0.1-native-SHA256SUMS` identify and verify the native downloads.
 
-The disk executable **[SEAQUEST.COM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/SEAQUEST.COM)**
+The disk executable **[SEAQUEST.COM](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/SEAQUEST.COM)**
 is available for **MSX-DOS 1**. Both formats use the original 64 KiB RAM and
 16 KiB VRAM. The disk program requires your normal disk interface/system disk;
 type `SEAQUEST` at the DOS prompt and use the machine reset to exit.
-The [native ZIP package](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.0/seaquest-1.0.0-native-msx1.zip)
+The [native ZIP package](https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/seaquest-1.0.1-native-msx1.zip)
 includes both formats, instructions, their manifest/checksums and the ZX0 notice.
 See [native loading, build and validation instructions](docs/native-delivery.md).
 
@@ -48,7 +48,7 @@ remains available with its original `seaquest-1.0.0.json` and `SHA256SUMS`.
 
 ### WebMSX
 
-[Play 1.0.0 in WebMSX — MSX1, 32 KiB Normal](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.0%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
+[Play 1.0.1 in WebMSX — MSX1, 32 KiB Normal](https://webmsx.org/?M=MSX1A&P=RAMNORMAL,NODISK&ROM=https%3A%2F%2Fgithub.com%2Fsandersouza%2Fmsxgp-seaquest%2Freleases%2Fdownload%2F1.0.1%2FSEAQUEST32.ROM&ROM_FORMAT=Normal)
 
 Click the emulator to give it keyboard focus and enable audio when requested.
 For manual loading, open [WebMSX](https://webmsx.org), select MSX1 and insert
@@ -96,24 +96,28 @@ to restore B/B. Held Select repeats with the original timing.
 
 ## Release status and validation
 
-**Version 1.0.0** contains the complete playable integration: original gameplay,
+**Version 1.0.1** contains the complete playable integration: original gameplay,
 graphics, HUD, oxygen and rescue loop, score progression, PSG effects,
 one/two-player sessions, game over, attract and restart.
+
+Version 1.0.1 makes filled oxygen yellow, preserves its empty red portion, adds
+`retrowork 2026` alongside Activision/copyright, and repairs palette-cycle HUD
+updates. The owner approved the exact native binaries on 2026-11-02.
 
 The default 32,768-byte Normal ROM has SHA-256:
 
 ```text
-bf4bcb22b2303decbb2316cb673f1e979a5ba4c4e5e97591cd06f7560b8d942e
+5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a
 ```
 
 Automated openMSX qualification of the native ROM and COM covers **36 complete-game/rescue
 routes**, 18 per format, on NTSC and PAL, both player selections and all four
 difficulty combinations. All 36 independent device replays reproduce every
-canonical update. The 59-check native matrix also covers dense scenes, generation
+canonical update. The 78-check native matrix also covers dense scenes, generation
 boundaries, actual loading, immutable RAM, VRAM writes, stack guards and frame pacing.
-See the [native qualification receipt](references/compact-delivery/native.json).
+See the [native qualification receipt](references/compact-delivery/issue-40-candidate.json).
 
-See the [release notes](docs/releases/1.0.0.md),
+See the [release notes](docs/releases/1.0.1.md),
 [original ASCII16 complete-game evidence](references/acceptance/verification.md) and
 [original ASCII16 video timing evidence](references/video/verification.md) for scopes and limitations.
 Automated play does not establish completed human playtesting or subjective sound
@@ -191,7 +195,7 @@ automated emulator measurements and actual physical-machine observations.
 
 Original Atari ROMs, extracted assets, disassemblies, BIOS and replay snapshots
 remain local and ignored. Version tools, metadata, concise evidence and synthetic
-fixtures. The owner-authorized 1.0.0 release distributes the MSX cartridge and
+fixtures. The owner-authorized releases distribute the MSX cartridge and
 the README includes an MSX gameplay image; this does not authorize publishing
 the original research ROMs or BIOS. Seaquest and Activision names and original
 game content belong to their respective owners.

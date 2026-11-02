@@ -40,11 +40,9 @@
     OUTD
     JP NZ,2B
     ENDIF
-    XOR A
-    IF fast == 0
-    NOP
-    ENDIF
-    OUT ($98),A
+    ; Row15 is permanently zero: cold VRAM clear initializes every private
+    ; enemy slot and no other producer owns these pattern bytes. Transferring
+    ; that constant row again spends the end of the tight NTSC VBlank window.
     POP DE
     IF column < 2
     LD A,E

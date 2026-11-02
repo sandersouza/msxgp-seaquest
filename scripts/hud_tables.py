@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 from original_graphics import ROOT, read_original, extract, bitmap
-from hud_fonts import score_rows, oxygen_rows
+from hud_fonts import score_rows, oxygen_rows, credit_rows
 
 OUT = ROOT/'outputs/presentation'
 BASE = 0xd000
@@ -157,11 +157,12 @@ def generate(palette_fast=False):
             for y, row in enumerate(bitmap(rom, 0xfe5b+16*column+window-7, 8)):
                 rows[y].extend(8*column+x for x in row)
         fields['hud_logo'] += tiles(scale(rows), 72, bottom, [(10,6)]*8)
+    fields['hud_logo'] += tiles(credit_rows(), 72, bottom, [(10,6)]*8)
 
     from graphics_reference import Reference
     import numpy as np
     ref = Reference()
-    roles = {0:6, 6:8, 12:7, 50:9}
+    roles = {0:6, 6:8, 12:3, 50:9}  # Filled bar follows player one's submarine.
     overlays = []
     oxygen = bytearray()
     label = oxygen_rows()
@@ -331,11 +332,11 @@ def generate(palette_fast=False):
                                      *['    RLCA']*4,'    LD B,A',
                                      f'    LD A,(HUD_ROLES+{roles_in_byte[0]})','    OR B']
                 palette_code += [f'    LD (HUD_CLASS_SIGNATURES+{2*index+half}),A']
-    # Every oxygen vector can reference roles6/7/8/9. Their four color nibbles
+    # Every oxygen vector can reference roles3/6/8/9. Their four color nibbles
     # give an exact16-bit field signature, independent of source-byte aliases.
-    for half in range(2):
-        palette_code += [f'    LD A,(HUD_ROLES+{7+half*2})',*['    RLCA']*4,'    LD B,A',
-                         f'    LD A,(HUD_ROLES+{6+half*2})','    OR B',
+    for half,(low,high) in enumerate(((3,6),(8,9))):
+        palette_code += [f'    LD A,(HUD_ROLES+{high})',*['    RLCA']*4,'    LD B,A',
+                         f'    LD A,(HUD_ROLES+{low})','    OR B',
                          f'    LD (HUD_OXYGEN_SIGNATURE+{half}),A']
     palette_code += ['    RET']
     (OUT/'hud-palette.inc').write_text('\n'.join(palette_code)+'\n')

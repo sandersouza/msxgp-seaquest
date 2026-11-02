@@ -19,6 +19,9 @@ PAL_FONT_LEFT EQU $C4BE
 PAL_FONT_BLANK EQU $C4BF
 PAL_FONT_WORK EQU $C6E3
 PAL_FONT_SOURCE EQU $C6E5
+PAL_FONT_TARGET EQU $C4C8
+PAL_FONT_IDS EQU $C4C9
+PAL_FONT_RGB EQU $C4CA
 
 palette_enemy_init:
     LD HL,0
@@ -62,11 +65,12 @@ palette_enemy_init:
     RET
 
 ; The opposite player's font is not displayed during this idle half-period.
-; Prewarm its attributes (not its patterns) so phase0's player swap does not
+; Prewarm its attributes (not its patterns) so either half-period player swap does not
 ; add work to the period containing the large preceding colour commit.
 palette_player_prefetch:
     LD A,($C081)
-    CP $C0
+    AND $7F
+    CP $40
     RET C
     LD A,($C0A3)
     OR A
@@ -74,10 +78,27 @@ palette_player_prefetch:
     LD A,($C0E9)
     OR A
     RET NZ
+    LD A,($C081)
+    BIT 7,A
+    JR NZ,.next_palette
+    LD L,LOW HUD_CLASS_SIGNATURES
+    LD A,(PAL_CURRENT_PAGE)
+    LD (PAL_FONT_RGB),A
+    LD A,(PAL_CUR_INDEX)
+    JR .target
+.next_palette:
     LD A,($C6D2)
     OR A
     RET Z
+    LD A,(PAL_NEXT_PAGE)
+    LD (PAL_FONT_RGB),A
+    LD L,LOW PAL_NEXT_IDS
     LD A,($C6D1)
+.target:
+    LD (PAL_FONT_TARGET),A
+    LD A,L
+    LD (PAL_FONT_IDS),A
+    LD A,(PAL_FONT_TARGET)
     LD HL,PAL_FONT_UID
     CP (HL)
     JR NZ,.start
@@ -95,7 +116,7 @@ palette_player_prefetch:
     CALL NZ,palette_stamp_default_memos
     LD A,(PAL_CUR_INDEX)
     LD (PAL_FONT_SOURCE),A
-    LD A,($C6D1)
+    LD A,(PAL_FONT_TARGET)
     LD (PAL_FONT_UID),A
     LD A,($C0B7)
     LD (PAL_FONT_PLAYER),A
@@ -140,6 +161,9 @@ palette_player_prefetch:
     CALL .blank_visible
     JR Z,.next
     LD A,HUD_BLANK_TILE
+    LD C,0
+    CALL .write
+    JR .next
 .ordinary:
     LD C,A
     LD A,(PAL_FONT_PLAYER)
@@ -154,6 +178,12 @@ palette_player_prefetch:
     JR NZ,.font
     RET
 .blank_visible:
+    LD A,($C081)
+    BIT 7,A                     ; current-palette blank keeps its background
+    JR NZ,.test_blank
+    OR 1
+    RET
+.test_blank:
     LD A,HUD_BLANK_TILE
     DUP 3,field
     LD HL,(HUD_PTRS+field*2)
@@ -172,7 +202,8 @@ palette_player_prefetch:
     LD (HUD_ALL_CURRENT),A
     LD D,HIGH hud_top_cache
     LD A,C
-    ADD A,LOW PAL_NEXT_IDS
+    LD HL,PAL_FONT_IDS
+    ADD A,(HL)
     LD L,A
     LD H,HIGH PAL_NEXT_IDS
     LD A,(HL)
@@ -192,7 +223,7 @@ palette_player_prefetch:
     ADD A,A
     ADD A,A
     LD L,A
-    LD A,(PAL_NEXT_PAGE)
+    LD A,(PAL_FONT_RGB)
     LD H,A
     LD B,8
     JP vram_copy_short
@@ -245,9 +276,29 @@ palette_default_prepare:
     LD A,(PAL_PALETTE_CHANGED)
     OR A
     JP Z,.no
+    IFDEF WITH_FLAT
+    ; An atlas-only swap can follow a large palette commit. When its hidden
+    ; font is already ready, use the normal memoized field path rather than
+    ; queueing the entire fixed HUD again. Bottom-field changes still collect.
+    CP 2
+    JR NZ,.fixed_fields
+    LD IY,HUD_FIELD_CACHE
+    CALL palette_player_memo
+    OR A
+    JR Z,.fixed_fields
+    CALL hud_commit_fields.bottom_fields
+    LD A,1
+    RET
+.fixed_fields:
+    ENDIF
+    IFNDEF WITH_FLAT
     LD A,($C0E6)
     LD HL,$C0BE
     OR (HL)
+    ELSE
+    LD A,($C0BE)
+    OR A
+    ENDIF
     JP NZ,.no
     LD A,($C0BB)
     OR A
@@ -258,14 +309,14 @@ palette_default_prepare:
     OR A
     JP NZ,.no
     LD A,(HUD_PREVIOUS_LOGO)
-    ADD A,18
+    ADD A,20
     JR .base
 .attract:
     LD A,($C0B7)
     OR A
     LD A,(HUD_PREVIOUS_LOGO)
     JR Z,.base
-    ADD A,9
+    ADD A,10
 .base:
     ADD A,A
     LD L,A
@@ -279,11 +330,9 @@ palette_default_prepare:
     LD A,(HL)
     INC HL
     LD (PAL_QUEUE_COUNT),A
-    ADD A,A
-    LD C,A
-    LD B,0
     LD DE,PAL_QUEUE
-    LDIR
+    CALL palette_base_copy_segment
+    CALL palette_base_copy_segment
     LD (PAL_QUEUE_PTR),DE
     LD HL,palette_base_memo
     LD DE,HUD_FIELD_CACHE+12
@@ -317,6 +366,21 @@ palette_default_prepare:
     LD (hud_top_cache+HUD_BLANK_TILE),A
     LD A,1
     LD (PAL_BASE_RESET_PENDING),A
+    IFDEF WITH_FLAT
+    ; A console transition can start refilling oxygen on the palette-change
+    ; tick. Keep the fixed fields precompiled and collect only its real gauge.
+    LD A,255
+    LD (HUD_FIELD_CACHE+27),A
+    LD IY,HUD_FIELD_CACHE+24
+    LD A,$10
+    LD (HUD_COLOR_BANK),A
+    LD HL,(HUD_PTRS+12)
+    LD B,13
+    hud_global_signature
+    CALL hud_field_colors
+    XOR A
+    LD (HUD_COLOR_BANK),A
+    ENDIF
     LD A,($C0B8)
     LD HL,$C0B9
     OR (HL)
@@ -367,6 +431,22 @@ palette_default_prepare:
     RET
 .no:
     XOR A
+    RET
+
+; Header: byte count, little-endian source. Common HUD and logo fragments are
+; interned independently, retaining an exact precompiled queue for every logo.
+palette_base_copy_segment:
+    LD C,(HL)
+    INC HL
+    LD B,0
+    LD A,(HL)
+    INC HL
+    PUSH HL
+    LD H,(HL)
+    LD L,A
+    LDIR
+    POP HL
+    INC HL
     RET
 
 ; A original AC byte. Return A slot*8|128 if ready,0 fallback; C exactRGBA.

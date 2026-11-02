@@ -5,6 +5,10 @@ VRAM MSX1**, with a standard-speed Z80, TMS9918-family VDP and PSG. Compression
 is used only during startup. Gameplay does not require a RAM mapper, turbo,
 extra sound hardware or a cartridge bank-switching mapper.
 
+Current native release: **1.0.1**, using the owner-approved issue #40 binaries.
+See [current qualification](../references/compact-delivery/issue-40-candidate.json)
+and [release notes](releases/1.0.1.md). The issue #35 figures below are historical.
+
 ## Playing from MSX-DOS
 
 1. Boot your MSX1 with your normal **MSX-DOS 1** system disk and disk interface.
@@ -83,7 +87,7 @@ under `src/third_party/zx0/`.
 
 | Address range | Ownership after startup |
 | --- | --- |
-| `0100..BF58` | Native code, compact graphics/palettes, writers and forecasts |
+| `0100..BCB4` | Native code, compact graphics/palettes, writers and forecasts |
 | `C000..CFFF` | Canonical source state and bounded platform workspace |
 | `D000..EBFF` | Immutable HUD data |
 | `EC00..EFFF` | Physical presentation caches |
@@ -128,7 +132,7 @@ current checkout's HEAD.
 For a cartridge, use the exact built binary and its matching runtime symbols:
 
 ```sh
-make input-natural
+make progression-natural
 .venv/bin/python -B scripts/render_bench.py --palette --progression
 make disk-build
 .venv/bin/python -B scripts/video_check.py --delivery plain32 --rom outputs/disk/SEAQUEST32.ROM --machine C-BIOS_MSX1 --scenario dense
@@ -138,7 +142,8 @@ make disk-build
 .venv/bin/python -B scripts/native_replay_check.py outputs/native-acceptance/plain32
 ```
 
-The first two commands generate the private continuous-input seed and the
+The first two commands generate the private continuous-input seed through
+game-over/restart and the
 39,328-case source/pixel benchmark with its cycle-ranked dense fixtures. They
 must precede seeded/dense qualification on a fresh checkout; the native build
 does not invent or substitute those measurements.
@@ -172,7 +177,7 @@ Automated original-state/pixel/PSG equivalence and emulator timing are distinct
 from subjective listening, human playtesting and physical-machine evidence.
 Those manual/physical observations remain pending, as for the original release.
 
-## Qualified candidate
+## Historical issue #35 qualification (native 1.0.0)
 
 The [compact receipts](../references/compact-delivery/native.json) cover the
 exact 25,361-byte COM and 32,768-byte plain cartridge, their source identity and

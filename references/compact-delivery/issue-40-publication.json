@@ -1,0 +1,19 @@
+{
+  "release": "1.0.1",
+  "status": "prepared; not yet published",
+  "published": false,
+  "owner_approval": "references/compact-delivery/issue-40-approval.json",
+  "approved_artifacts": {
+    "SEAQUEST32.ROM": {
+      "bytes": 32768,
+      "sha256": "5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a"
+    },
+    "SEAQUEST.COM": {
+      "bytes": 25599,
+      "sha256": "a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91"
+    }
+  },
+  "build_source": "a44811c68345d32041d0114c048276e169958430",
+  "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
+  "physical_hardware": false
+}

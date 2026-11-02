@@ -1,7 +1,7 @@
 """Original scene and authorized MSX lettering versus actual SCREEN2 colours.
 
-Canonical source state determines content/colours. Only the score and oxygen
-label masks use the explicit MSX font specification; no native HUD buffers feed
+Canonical source state determines content/colours. Score, oxygen label and the
+authored credit use explicit MSX font masks; no native HUD buffers feed
 the expected image.
 """
 from functools import lru_cache
@@ -11,7 +11,7 @@ import zlib
 import numpy as np
 from graphics_palette import tms_color
 from hud_reference import masks
-from hud_fonts import displayed_score, oxygen_rows
+from hud_fonts import displayed_score, oxygen_rows, credit_rows
 
 
 def decode_colors(vram, name_base, backdrop=0):
@@ -75,6 +75,10 @@ class PresentationOracle:
             if name=='divers': height=16
             result[top:top+height,96:168] = tms_color(field['background'])
             foreground = tms_color(field['foreground'])
+            if name=='logo' and ram[0xa3]>=192:
+                for y,row in enumerate(credit_rows()):
+                    for x in row: result[top+y,96+x] = foreground
+                continue
             if name=='score':
                 for y,row in enumerate(displayed_score(ram)):
                     for x in row: result[top+y,96+x] = foreground
@@ -85,7 +89,9 @@ class PresentationOracle:
         blink = int(ram[0xe1]!=13 and not ram[0xe9] and 0<oxygen<=16 and not ram[0x81]&16)
         gauge = self.gauges[blink,oxygen]
         for x in range(8,160):
-            result[152:157,8+3*x//2:8+3*(x+1)//2] = color[gauge[:,x]][:,None]
+            pixels = color[gauge[:,x]].copy()
+            pixels[gauge[:,x]==12] = color[self.rom[0xcf3]]
+            result[152:157,8+3*x//2:8+3*(x+1)//2] = pixels[:,None]
         result[152:160,24:72] = color[6]
         for y,row in enumerate(oxygen_rows()):
             for x in row: result[152+y,24+x] = color[0]

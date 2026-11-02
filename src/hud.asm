@@ -492,19 +492,26 @@ hud_prepare:
     hud_store_pointer 8
 .divers_ready:
     LD A,($C0A3)
+    OR A
+    JR Z,.logo_index            ; active game retains its original Seaquest logo
     DUP 3
     SRL A
     EDUP
+    CP 24
+    JR NC,.credit
     CP 20
-    JR NC,.activision
+    JR NC,.copyright
     CP 12
-    JR C,.seaquest
+    JR C,.activision
     SUB 11                      ; source8..15 -> table1..8
     JR .logo_index
-.activision:
+.copyright:
     LD A,8
     JR .logo_index
-.seaquest:
+.credit:
+    LD A,9                     ; third idle window; retain Activision and 1983
+    JR .logo_index
+.activision:
     XOR A
 .logo_index:
     LD HL,HUD_PREVIOUS_LOGO
@@ -617,18 +624,9 @@ hud_player_bases:
     RET Z
     LD (HL),A
     IFDEF WITH_PALETTE
-    ; A player swap can invalidate the whole score/life atlas even when the
-    ; palette itself stayed fixed after input canceled attract mode.
-    LD A,($C0A2)
-    CP 127
-    JR NC,.ordinary_swap
-    LD A,($C0A3)
-    OR A
-    JR Z,.ordinary_swap
-    LD A,($C0BB)
-    LD HL,$C0E9
-    OR (HL)
-    JR NZ,.ordinary_swap
+    ; Every player swap changes the selected atlas. Select/reset can clear
+    ; A3 and restore three lives while the physical palette stays identical;
+    ; retain the fast fixed-HUD path for that transition as well as game-over.
     LD A,(PAL_PALETTE_CHANGED)
     OR A
     JR NZ,.ordinary_swap

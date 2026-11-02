@@ -57,11 +57,11 @@ def colour_programs(classes,fields,labels,default,future_base):
         if span not in spans: spans[span] = len(spans)
         dynamic_spans[tile] = spans[span]
     bases = []
-    for player,life,logo in [(p,0,l) for p in range(2) for l in range(9)]+[(0,3,l) for l in range(9)]:
+    for player,life,logo in [(p,0,l) for p in range(2) for l in range(10)]+[(0,3,l) for l in range(10)]:
         life_name = 'hud_lives1' if player else 'hud_lives'
         vectors = [(fields[life_name][life*9:life*9+9],0),
                    (fields['hud_blank_pair'],0),(fields['hud_divers'][:18],2),
-                   (fields['hud_logo'][logo*9:logo*9+9],2),(fields['hud_oxygen'][:13],2),
+                   (fields['hud_logo'][logo*9:logo*9+9],2),
                    (fields['hud_oxygen_label'],2),(fields['hud_background_top'],0),
                    (fields['hud_background_bottom'],2)]
         zero = list(fields['hud_single1'][:3] if player else fields['hud_single'][:3])
@@ -100,7 +100,35 @@ def colour_programs(classes,fields,labels,default,future_base):
             writers += ['    LD A,(HL)',f'    LD B,{count}','    JP (IX)']
         else:
             writers += [f'    LD D,{count}',f'    LD E,{cls*8}','    JP (IY)']
-    writers += ['palette_writers_end:','    ASSERT $ <= $C000']
+    # A palette commit can recolour every lower-background class at once.
+    # Fuse its contiguous transfers instead of repeating each VDP setup.
+    bottom_tiles = list(fields['hud_background_bottom'])
+    if bottom_tiles!=list(range(bottom_tiles[0],bottom_tiles[0]+len(bottom_tiles))):
+        raise ValueError('revisit fused initial-background tile layout')
+    bottom_classes = fields['hud_bottom_class_ids']
+    bottom_program = next(key for key,index in programs.items()
+                          if index==background['hud_background_bottom'])
+    writers += ['colour_writer_fused_bottom:', '    LD A,($C6E4)', '    OR A',
+                '    JP Z,.slow']
+    previous = None
+    for tile in bottom_tiles:
+        address = 0x3000+tile*8
+        if previous is None or tile!=previous+1:
+            writers += [f'    LD A,{address&255}','    OUT ($99),A',
+                        f'    LD A,{(address>>8)|64}','    OUT ($99),A']
+        cls = bottom_classes[tile]
+        writers += [f'    LD L,{cls*8}']
+        if len(set(classes[cls]))==1:
+            writers += ['    LD A,(HL)']+['    OUT ($98),A']*8
+        else: writers += ['    OUTI']*8
+        previous = tile
+    writers += ['    RET','.slow:',
+                '    LD ($C4CB),SP','    LD SP,($C6E6)',
+                '    LD DE,.restore','    PUSH DE']
+    for span in reversed(bottom_program):
+        writers += [f'    LD DE,colour_writer_{spans[span]}','    PUSH DE']
+    writers += ['    RET','.restore:','    LD SP,($C4CB)','    RET',
+                'palette_writers_end:','    ASSERT $ <= $C000']
     # Resolve constant writer addresses before assembling the independent bank4.
     # Stub targets only fix three-byte JP encoding; the final link resolves them.
     stubs = []
@@ -110,6 +138,19 @@ def colour_programs(classes,fields,labels,default,future_base):
     writer_symbols = {n:int(v,16) for n,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',
                                                       (OUT/'palette-writers.sym').read_text(),re.M)}
     (OUT/'palette-writers.inc').write_text('\n'.join(writers[1:])+'\n')
+    fused = ['forecast_bottom_background:',
+             '    LD A,(F_COUNT)','    CP 63','    RET NC',
+             f'    LD HL,${labels["hud_bottom_class_ids"]+bottom_tiles[0]:04X}',
+             f'    LD E,{bottom_tiles[0]}',f'    LD B,{len(bottom_tiles)}',
+             '.mark:','    LD A,(HL)','    INC HL','    PUSH HL','    ADD A,$D0','    LD L,A',
+             '    LD H,$CF','    LD A,(HL)','    LD L,E','    LD H,$C3','    LD (HL),A',
+             f'    LD H,${labels["hud_bottom_cache"]>>8:02X}','    XOR A','    LD (HL),A',
+             '    INC E','    POP HL','    DJNZ .mark',
+             '    LD (F_REMAIN),A','    LD HL,(F_QPTR)',
+              '    LD DE,F_FUSED_BOTTOM_WRITER','    LD (HL),E','    INC HL',
+              '    LD (HL),D','    INC HL','    LD (F_QPTR),HL',
+              '    LD HL,F_COUNT','    INC (HL)','    RET']
+    (OUT/'palette-fused-background.inc').write_text('\n'.join(fused)+'\n')
     gen = ['palette_restore_default_roles:']
     # Roles remain real TMS indices; only the class rows substitute water0.
     default_roles = bytes(tms_color(value) for value in fields['hud_role_sources'])
@@ -135,9 +176,15 @@ def colour_programs(classes,fields,labels,default,future_base):
                 '    LD A,1','    JR Z,$+3','    LD A,C',f'    LD (PAL_NEXT_IDS+{cls}),A']
     gen += ['    RET','palette_rebase_current_tokens:',
             '    LD A,(PAL_STATIC_DEFAULT)','    OR A','    JP NZ,palette_generations_default']
+    # Retain the fixed-time unroll. Both arrays stay within their own page;
+    # register-indirect accesses save code and cycles without a loop counter.
+    gen += ['    LD HL,PAL_CURRENT_STATIC','    LD DE,HUD_CLASS_SIGNATURES','    LD C,1',
+            '    ASSERT (PAL_CURRENT_STATIC & 255)+31 <= 256',
+            '    ASSERT (HUD_CLASS_SIGNATURES & 255)+31 <= 256']
     for cls in range(31):
-        gen += [f'    LD A,(PAL_CURRENT_STATIC+{cls})',f'    CP {default[248+cls]}',
-                '    LD A,1','    JR Z,$+3','    INC A',f'    LD (HUD_CLASS_SIGNATURES+{cls}),A']
+        gen += ['    LD A,(HL)',f'    CP {default[248+cls]}',
+                '    LD A,C','    JR Z,$+3','    INC A','    LD (DE),A']
+        if cls<30:gen += ['    INC L','    INC E']
     gen += ['    RET','palette_base_clear_cache:','    XOR A','    LD HL,0']
     for bank in (0,2):
         tiles = sorted({tile for keys,_ in bases for first,count,cls,which,_ in keys if which==bank
@@ -160,9 +207,20 @@ def colour_programs(classes,fields,labels,default,future_base):
 
     base_code = ['palette_default_bases:',
                  '    DW '+','.join(f'palette_default_base_{n}' for n in range(len(bases)))]
+    common,logos = {},{}
+    logo_class = classes.index(tuple([(10,6)]*8))
     for index,(keys,pointers) in enumerate(bases):
-        base_code += [f'palette_default_base_{index}:',f'    DB {len(keys)}',
-                      '    DW '+','.join(str(writer_symbols[f'colour_writer_{spans[span]}']) for span in keys)]
+        rest = tuple(span for span in keys if span[2]!=logo_class)
+        logo = tuple(span for span in keys if span[2]==logo_class)
+        ci,li = common.setdefault(rest,len(common)),logos.setdefault(logo,len(logos))
+        base_code += [f'palette_default_base_{index}:',f'    DB {len(keys)},{2*len(rest)}',
+                      f'    DW palette_base_common_{ci}',f'    DB {2*len(logo)}',
+                      f'    DW palette_base_logo_{li}']
+    for prefix,groups in (('common',common),('logo',logos)):
+        for keys,index in groups.items():
+            if not keys: raise ValueError('empty palette queue fragment')
+            base_code += [f'palette_base_{prefix}_{index}:',
+                          '    DW '+','.join(str(writer_symbols[f'colour_writer_{spans[span]}']) for span in keys)]
     base_code += ['palette_base_memo:']
     for field,pointer in enumerate(bases[0][1]):
         sig = '0' if field<3 else 'PALETTE_DEFAULT_INDEX'
@@ -208,6 +266,7 @@ def colour_programs(classes,fields,labels,default,future_base):
                           ('palette_program_lookup','palette_program_pointers','palette_dynamic_programs',
                            'palette_top_background_program','palette_bottom_background_program'))
     future = [f'    ORG ${future_base:04X}',
+              f'F_FUSED_BOTTOM_WRITER EQU ${writer_symbols["colour_writer_fused_bottom"]:04X}',
               f'F_HUD_LOGO EQU ${labels["hud_logo"]:04X}',
               f'F_SCORE0 EQU {classes.index(tuple([(0,5)]*8))}',
               f'F_SCORE1 EQU {score_class}',
@@ -233,7 +292,9 @@ def colour_programs(classes,fields,labels,default,future_base):
                f'F_BACKGROUND_TOP EQU ${labels["hud_background_top"]:04X}',
                f'F_BACKGROUND_BOTTOM EQU ${labels["hud_background_bottom"]:04X}',
                f'    INCLUDE "{ROOT}/src/palette_forecast.asm"',
-               f'    INCLUDE "{ROOT}/src/disk/current_fields.asm"','forecast_end:','    ASSERT $ <= $C000']
+               f'    INCLUDE "{ROOT}/src/disk/current_fields.asm"',
+               '    IFDEF WITH_FLAT',f'    INCLUDE "{OUT}/palette-fused-background.inc"',
+               '    ENDIF','forecast_end:','    ASSERT $ <= $C000']
     (OUT/'palette-forecast.asm').write_text('\n'.join(future)+'\n')
     subprocess.run([str(ROOT/'.tools/sjasmplus/sjasmplus'),'--nologo',
                     '--raw='+str(OUT/'palette-forecast.bin'),
