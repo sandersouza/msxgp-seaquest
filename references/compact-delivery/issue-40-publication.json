@@ -1,8 +1,14 @@
 {
   "release": "1.0.1",
-  "status": "prepared; not yet published",
-  "published": false,
-  "owner_approval": "references/compact-delivery/issue-40-approval.json",
+  "status": "published; public downloads verified",
+  "published": true,
+  "url": "https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.1",
+  "published_at": "2026-11-02T14:40:36Z",
+  "tag_object": "ba05f690bc3dc73e7c109228980e8f3f84066ce0",
+  "tag_target": "6df671816fba7b4afbfa57230b0fa435ed444c0d",
+  "implementation_pr": "https://github.com/sandersouza/msxgp-seaquest/pull/41",
+  "build_source": "a44811c68345d32041d0114c048276e169958430",
+  "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
   "approved_artifacts": {
     "SEAQUEST32.ROM": {
       "bytes": 32768,
@@ -13,7 +19,64 @@
       "sha256": "a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91"
     }
   },
-  "build_source": "a44811c68345d32041d0114c048276e169958430",
-  "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
-  "physical_hardware": false
+  "owner_approval": "references/compact-delivery/issue-40-approval.json",
+  "independent_review": "references/compact-delivery/issue-40-review.json",
+  "ci": {
+    "pr_checks": "both diagnostic jobs passed",
+    "integration_run": 41463682125,
+    "integration_conclusion": "success"
+  },
+  "assets": [
+    {
+      "id": 702058328,
+      "name": "seaquest-1.0.1-native-manifest.json",
+      "bytes": 1515,
+      "sha256": "724bd63a009cf60e87aa791b477753416f0eabac1d03447f89b83a07a45712bc",
+      "url": "https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/seaquest-1.0.1-native-manifest.json",
+      "unauthenticated_download_verified": true
+    },
+    {
+      "id": 702058333,
+      "name": "seaquest-1.0.1-native-msx1.zip",
+      "bytes": 63975,
+      "sha256": "117556b214fabce47138ecf78003532e00d675d5808c83a7aa8f9939e3e96e71",
+      "url": "https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/seaquest-1.0.1-native-msx1.zip",
+      "unauthenticated_download_verified": true
+    },
+    {
+      "id": 702058325,
+      "name": "seaquest-1.0.1-native-SHA256SUMS",
+      "bytes": 359,
+      "sha256": "5e5dbdc05703ceb4ede4a0a88ba2244985df3b0defb80e6aa5ee96a3bb27e33d",
+      "url": "https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/seaquest-1.0.1-native-SHA256SUMS",
+      "unauthenticated_download_verified": true
+    },
+    {
+      "id": 702058324,
+      "name": "SEAQUEST.COM",
+      "bytes": 25599,
+      "sha256": "a4f1e4330ceb6ad0dff7769d0c2805e22149241da6c3359b8cf2baa453a03d91",
+      "url": "https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/SEAQUEST.COM",
+      "unauthenticated_download_verified": true
+    },
+    {
+      "id": 702058327,
+      "name": "SEAQUEST32.ROM",
+      "bytes": 32768,
+      "sha256": "5907ee7f9eb50df9ae356fee9bcb5ef931beb388d569a22aa9af043a7d97018a",
+      "url": "https://github.com/sandersouza/msxgp-seaquest/releases/download/1.0.1/SEAQUEST32.ROM",
+      "unauthenticated_download_verified": true
+    }
+  ],
+  "zip_integrity_verified": true,
+  "inner_and_outer_checksums_verified": true,
+  "original_release": {
+    "tag": "1.0.0",
+    "body_unchanged": true,
+    "assets_unchanged": true,
+    "asset_count": 8,
+    "body_sha256": "587720a66cf8166cfa003e21e8fae6ec6a61a52897c90ed979e8f7892cda33d0"
+  },
+  "physical_hardware": false,
+  "manual_test_details": "Owner approved; platform and duration not specified"
 }

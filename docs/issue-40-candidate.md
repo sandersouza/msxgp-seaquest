@@ -212,3 +212,11 @@ done
 ## Approval and independent review
 
 The owner approved this exact candidate on 2026-11-02. Independent review of `e315927..afed3c0` found no actionable or merge-blocking defects and checked all 30 generated queues, binary/source identities and the 78 receipts. The reviewer did not rerun emulator tests. Physical hardware remains unverified; the owner did not specify a test platform or duration. The pre-approval ZIP and its receipt remain immutable snapshots.
+
+## Integrated publication
+
+Implementation PR #41 merged after independent review and successful PR/main CI.
+Release 1.0.1 publishes the exact approved binaries. All five public assets were
+downloaded without authentication and verified against local hashes, including
+ZIP members and inner/outer checksums. The previous 1.0.0 body/assets are unchanged.
+See `references/compact-delivery/issue-40-publication.json` for the final record.
