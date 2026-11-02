@@ -5,6 +5,10 @@ VRAM MSX1**, with a standard-speed Z80, TMS9918-family VDP and PSG. Compression
 is used only during startup. Gameplay does not require a RAM mapper, turbo,
 extra sound hardware or a cartridge bank-switching mapper.
 
+Current native release: **1.0.1**, using the owner-approved issue #40 binaries.
+See [current qualification](../references/compact-delivery/issue-40-candidate.json)
+and [release notes](releases/1.0.1.md). The issue #35 figures below are historical.
+
 ## Playing from MSX-DOS
 
 1. Boot your MSX1 with your normal **MSX-DOS 1** system disk and disk interface.
@@ -83,7 +87,7 @@ under `src/third_party/zx0/`.
 
 | Address range | Ownership after startup |
 | --- | --- |
-| `0100..BF58` | Native code, compact graphics/palettes, writers and forecasts |
+| `0100..BCB4` | Native code, compact graphics/palettes, writers and forecasts |
 | `C000..CFFF` | Canonical source state and bounded platform workspace |
 | `D000..EBFF` | Immutable HUD data |
 | `EC00..EFFF` | Physical presentation caches |
@@ -173,7 +177,7 @@ Automated original-state/pixel/PSG equivalence and emulator timing are distinct
 from subjective listening, human playtesting and physical-machine evidence.
 Those manual/physical observations remain pending, as for the original release.
 
-## Qualified candidate
+## Historical issue #35 qualification (native 1.0.0)
 
 The [compact receipts](../references/compact-delivery/native.json) cover the
 exact 25,361-byte COM and 32,768-byte plain cartridge, their source identity and

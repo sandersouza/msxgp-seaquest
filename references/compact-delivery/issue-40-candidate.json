@@ -1,6 +1,6 @@
 {
   "issue": 40,
-  "status": "local candidate awaiting explicit owner approval",
+  "status": "owner approved; reviewed; integration in progress",
   "source_revision": "a44811c68345d32041d0114c048276e169958430",
   "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
   "instrumented_checks": 78,
@@ -36,9 +36,9 @@
     },
     "scanout_visual_corruption_recorded": false
   },
-  "manual_emulator_playtesting": "pending owner",
+  "manual_emulator_playtesting": "owner approved candidate; platform and duration not specified",
   "physical_hardware": false,
-  "owner_approval": false,
+  "owner_approval": true,
   "pr_created": false,
   "merged": false,
   "published": false,
@@ -116,5 +116,7 @@
       "copyright.png": "fb4cf79efc680d3d993be201e77b019cf9ff6cf5205aa0c5916abd8400edc092",
       "credit.png": "6b67f231dd236bfb22a38d976aa673187e62ae1daa569fedb73d04b71f10a37b"
     }
-  }
+  },
+  "approval_record": "references/compact-delivery/issue-40-approval.json",
+  "independent_review": "references/compact-delivery/issue-40-review.json"
 }

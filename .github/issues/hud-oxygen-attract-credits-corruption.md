@@ -48,7 +48,7 @@ Owner observed corruption at the bottom of the screen outside gameplay while HUD
 - [x] Reported cycling-HUD corruption is reproduced, explained and fixed across full palette/credit cycles.
 - [x] Final Normal ROM stays <=32 KiB; ROM and COM work on the original 64 KiB MSX1 target with measured PAL/NTSC timing and guard/state/presentation regressions passing.
 - [x] Candidate artifacts and before/after evidence are delivered for owner testing, with automated/manual/physical evidence kept separate.
-- [ ] Owner explicitly approves the tested candidate before any PR, merge or release.
+- [x] Owner explicitly approves the tested candidate before any PR, merge or release.
 - [ ] Independent review, PR checks and integration pass after that approval.
 - [ ] New release is published after approval, retaining base release text and adding these fixes; GitHub/local handoff/status agree.
 
@@ -80,3 +80,7 @@ locally in the dedicated issue chat. Compact metadata and reproduction are in
 private. Owner visual/audio/playtesting and physical MSX acceptance are pending.
 **Keep this issue open/In progress. Owner approval remains required before
 independent review, any PR/draft, merge, tag or publication. No release was made.**
+
+## Owner approval and review — 2026-11-02
+
+The owner approved the exact ROM/COM candidate in the dedicated issue chat: “aprovada, pode seguir”. Independent review of `e315927..afed3c0` found no actionable or merge-blocking defects. No runtime files changed after approval. PR/integration and release 1.0.1 are now authorized; keep the issue open until publication is verified. Physical hardware remains unverified.

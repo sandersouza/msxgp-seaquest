@@ -1,7 +1,7 @@
 # Issue #40 local test candidate
 
-Owner approval is required before any PR, merge, tag or release. The issue stays
-open. Original ROMs, BIOS/DOS, emulator traces and binaries remain local/ignored.
+The owner approved the exact candidate on 2026-11-02: “aprovada, pode seguir”.
+The approval gate is satisfied; the issue stays open until integration/publication. Original ROMs, BIOS/DOS, emulator traces and binaries remain local/ignored.
 
 ## Changes
 
@@ -208,3 +208,7 @@ for delivery in plain32 dos; do
   .venv/bin/python -B scripts/native_replay_check.py "$acceptance"
 done
 ```
+
+## Approval and independent review
+
+The owner approved this exact candidate on 2026-11-02. Independent review of `e315927..afed3c0` found no actionable or merge-blocking defects and checked all 30 generated queues, binary/source identities and the 78 receipts. The reviewer did not rerun emulator tests. Physical hardware remains unverified; the owner did not specify a test platform or duration. The pre-approval ZIP and its receipt remain immutable snapshots.

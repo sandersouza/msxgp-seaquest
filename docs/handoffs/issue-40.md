@@ -47,7 +47,7 @@ Likely source entry points: scripts/hud_tables.py (hud_logo/oxygen tile vectors 
 
 ## Next actions
 
-Wait for the owner to test and explicitly approve the exact candidate below. Do not change the frozen runtime, create a PR/draft, merge, tag or publish while approval is pending. After approval, continue this issue with independent review and integration/release checks; preserve the existing release narrative and append the fixes. Keep the issue open until those delivery conditions are met.
+Owner approval was received on 2026-11-02 for the exact binaries below. Independent review passed without actionable findings. Continue with PR checks, integration and release 1.0.1, preserving the 1.0.0 base narrative and adding these fixes. Keep the issue open until publication is verified. The approved runtime remains unchanged.
 
 
 ## Local candidate delivered for owner testing
@@ -78,3 +78,7 @@ Wait for the owner to test and explicitly approve the exact candidate below. Do 
   release retaining `docs/releases/1.0.0.md`'s base narrative and appending fixes.
   Any runtime change must be requalified and its binary identity rechecked
   against the owner's tested candidate. Do not start another issue in this chat.
+
+## Approval and release preparation — 2026-11-02
+
+Owner message: “aprovada, pode seguir”. Approval and independent review records are `references/compact-delivery/issue-40-approval.json` and `issue-40-review.json`. Release 1.0.1 ships the exact approved hashes; the 1.0.0 assets and narrative source file remain unchanged. Integration/publication is in progress. No platform, duration or physical test evidence was supplied with approval.
