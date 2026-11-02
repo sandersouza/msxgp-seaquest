@@ -49,11 +49,11 @@ Owner observed corruption at the bottom of the screen outside gameplay while HUD
 - [x] Final Normal ROM stays <=32 KiB; ROM and COM work on the original 64 KiB MSX1 target with measured PAL/NTSC timing and guard/state/presentation regressions passing.
 - [x] Candidate artifacts and before/after evidence are delivered for owner testing, with automated/manual/physical evidence kept separate.
 - [x] Owner explicitly approves the tested candidate before any PR, merge or release.
-- [ ] Independent review, PR checks and integration pass after that approval.
-- [ ] New release is published after approval, retaining base release text and adding these fixes; GitHub/local handoff/status agree.
+- [x] Independent review, PR checks and integration pass after that approval.
+- [x] New release is published after approval, retaining base release text and adding these fixes; GitHub/local handoff/status agree.
 
 
-## Local implementation and candidate evidence
+## Local implementation and candidate evidence (pre-approval snapshot)
 
 Implementation source: `a44811c68345d32041d0114c048276e169958430` on local branch
 `codex/fix/40-hud-attract`. ROM 32,768 bytes SHA256
@@ -78,9 +78,23 @@ locally in the dedicated issue chat. Compact metadata and reproduction are in
 `references/compact-delivery/issue-40-candidate.json` and
 `docs/issue-40-candidate.md`. Original inputs, BIOS/DOS and replay images remain
 private. Owner visual/audio/playtesting and physical MSX acceptance are pending.
-**Keep this issue open/In progress. Owner approval remains required before
-independent review, any PR/draft, merge, tag or publication. No release was made.**
+At that snapshot no PR or release had been made. Approval and publication are recorded below.
 
 ## Owner approval and review — 2026-11-02
 
 The owner approved the exact ROM/COM candidate in the dedicated issue chat: “aprovada, pode seguir”. Independent review of `e315927..afed3c0` found no actionable or merge-blocking defects. No runtime files changed after approval. PR/integration and release 1.0.1 are now authorized; keep the issue open until publication is verified. Physical hardware remains unverified.
+
+## Verified delivery — 2026-11-02
+
+[PR #41](https://github.com/sandersouza/msxgp-seaquest/pull/41) merged as
+`6df671816fba7b4afbfa57230b0fa435ed444c0d` after both PR checks and independent
+review passed. The merge's main-branch CI also passed.
+[Release 1.0.1](https://github.com/sandersouza/msxgp-seaquest/releases/tag/1.0.1)
+is published as latest. All five assets were downloaded without authentication
+and compared byte-for-byte with the approved files; ZIP contents and both sets
+of checksums passed. Original 1.0.0 body and all eight assets remain unchanged.
+
+The release retains the base narrative and appends the oxygen, credit and HUD
+fixes. No runtime bytes changed after approval. Detailed publication evidence is
+`references/compact-delivery/issue-40-publication.json`. Physical hardware remains
+unverified. This metadata-only completion record closes the issue after merge.

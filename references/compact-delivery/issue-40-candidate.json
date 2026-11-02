@@ -1,6 +1,6 @@
 {
   "issue": 40,
-  "status": "owner approved; reviewed; integration in progress",
+  "status": "owner approved; reviewed, integrated and published as 1.0.1",
   "source_revision": "a44811c68345d32041d0114c048276e169958430",
   "source_identity_sha256": "11d27353dfe055cafe47865920ec6d2da27d017109e68442a7bafbe8e02e7218",
   "instrumented_checks": 78,
@@ -39,9 +39,9 @@
   "manual_emulator_playtesting": "owner approved candidate; platform and duration not specified",
   "physical_hardware": false,
   "owner_approval": true,
-  "pr_created": false,
-  "merged": false,
-  "published": false,
+  "pr_created": true,
+  "merged": true,
+  "published": true,
   "artifacts": {
     "SEAQUEST32.ROM": {
       "bytes": 32768,
@@ -55,8 +55,6 @@
   "native_matrix_checks": 42,
   "natural_routes": 36,
   "independent_replays": 36,
-  "issue_state": "open",
-  "project_status": "In progress",
   "host_tests": {
     "passed": 91,
     "skipped": 0
@@ -118,5 +116,6 @@
     }
   },
   "approval_record": "references/compact-delivery/issue-40-approval.json",
-  "independent_review": "references/compact-delivery/issue-40-review.json"
+  "independent_review": "references/compact-delivery/issue-40-review.json",
+  "publication_record": "references/compact-delivery/issue-40-publication.json"
 }
